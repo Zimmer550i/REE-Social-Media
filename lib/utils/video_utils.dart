@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:ree_social_media_app/helpers/generate_video_thumbnail.dart';
 
 class VideoUtils {
-  static Future<String?> getCachedThumbnail(String videoUrl) async {
+  static Future<String?> getCachedThumbnail(String videoUrl,context) async {
     try {
       final tempDir = await getTemporaryDirectory();
       final fileName = videoUrl.hashCode.toString(); // unique cache name
@@ -18,13 +18,11 @@ class VideoUtils {
       }
 
       // ❌ If not cached → generate and save
-      final generatedPath = await VideoThumbnail.thumbnailFile(
-        video: videoUrl,
-        imageFormat: ImageFormat.JPEG,
-        maxHeight: 180,
-        quality: 75,
-        thumbnailPath: thumbPath,
-      );
+
+      final generatedPath = await generateVideoThumbnail(File(videoUrl),context);
+      if (generatedPath != null) {
+        debugPrint('Thumbnail saved at: $generatedPath');
+      }
 
       return generatedPath;
     } catch (e) {

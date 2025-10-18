@@ -2,9 +2,9 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:ree_social_media_app/helpers/generate_video_thumbnail.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
 import 'package:ree_social_media_app/views/screen/Message/AllSubScreen/AllSubScreen/video_preview_screen.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
 
 class BlurVideoCard extends StatefulWidget {
   final File videoFile;
@@ -41,31 +41,33 @@ class _BlurVideoCardState extends State<BlurVideoCard> {
 
   Future<void> _generateThumbnail() async {
     try {
-      final thumb = await VideoThumbnail.thumbnailFile(
-        video: widget.videoFile.path,
-        imageFormat: ImageFormat.JPEG,
-        maxHeight: 180,
-        quality: 80,
-      );
+      final thumbPath = await generateVideoThumbnail(widget.videoFile,context);
       if (!mounted) return;
+
       setState(() {
-        _thumbnailPath = thumb;
+        _thumbnailPath = thumbPath;
         _isLoading = false;
       });
+
+      if (thumbPath != null) {
+        debugPrint('✅ Thumbnail generated at: $thumbPath');
+      }
     } catch (e) {
-      debugPrint("❌ Thumbnail generation error: $e");
+      debugPrint('❌ Error generating thumbnail: $e');
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   void dispose() {
-    // Clean up the generated thumbnail file if it exists
+    // Clean up generated thumbnail file
     if (_thumbnailPath != null) {
       final file = File(_thumbnailPath!);
       if (file.existsSync()) {
         file.delete().then((_) {
-          debugPrint("🧹 Deleted temp thumbnail file");
+          debugPrint('🧹 Deleted temp thumbnail file');
+        }).catchError((e) {
+          debugPrint('⚠️ Failed to delete thumbnail: $e');
         });
       }
     }
@@ -75,23 +77,23 @@ class _BlurVideoCardState extends State<BlurVideoCard> {
   void _onTapVideo() {
     if (_isTapped) return;
     setState(() => _isTapped = true);
-    Future.delayed(const Duration(milliseconds: 200), () {
+
+    Future.delayed(const Duration(milliseconds: 200), () async {
       if (!mounted) return;
-      Navigator.push(
+      await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => VideoPreviewScreen(
             videoUrl: widget.videoFile.path,
             countdownSeconds: 3,
-            userProfile: widget.receiverImage ?? "",
+            userProfile: widget.receiverImage ?? '',
             userName: widget.receiverName,
             chatId: widget.chatId,
             isInbox: true,
           ),
         ),
-      ).then((_) {
-        if (mounted) setState(() => _isTapped = false);
-      });
+      );
+      if (mounted) setState(() => _isTapped = false);
     });
   }
 
@@ -108,7 +110,7 @@ class _BlurVideoCardState extends State<BlurVideoCard> {
                 ? Container(
                     height: 180,
                     width: 240,
-                    color: Colors.black12.withValues(alpha: .1),
+                    color: Colors.black12.withOpacity(0.1),
                     child: Center(
                       child: SpinKitWave(
                         color: AppColors.primaryColor,
@@ -119,15 +121,11 @@ class _BlurVideoCardState extends State<BlurVideoCard> {
                 : _thumbnailPath != null
                     ? AnimatedOpacity(
                         duration: const Duration(milliseconds: 500),
-                        opacity: _isTapped ? 1.0 : 0.6,
+                        opacity: _isTapped ? 1.0 : 0.7,
                         child: ImageFiltered(
                           imageFilter: widget.isMe
                               ? ImageFilter.blur(sigmaX: 0, sigmaY: 0)
-                              : ImageFilter.blur(
-                                  sigmaX: 20,
-                                  sigmaY: 20,
-                                  tileMode: TileMode.decal,
-                                ),
+                              : ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                           child: Image.file(
                             File(_thumbnailPath!),
                             height: 180,
@@ -139,9 +137,13 @@ class _BlurVideoCardState extends State<BlurVideoCard> {
                     : Container(
                         height: 180,
                         width: 240,
-                        color: Colors.grey.shade200,
+                        color: Colors.grey.shade300,
                         alignment: Alignment.center,
-                        child: const Icon(Icons.error, color: Colors.red),
+                        child: const Icon(
+                          Icons.error_outline,
+                          color: Colors.red,
+                          size: 36,
+                        ),
                       ),
           ),
 
@@ -158,7 +160,7 @@ class _BlurVideoCardState extends State<BlurVideoCard> {
                 border: Border.all(color: Colors.white, width: 2),
               ),
               child: const Icon(
-                Icons.play_arrow,
+                Icons.play_arrow_rounded,
                 color: Colors.white,
                 size: 36,
               ),

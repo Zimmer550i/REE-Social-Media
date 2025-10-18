@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:ree_social_media_app/controllers/user_controller.dart';
+import 'package:ree_social_media_app/helpers/generate_video_thumbnail.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
 import 'package:ree_social_media_app/controllers/message_controller.dart';
 import 'package:ree_social_media_app/views/screen/Message/AllSubScreen/AllSubScreen/video_preview_screen.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -173,12 +173,11 @@ class SeeAllStoryScreen extends StatelessWidget {
     final localVideo = await _downloadVideoToLocal(videoUrl);
 
     // Generate thumbnail
-    final thumbPath = await VideoThumbnail.thumbnailFile(
-      video: localVideo.path,
-      imageFormat: ImageFormat.JPEG,
-      maxHeight: 200,
-      quality: 75,
-    );
+    final thumbPath = await generateVideoThumbnail(File(localVideo.path),context);
+if (thumbPath != null) {
+  print('Thumbnail saved at: $thumbPath');
+}
+
 
     return InkWell(
       onTap: () => Get.to(

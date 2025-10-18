@@ -1,14 +1,16 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:ree_social_media_app/controllers/camera_controller.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
 import 'package:ree_social_media_app/views/base/custom_button.dart';
 import 'package:ree_social_media_app/views/screen/Camera/AllSubScreen/send_message_with_friend_screen.dart';
 import 'package:video_player/video_player.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:video_trimmer/video_trimmer.dart';
 
 
@@ -30,6 +32,7 @@ class _VideoTrimAndSendScreenState extends State<VideoTrimAndSendScreen> {
   final ValueNotifier<bool> _isPlaying = ValueNotifier(false);
   final ScrollController _scrollController = ScrollController();
     VideoPlayerController? _frontVideoController;
+    final GlobalKey _videoPreviewKey = GlobalKey();
   int _selectedTab = 0;
 
   final List<String> _thumbnailPaths = [];
@@ -94,20 +97,36 @@ class _VideoTrimAndSendScreenState extends State<VideoTrimAndSendScreen> {
   }
 
   Future<void> _generateThumbnails() async {
-    _thumbnailPaths.clear();
-    final totalDuration = _videoController.value.duration.inMilliseconds;
-    const int count = 10;
-    final interval = (totalDuration / count).floor();
+  if (!_videoController.value.isInitialized) return;
 
-    for (int i = 0; i < count; i++) {
-      final path = await VideoThumbnail.thumbnailFile(
-        video: widget.videoUrl,
-        quality: 70,
-        timeMs: i * interval,
-      );
-      if (path != null) _thumbnailPaths.add(path);
-    }
+  _thumbnailPaths.clear();
+
+  final totalDuration = _videoController.value.duration.inMilliseconds;
+  const int count = 10;
+  final int interval = (totalDuration / count).floor();
+  final dir = await getTemporaryDirectory();
+
+  for (int i = 0; i < count; i++) {
+    await _videoController.seekTo(Duration(milliseconds: i * interval));
+    await Future.delayed(const Duration(milliseconds: 150)); // allow frame to render
+
+    final boundary = _videoPreviewKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+    if (boundary == null) continue;
+
+    final image = await boundary.toImage(pixelRatio: 1.0);
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    final pngBytes = byteData?.buffer.asUint8List();
+    if (pngBytes == null) continue;
+
+    final file = File('${dir.path}/thumb_$i.png');
+    await file.writeAsBytes(pngBytes);
+    _thumbnailPaths.add(file.path);
   }
+
+  if (mounted) setState(() {});
+}
+
+
 
   /// ⏱️ Format Duration (mm:ss)
   String _formatDuration(Duration d) {

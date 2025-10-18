@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:ree_social_media_app/controllers/message_controller.dart';
 import 'package:ree_social_media_app/controllers/notification_controller.dart';
 import 'package:ree_social_media_app/controllers/user_controller.dart';
+import 'package:ree_social_media_app/helpers/generate_video_thumbnail.dart';
 import 'package:ree_social_media_app/helpers/global_video_player_manager.dart';
 import 'package:ree_social_media_app/services/api_service.dart';
 import 'package:ree_social_media_app/services/camera_manager.dart';
@@ -17,7 +18,6 @@ import 'AllSubScreen/AllSubScreen/add_friends.dart';
 import 'AllSubScreen/AllSubScreen/search_screen.dart';
 import 'AllSubScreen/AllSubScreen/video_preview_screen.dart';
 import 'AllSubScreen/chat_screen.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'groupChat/group_chat.dart';
@@ -507,12 +507,11 @@ void dispose() {
     final localVideo = await _downloadVideoToLocal(videoUrl);
 
     // ✅ Generate thumbnail
-    final thumbPath = await VideoThumbnail.thumbnailFile(
-      video: localVideo.path,
-      imageFormat: ImageFormat.JPEG,
-      maxHeight: 200,
-      quality: 75,
-    );
+    final thumbPath = await generateVideoThumbnail(File(localVideo.path),context);
+if (thumbPath != null) {
+  debugPrint('Thumbnail saved at: $thumbPath');
+}
+
 
     return InkWell(
       onTap: () {
