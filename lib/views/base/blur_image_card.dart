@@ -69,6 +69,7 @@ class _BlurImageCardState extends State<BlurImageCard> {
               userName: widget.receiverName,
               chatId: widget.chatId,
               isInbox: true,
+              postId: widget.msgId,
             ),
           ),
         ).then((_) {

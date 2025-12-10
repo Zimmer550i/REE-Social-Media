@@ -124,35 +124,35 @@ class _ContactAccessScreenState extends State<ContactAccessScreen> {
 
               const SizedBox(height: 80),
 
-              // Not Now button
-              InkWell(
-                onTap: () {
-                  Get.to(() => const EnableNotificationScreen());
-                },
-                child: Container(
-                  height: 48,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: const Color(0xFFC4C3C3),
-                      width: 0.5,
-                    ),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      "Not Now",
-                      style: TextStyle(
-                        color: Color(0xFF676565),
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              // // Not Now button
+              // InkWell(
+              //   onTap: () {
+              //     Get.to(() => const EnableNotificationScreen());
+              //   },
+              //   child: Container(
+              //     height: 48,
+              //     width: double.infinity,
+              //     decoration: BoxDecoration(
+              //       borderRadius: BorderRadius.circular(8),
+              //       border: Border.all(
+              //         color: const Color(0xFFC4C3C3),
+              //         width: 0.5,
+              //       ),
+              //     ),
+              //     child: const Center(
+              //       child: Text(
+              //         "Not Now",
+              //         style: TextStyle(
+              //           color: Color(0xFF676565),
+              //           fontSize: 18,
+              //           fontWeight: FontWeight.w600,
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
 
-              const SizedBox(height: 20),
+              // const SizedBox(height: 20),
 
               // Allow Access button
               CustomButton(
@@ -160,7 +160,7 @@ class _ContactAccessScreenState extends State<ContactAccessScreen> {
                   if (await FlutterContacts.requestPermission()) {
                     await _saveContactsToLocal();
                     Get.to(() => const InviteFriendScreen());
-                  } else{
+                  } else {
                     Get.snackbar(
                       "Permission Denied",
                       "You need to allow access to continue",

@@ -19,6 +19,7 @@ class SendOrTrimVideoScreen extends StatefulWidget {
   final String userProfile;
   final String userName;
   final String chatId;
+  final String postId;
   final bool? isInbox;
   final bool? isVideo;
 
@@ -28,6 +29,7 @@ class SendOrTrimVideoScreen extends StatefulWidget {
     required this.userProfile,
     required this.userName,
     required this.chatId,
+    required this.postId,
     required this.reactionVideo,
     this.isInbox,
     this.isVideo,
@@ -143,6 +145,7 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
         throw Exception('Error: Video(s) not initialized properly.');
       }
 
+      _mainVideoController?.setVolume(0.0);
       // Loop both videos
       _mainVideoController!.setLooping(false);
       _reactionVideoController!.setLooping(false);
@@ -239,6 +242,45 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
     }
   }
 
+  PopupMenuButton<dynamic> actionButton() {
+    return PopupMenuButton(
+      onSelected: (value) async {
+        if (value == 0) {
+          await sendMessageController.reportStory(widget.postId);
+        }
+      },
+      itemBuilder: (context) => <PopupMenuEntry>[
+        PopupMenuItem<int>(
+          value: 0,
+          height: 25,
+          child: Container(
+            width: double.infinity,
+            height: 25,
+            padding: EdgeInsets.only(left: 6),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Report',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                  color: Color(0xB81B1F26),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+      child: SizedBox(
+        height: 48,
+        width: 48,
+        child: Center(
+          child: Icon(Icons.report, color: AppColors.primaryColor, size: 28),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -267,6 +309,8 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
                 fontWeight: FontWeight.w600,
               ),
             ),
+            Spacer(),
+            actionButton(),
           ],
         ),
       ),

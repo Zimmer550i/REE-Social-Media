@@ -283,7 +283,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           constraints: const BoxConstraints(maxWidth: 260),
           decoration: BoxDecoration(
             color: msg["isMe"]
-                ? const Color(0xFF56BBFF)
+                ? AppColors.primaryColor
                 : const Color(0xFFECECEC),
             borderRadius: BorderRadius.only(
               topLeft: const Radius.circular(32),

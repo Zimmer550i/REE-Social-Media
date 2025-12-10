@@ -175,7 +175,10 @@ class _MessageScreenState extends State<MessageScreen> {
   Widget _notificationButton() {
     return Stack(
       children: [
-        _iconButton('assets/icons/notification.svg', onTap: () => Get.to(() => const NotificationScreen()),),
+        _iconButton(
+          'assets/icons/notification.svg',
+          onTap: () => Get.to(() => const NotificationScreen()),
+        ),
         Positioned(
           right: -2,
           top: -2,
@@ -314,6 +317,7 @@ class _MessageScreenState extends State<MessageScreen> {
                     authorImage.toString(),
                     isVideo,
                     authorId.toString(),
+                    story["_id"],
                   );
                 },
               ),
@@ -453,14 +457,15 @@ class _MessageScreenState extends State<MessageScreen> {
     String image,
     bool isVideo,
     String authorId,
+    String postId,
   ) {
     const double cardW = 100;
     const double cardH = 132;
 
     return FutureBuilder<Widget>(
       future: isVideo
-          ? _buildVideoThumbnailWidget(mediaUrl, name, image, authorId)
-          : _buildImageStoryWidget(mediaUrl, name, image, authorId),
+          ? _buildVideoThumbnailWidget(mediaUrl, name, image, authorId, postId)
+          : _buildImageStoryWidget(mediaUrl, name, image, authorId, postId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Container(
@@ -499,6 +504,7 @@ class _MessageScreenState extends State<MessageScreen> {
     String name,
     String image,
     String authorId,
+    String postId,
   ) async {
     const double cardW = 100;
     const double cardH = 132;
@@ -512,6 +518,7 @@ class _MessageScreenState extends State<MessageScreen> {
             countdownSeconds: 3,
             userProfile: image,
             userName: name,
+            postId: postId,
             chatId: authorId,
           ),
         );
@@ -569,6 +576,7 @@ class _MessageScreenState extends State<MessageScreen> {
     String name,
     String image,
     String authorId,
+    String postId,
   ) async {
     const double cardW = 100;
     const double cardH = 132;
@@ -587,6 +595,7 @@ class _MessageScreenState extends State<MessageScreen> {
           cardW,
           cardH,
           barH,
+          postId,
         );
       }
 
@@ -620,6 +629,7 @@ class _MessageScreenState extends State<MessageScreen> {
         cardW,
         cardH,
         barH,
+        postId,
       );
     } catch (e) {
       debugPrint("⚠️ Thumbnail generation error: $e");
@@ -646,6 +656,7 @@ class _MessageScreenState extends State<MessageScreen> {
     double cardW,
     double cardH,
     double barH,
+    String postId,
   ) {
     return InkWell(
       onTap: () {
@@ -656,6 +667,7 @@ class _MessageScreenState extends State<MessageScreen> {
             userProfile: image,
             userName: name,
             chatId: authorId,
+            postId: postId,
           ),
         );
       },
@@ -817,6 +829,7 @@ class _MessageScreenState extends State<MessageScreen> {
           if (name == "group chat") name = "Group Chat";
           String image = chat["image"] ?? "";
           String chatId = chat["_id"] ?? "";
+          String userId = "";
 
           if (chat["type"] == "private") {
             final members = chat["members"] as List? ?? [];
@@ -827,6 +840,7 @@ class _MessageScreenState extends State<MessageScreen> {
             if (other != null) {
               name = other["name"] ?? name;
               image = other["image"] ?? image;
+              userId = other["_id"] ?? "";
             }
           }
 
@@ -860,6 +874,7 @@ class _MessageScreenState extends State<MessageScreen> {
                   Get.to(
                     () => ChatScreen(
                       chatId: chatId,
+                      receiverid: userId,
                       receiverName: name,
                       receiverImage: image,
                     ),

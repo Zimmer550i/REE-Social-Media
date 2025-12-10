@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, unnecessary_underscores
 
 import 'dart:async';
 import 'dart:io';
@@ -22,6 +22,7 @@ class VideoPreviewScreen extends StatefulWidget {
     required this.userProfile,
     required this.userName,
     this.chatId,
+    required this.postId,
     this.isInbox = false,
   });
 
@@ -29,6 +30,7 @@ class VideoPreviewScreen extends StatefulWidget {
   final String userProfile;
   final String userName;
   final String? chatId;
+  final String postId;
   final bool? isInbox;
   final int countdownSeconds;
 
@@ -208,6 +210,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
               reactionVideo: recordedFile!.path,
               userProfile: widget.userProfile,
               userName: widget.userName,
+              postId: widget.postId,
               chatId: widget.isInbox == true
                   ? widget.chatId.toString()
                   : storyChatId.toString(),
@@ -221,6 +224,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
               reactionVideo: recordedFile!.path,
               userProfile: widget.userProfile,
               userName: widget.userName,
+              postId: widget.postId,
               chatId: widget.isInbox == true
                   ? widget.chatId.toString()
                   : storyChatId.toString(),
@@ -387,7 +391,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
 
                             return Image.network(
                               widget.videoUrl,
-                              fit: isVeryTall ? BoxFit.fill : BoxFit.contain,
+                              fit: isVeryTall ? BoxFit.cover : BoxFit.contain,
                               errorBuilder: (_, __, ___) =>
                                   const Icon(Icons.broken_image),
                             );

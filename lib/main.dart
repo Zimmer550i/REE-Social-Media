@@ -35,7 +35,7 @@ void main() async {
     cameras = await availableCameras();
     AppRoutes.cameras = cameras;
   } catch (e) {
-    debugPrint("❌ Camera init error: $e");
+    debugPrint("Camera init error: $e");
   }
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(MyApp(languages: languages));

@@ -223,7 +223,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
         boxShadow: filled
             ? [
                 BoxShadow(
-                  color: AppColors.primaryColor.withOpacity(.35),
+                  color: AppColors.primaryColor.withValues(alpha: .35),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),

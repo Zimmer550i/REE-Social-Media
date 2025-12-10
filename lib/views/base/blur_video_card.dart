@@ -108,13 +108,11 @@ class _BlurVideoCardState extends State<BlurVideoCard> {
         Get.to(() => ViewMedia(mediaUrl: widget.videoFile.path))?.then((_) {
           if (mounted) setState(() => _isTapped = false);
         });
-      }
-      else if(widget.isMe == false && widget.isReaction == true){
+      } else if (widget.isMe == false && widget.isReaction == true) {
         Get.to(() => ViewMedia(mediaUrl: widget.videoFile.path))?.then((_) {
           if (mounted) setState(() => _isTapped = false);
         });
-      }
-       else {
+      } else {
         widget.chatController.updateChatView(widget.msgId);
         Navigator.push(
           context,
@@ -126,6 +124,7 @@ class _BlurVideoCardState extends State<BlurVideoCard> {
               userName: widget.receiverName,
               chatId: widget.chatId,
               isInbox: true,
+              postId: widget.msgId,
             ),
           ),
         ).then((_) {

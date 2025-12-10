@@ -207,6 +207,7 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
                 userProfile: userImage,
                 userName: name,
                 chatId: authorId,
+                postId: storyId,
               ),
             );
           } else {
@@ -282,6 +283,7 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
                 userProfile: userImage,
                 userName: name,
                 chatId: authorId,
+                postId: storyId,
               ),
             );
           } else {

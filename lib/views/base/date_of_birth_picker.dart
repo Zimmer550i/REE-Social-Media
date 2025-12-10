@@ -31,20 +31,24 @@ class _DateOfBirthFieldState extends State<DateOfBirthField> {
               // Done Button
               Container(
                 alignment: Alignment.centerRight,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: TextButton(
                   onPressed: () {
                     setState(() {
                       _selectedDate = tempPickedDate;
-                      widget.controller.text =
-                          DateFormat('MM/dd/yyyy').format(_selectedDate);
+                      widget.controller.text = DateFormat(
+                        'MM/dd/yyyy',
+                      ).format(_selectedDate);
                     });
                     Navigator.pop(context);
                   },
-                  child: const Text(
+                  child: Text(
                     'Done',
                     style: TextStyle(
-                      color: Colors.blue,
+                      color: AppColors.primaryColor,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

@@ -97,8 +97,8 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
       age--;
     }
 
-    if (age < 13) {
-      showSnackBar("You must be at least 13 years old to use this app.", true);
+    if (age < 18) {
+      showSnackBar("You must be at least 18+ years old to use this app.", true);
       return;
     }
 

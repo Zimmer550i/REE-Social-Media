@@ -33,7 +33,7 @@
 		</array>
 
 		<key>NSCameraUsageDescription</key>
-		<string>This app needs camera access to record your video.</string>
+		<string>This app needs camera access to upload and share photos/videos to your profile or in chat messages.</string>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>This app needs microphone access to record audio with your video.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
@@ -43,7 +43,7 @@
 		<key>UITextInputTextContentTypeOneTimeCode</key>
 		<string>OneTimeCode</string>
 		<key>NSContactsUsageDescription</key>
-		<string>This app requires access to your contacts to allow inviting friends.</string>
+		<string>This app needs access to your contacts to help you connect with friends on the platform.</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>This app requires access to your location while in use to support location-based features.</string>
 		<key>UIApplicationSupportsIndirectInputEvents</key>

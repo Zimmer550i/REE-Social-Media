@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ree_social_media_app/controllers/chat_controller.dart';
 import 'package:ree_social_media_app/controllers/user_controller.dart';
+import 'package:ree_social_media_app/utils/app_colors.dart';
 import '../models/multi_body.dart';
 import '../services/api_service.dart';
 
@@ -64,52 +65,48 @@ class MessageController extends GetxController {
     debugPrint("Total unread messages: $total");
   }
 
-Future<String?> getOrCreatePrivateChat(
-  String userId,
-  String name,
-  String image,
-) async {
-  try {
-    // Step 1 — Check if chat exists
-    final Map<String, dynamic>? existingChat = _findChatByUserId(userId);
+  Future<String?> getOrCreatePrivateChat(
+    String userId,
+    String name,
+    String image,
+  ) async {
+    try {
+      // Step 1 — Check if chat exists
+      final Map<String, dynamic>? existingChat = _findChatByUserId(userId);
 
-    if (existingChat != null) {
-      return existingChat["_id"];
+      if (existingChat != null) {
+        return existingChat["_id"];
+      }
+
+      // Step 2 — Create new chat
+      await createChatAndSendReaction(name, image, userId);
+
+      // Step 3 — Re-check after creation
+      final Map<String, dynamic>? newChat = _findChatByUserId(userId);
+
+      debugPrint("Chat ID: ${newChat?['_id']}");
+
+      return newChat?['_id'];
+    } catch (e) {
+      debugPrint("❌ Error in getOrCreatePrivateChat: $e");
+      return null;
     }
-
-    // Step 2 — Create new chat
-    await createChatAndSendReaction(name, image, userId);
-
-    // Step 3 — Re-check after creation
-    final Map<String, dynamic>? newChat = _findChatByUserId(userId);
-
-    debugPrint("Chat ID: ${newChat?['_id']}");
-
-    return newChat?['_id'];
-  } catch (e) {
-    debugPrint("❌ Error in getOrCreatePrivateChat: $e");
-    return null;
   }
-}
 
-/// Helper: Find private chat where member id matches userId
-Map<String, dynamic>? _findChatByUserId(String userId) {
-  try {
-    return privateChats.firstWhere(
-      (chat) {
+  /// Helper: Find private chat where member id matches userId
+  Map<String, dynamic>? _findChatByUserId(String userId) {
+    try {
+      return privateChats.firstWhere((chat) {
         final members = chat["members"] as List<dynamic>?;
 
         if (members == null) return false;
 
-        return members.any(
-          (m) => m is Map && m["_id"] == userId,
-        );
-      },
-    );
-  } catch (_) {
-    return null; // No chat found → return null safely
+        return members.any((m) => m is Map && m["_id"] == userId);
+      });
+    } catch (_) {
+      return null; // No chat found → return null safely
+    }
   }
-}
 
   Future<void> createChatAndSendReaction(
     String name,
@@ -302,7 +299,7 @@ Map<String, dynamic>? _findChatByUserId(String userId) {
         child: Wrap(
           children: [
             ListTile(
-              leading: const Icon(Icons.image, color: Colors.blue),
+              leading: Icon(Icons.image, color: AppColors.primaryColor),
               title: const Text('Add Image Story'),
               onTap: () => Get.back(result: 'image'),
             ),

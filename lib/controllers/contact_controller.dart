@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -50,29 +51,37 @@ class ContactController extends GetxController {
     }
   }
 
-static List<Map<String, dynamic>> _processContacts(List<Map<String, dynamic>> rawContacts) {
-  final expanded = rawContacts.expand((c) {
-    final phones = c["phones"] as List<dynamic>? ?? [];
-    if (phones.isEmpty) return [];
-    return phones.map((phone) {
-      String cleanedNumber = (phone as String).replaceAll(RegExp(r'[^\d+]'), '');
-      if (!cleanedNumber.startsWith("+")) {
-        cleanedNumber = "+1$cleanedNumber"; // default country code
-      }
-      return {"name": c["displayName"], "phone": cleanedNumber};
+  static List<Map<String, dynamic>> _processContacts(
+    List<Map<String, dynamic>> rawContacts,
+  ) {
+    final expanded = rawContacts.expand((c) {
+      final phones = c["phones"] as List<dynamic>? ?? [];
+      if (phones.isEmpty) return [];
+      return phones.map((phone) {
+        String cleanedNumber = (phone as String).replaceAll(
+          RegExp(r'[^\d+]'),
+          '',
+        );
+        if (!cleanedNumber.startsWith("+")) {
+          cleanedNumber = "+1$cleanedNumber"; // default country code
+        }
+        return {"name": c["displayName"], "phone": cleanedNumber};
+      });
     });
-  });
-  return List<Map<String, dynamic>>.from(expanded);
-}
+    return List<Map<String, dynamic>>.from(expanded);
+  }
 
   Future<void> sendInviteSms(
     BuildContext context,
     String number,
     String name,
   ) async {
+    String link = Platform.isIOS
+        ? ""
+        : "https://play.google.com/store/apps/details?id=com.re.socialmedia";
     // 1️⃣ Create the message
     final message =
-        "Join me on re: The app that makes sharing photos and videos more fun by capturing real reactions. Download here - link";
+        "Join me on re: The app that makes sharing photos and videos more fun by capturing real reactions. Download here - $link";
 
     // 2️⃣ Encode the message for URI
     final encodedMessage = Uri.encodeComponent(message);

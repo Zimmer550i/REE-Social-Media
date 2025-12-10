@@ -7,6 +7,7 @@ import 'package:mime/mime.dart';
 // ignore: depend_on_referenced_packages
 import 'package:path/path.dart' as p;
 import 'package:ree_social_media_app/helpers/route.dart';
+import 'package:ree_social_media_app/utils/app_colors.dart';
 import '../models/multi_body.dart';
 import '../services/api_service.dart';
 
@@ -53,7 +54,7 @@ class CreateStoryController extends GetxController {
       }
 
       await _uploadStoryMedia(mediaFile, mediaType);
-      
+
       Get.offAndToNamed(AppRoutes.messageScreen);
     } catch (e) {
       debugPrint("❌ Error creating story: $e");
@@ -63,7 +64,7 @@ class CreateStoryController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.redAccent.withValues(alpha: .2),
       );
-    }finally{
+    } finally {
       isLoading.value = false;
     }
   }
@@ -80,7 +81,7 @@ class CreateStoryController extends GetxController {
         child: Wrap(
           children: [
             ListTile(
-              leading: const Icon(Icons.image, color: Colors.blue),
+              leading: Icon(Icons.image, color: AppColors.primaryColor),
               title: const Text('Add Image Story'),
               onTap: () => Get.back(result: 'image'),
             ),
@@ -116,9 +117,7 @@ class CreateStoryController extends GetxController {
       final mimeType = lookupMimeType(file.path) ?? 'application/octet-stream';
       debugPrint('📡 Uploading $type with MIME type: $mimeType');
 
-      final multipartBody = [
-        MultipartBody(key: type, file: file),
-      ];
+      final multipartBody = [MultipartBody(key: type, file: file)];
 
       final response = await _api.postMultipartData(
         "/story/create-story",
@@ -129,7 +128,7 @@ class CreateStoryController extends GetxController {
 
       debugPrint("📥 Server Response: ${response.statusCode}");
       debugPrint("📦 Body: ${response.body}");
-        final resData = jsonDecode(response.body);
+      final resData = jsonDecode(response.body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
       } else {
@@ -159,7 +158,4 @@ class CreateStoryController extends GetxController {
       );
     }
   }
-
-
-
 }

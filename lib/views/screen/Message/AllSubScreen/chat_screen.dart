@@ -23,6 +23,7 @@ import '../../../../utils/media_store.dart';
 
 class ChatScreen extends StatefulWidget {
   final String chatId;
+  final String receiverid;
   final String receiverName;
   final String receiverImage;
 
@@ -31,6 +32,7 @@ class ChatScreen extends StatefulWidget {
     required this.chatId,
     required this.receiverName,
     required this.receiverImage,
+    required this.receiverid,
   });
 
   @override
@@ -48,6 +50,7 @@ class _ChatScreenState extends State<ChatScreen> {
   String? _token;
   String? _currentUserId;
   String? _receiverImage;
+  bool enableBlur = false;
 
   @override
   void initState() {
@@ -279,9 +282,124 @@ class _ChatScreenState extends State<ChatScreen> {
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF413E3E),
               ),
+              maxLines: 1,
             ),
           ),
+          actionButton(),
         ],
+      ),
+    );
+  }
+
+  PopupMenuButton<dynamic> actionButton() {
+    return PopupMenuButton(
+      onSelected: (value) async {
+        if (value == 0) {
+          bool result = await chatController.reportUser(
+            widget.receiverid,
+            widget.chatId,
+          );
+          if (result) {
+            Get.snackbar(
+              "Reported",
+              "User has been reported successfully.",
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: AppColors.primaryColor,
+              colorText: Colors.white,
+            );
+            Get.offAllNamed(AppRoutes.messageScreen);
+          } else {
+            Get.snackbar(
+              "Error",
+              "Failed to report the user. Please try again.",
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: AppColors.primaryColor,
+              colorText: Colors.white,
+            );
+          }
+        } else if (value == 1) {
+          bool result = await chatController.blockUser(
+            widget.receiverid,
+            widget.chatId,
+          );
+          if (result) {
+            Get.snackbar(
+              "Blocked",
+              "User has been blocked successfully.",
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: AppColors.primaryColor,
+              colorText: Colors.white,
+            );
+            Get.offAllNamed(AppRoutes.messageScreen);
+          } else {
+            Get.snackbar(
+              "Error",
+              "Failed to block the user. Please try again.",
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: AppColors.primaryColor,
+              colorText: Colors.white,
+            );
+          }
+        }
+      },
+      itemBuilder: (context) => <PopupMenuEntry>[
+        PopupMenuItem<int>(
+          value: 0,
+          height: 25,
+          child: Container(
+            width: double.infinity,
+            height: 25,
+            padding: EdgeInsets.only(left: 6),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Report',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                  color: Color(0xB81B1F26),
+                ),
+              ),
+            ),
+          ),
+        ),
+        PopupMenuItem(
+          height: 9,
+          enabled: false,
+          child: Container(
+            width: double.infinity,
+            height: 1,
+            color: Color(0xffc4c4c4),
+          ),
+        ),
+        PopupMenuItem<int>(
+          value: 1,
+          height: 25,
+          child: Container(
+            width: double.infinity,
+            height: 25,
+            padding: EdgeInsets.only(left: 6),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Block',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                  color: Color(0xB81B1F26),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+      child: Container(
+        height: 48,
+        width: 48,
+        decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+        child: Center(
+          child: Icon(Icons.report, color: AppColors.primaryColor, size: 28),
+        ),
       ),
     );
   }
@@ -310,7 +428,7 @@ class _ChatScreenState extends State<ChatScreen> {
           constraints: const BoxConstraints(maxWidth: 260),
           decoration: BoxDecoration(
             color: msg["isMe"]
-                ? const Color(0xFF56BBFF)
+                ? AppColors.primaryColor
                 : const Color(0xFFECECEC),
             borderRadius: BorderRadius.only(
               topLeft: const Radius.circular(32),
