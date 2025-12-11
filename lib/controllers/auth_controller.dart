@@ -343,7 +343,6 @@ class AuthController extends GetxController {
     await SharedPrefsService.remove('token');
     OneSignalHelper.optOut();
     await Get.offAll(() => LoginScreen());
-    showSnackBar("You have been logged out", false);
     isLoggedIn.value = false;
   }
 

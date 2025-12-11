@@ -378,17 +378,13 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                               context,
                             ).size.height;
 
-                            // 🔥 Rendered height on screen
+                            // Rendered height on screen
                             final renderedHeight =
                                 constraints.maxWidth * (imgHeight / imgWidth);
 
-                            // 🔥 If rendered image height > 80% of screen height
+                            // If rendered image height > 70% of screen height
                             double sHeight = screenHeight * 0.7;
                             final bool isVeryTall = renderedHeight > sHeight;
-                            debugPrint(
-                              "🔥 renderedHeight: $renderedHeight || screenHeight: ${screenHeight * 0.7} || isVeryTall: $isVeryTall",
-                            );
-
                             return Image.network(
                               widget.videoUrl,
                               fit: isVeryTall ? BoxFit.cover : BoxFit.contain,

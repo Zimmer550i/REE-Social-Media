@@ -432,7 +432,9 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
       builder: (_, playing, _) {
         return Container(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-          decoration: BoxDecoration(color: Colors.white.withOpacity(0.24)),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.24),
+          ),
           child: Column(
             children: [
               Row(
