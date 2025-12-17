@@ -1042,7 +1042,7 @@ class _MessageScreenState extends State<MessageScreen> {
                 final message = await controller.deleteChat(chatId);
                 if (message == "success") {
                   // Get.back();
-                  Get.offAll(() => MessageScreen());
+                  Get.offAllNamed(AppRoutes.messageScreen);
                 } else {
                   Get.back();
                   showSnackBar("ERROR $message", true);

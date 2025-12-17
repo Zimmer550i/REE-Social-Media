@@ -114,7 +114,7 @@ class _FrameSelectionScreenState extends State<FrameSelectionScreen> {
       ),
       body: Column(
         children: [
-          // 🖼️ Big preview
+          // Big preview
           Expanded(
             child: _thumbnailPaths.isEmpty
                 ? const Center(child: Text("No frames available"))

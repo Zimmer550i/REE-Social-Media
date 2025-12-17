@@ -112,6 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         passwordTextController.text,
                       );
                       if (message == "success") {
+                        
                         OneSignalHelper.optIn();
                         Get.offAll(() => MessageScreen());
                       } else if (message == "verify") {

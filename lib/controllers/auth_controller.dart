@@ -91,20 +91,27 @@ class AuthController extends GetxController {
         if (rememberMe) {
           setToken(body['data']['accessToken']);
         }
-        isLoading.value = false;
-
+        final data = Get.find<UserController>().userInfo.value;
+        if (data == null) {
+          return "Account not found";
+        }
+        String name = data.name.toString();
+        String image = data.image.toString();
+        if (name.isEmpty || image.isEmpty) {
+          return "Account not found";
+        }
         return "success";
       } else {
         if (body['error'] == "Please verify your phone address.") {
-          isLoading.value = false;
           return "verify";
         }
-        isLoading.value = false;
         return body['message'] ?? "Connection Error";
       }
     } catch (e) {
-      isLoading.value = false;
+      
       return "Unexpected error: ${e.toString()}";
+    }finally{
+      isLoading.value = false;
     }
   }
 
@@ -343,7 +350,6 @@ class AuthController extends GetxController {
     await SharedPrefsService.remove('token');
     OneSignalHelper.optOut();
     await Get.offAll(() => LoginScreen());
-    showSnackBar("You have been logged out", false);
     isLoggedIn.value = false;
   }
 

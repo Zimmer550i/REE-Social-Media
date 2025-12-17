@@ -6,21 +6,54 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 // ignore: depend_on_referenced_packages
 import 'package:path/path.dart' as p;
+import 'package:ree_social_media_app/controllers/user_controller.dart';
 import 'package:ree_social_media_app/helpers/route.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
 import '../models/multi_body.dart';
 import '../services/api_service.dart';
+import 'message_controller.dart';
 
 class CreateStoryController extends GetxController {
+  final MessageController messageController = Get.put(MessageController());
+  final UserController userController = Get.find<UserController>();
   final ApiService _api = ApiService();
   final ImagePicker _picker = ImagePicker();
   var isLoading = false.obs;
 
   Future<void> addStory({String? imagePath, String? videoPath}) async {
     isLoading.value = true;
+
     try {
       String? mediaType;
       File? mediaFile;
+
+      final currentUserId = userController.userInfo.value!.id;
+
+      // Wait a tiny bit to ensure messageController.stories is ready
+      await Future.delayed(const Duration(seconds: 3));
+
+      final myStories = messageController.stories
+          .where(
+            (story) =>
+                story["author"] != null &&
+                (story["author"] is Map
+                    ? story["author"]["_id"] == currentUserId
+                    : false),
+          )
+          .toList();
+
+      if (myStories.isNotEmpty) {
+        Get.offAllNamed(AppRoutes.messageScreen);
+        Get.snackbar(
+          "Limit Reached",
+          "You have already uploaded your Story for the day 🙂",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: AppColors.primaryColor,
+        );
+        return;
+      }
+
+      // ↓ Continue with the rest of the story upload logic
 
       if (imagePath != null) {
         mediaType = 'image';

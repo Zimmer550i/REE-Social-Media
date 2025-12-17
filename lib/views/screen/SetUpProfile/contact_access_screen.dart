@@ -6,8 +6,8 @@ import 'package:ree_social_media_app/utils/re_logo.dart';
 import 'package:ree_social_media_app/views/base/custom_button.dart';
 import 'package:ree_social_media_app/views/screen/SetUpProfile/invite_friend_screen.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'enable_notification_screen.dart';
 
 class ContactAccessScreen extends StatefulWidget {
   const ContactAccessScreen({super.key});
@@ -16,7 +16,36 @@ class ContactAccessScreen extends StatefulWidget {
   State<ContactAccessScreen> createState() => _ContactAccessScreenState();
 }
 
-class _ContactAccessScreenState extends State<ContactAccessScreen> {
+class _ContactAccessScreenState extends State<ContactAccessScreen> with WidgetsBindingObserver {
+  bool _permissionGranted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _checkPermissionStatus();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkPermissionStatus();
+    }
+  }
+
+  Future<void> _checkPermissionStatus() async {
+    final status = await Permission.contacts.status;
+    setState(() {
+      _permissionGranted = status.isGranted;
+    });
+  }
+
   /// Fetch contacts and save them locally
   Future<void> _saveContactsToLocal() async {
     final contacts = await FlutterContacts.getContacts(withProperties: true);
@@ -123,48 +152,56 @@ class _ContactAccessScreenState extends State<ContactAccessScreen> {
               ),
 
               const SizedBox(height: 80),
-
-              // // Not Now button
-              // InkWell(
-              //   onTap: () {
-              //     Get.to(() => const EnableNotificationScreen());
-              //   },
-              //   child: Container(
-              //     height: 48,
-              //     width: double.infinity,
-              //     decoration: BoxDecoration(
-              //       borderRadius: BorderRadius.circular(8),
-              //       border: Border.all(
-              //         color: const Color(0xFFC4C3C3),
-              //         width: 0.5,
-              //       ),
-              //     ),
-              //     child: const Center(
-              //       child: Text(
-              //         "Not Now",
-              //         style: TextStyle(
-              //           color: Color(0xFF676565),
-              //           fontSize: 18,
-              //           fontWeight: FontWeight.w600,
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
-
-              // const SizedBox(height: 20),
-
               // Allow Access button
               CustomButton(
                 onTap: () async {
-                  if (await FlutterContacts.requestPermission()) {
+                  if (_permissionGranted) {
                     await _saveContactsToLocal();
-                    Get.to(() => const InviteFriendScreen());
+                    Get.off(() => const InviteFriendScreen());
                   } else {
-                    Get.snackbar(
-                      "Permission Denied",
-                      "You need to allow access to continue",
-                    );
+                    final permission = await FlutterContacts.requestPermission();
+
+                    if (permission) {
+                      await _saveContactsToLocal();
+                      Get.off(() => const InviteFriendScreen());
+                    } else {
+                      Get.defaultDialog(
+                        title: "Permission Required",
+                        backgroundColor: Colors.white,
+                        middleText:
+                            "Please enable access to Contacts from Settings to continue.",
+                        confirm: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryColor,
+                            overlayColor: AppColors.primaryColor.withAlpha(50),
+                          ),
+                          onPressed: () async {
+                            await openAppSettings();
+                            final status = await Permission.contacts.status;
+                            if (status.isGranted) {
+                              await _saveContactsToLocal();
+                              Get.off(() => const InviteFriendScreen());
+                            }
+                          },
+                          child: const Text(
+                            "Open Settings",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        cancel: TextButton(
+                          onPressed: () => Get.back(),
+                          style: ButtonStyle(
+                            overlayColor: WidgetStateProperty.all(
+                              AppColors.primaryColor.withAlpha(50),
+                            ),
+                          ),
+                          child: Text(
+                            "Cancel",
+                            style: TextStyle(color: AppColors.primaryColor),
+                          ),
+                        ),
+                      );
+                    }
                   }
                 },
                 text: "Allow Access",

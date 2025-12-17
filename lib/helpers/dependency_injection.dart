@@ -10,7 +10,6 @@ class InitialBindings extends Bindings {
     // Permanent controllers (stay in memory)
     Get.put(AuthController(), permanent: true);
     Get.put(UserController(), permanent: true);
-
   }
 
   

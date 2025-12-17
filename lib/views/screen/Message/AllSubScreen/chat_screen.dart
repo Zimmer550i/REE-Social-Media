@@ -178,16 +178,19 @@ class _ChatScreenState extends State<ChatScreen> {
                       vertical: 10,
                     ),
                     itemCount: msgs.length,
+                    addAutomaticKeepAlives: true,
+                    cacheExtent: 1000,
                     itemBuilder: (_, index) {
                       final msg = msgs[index];
-                      // debugPrint("Rendering message: $msg");
-                      return Align(
-                        alignment: msg["isMe"]
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 6),
-                          child: _buildMessageBubble(msg),
+                      return RepaintBoundary(
+                        child: Align(
+                          alignment: msg["isMe"]
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            child: _buildMessageBubble(msg),
+                          ),
                         ),
                       );
                     },
