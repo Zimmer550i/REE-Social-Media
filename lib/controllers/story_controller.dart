@@ -14,7 +14,7 @@ import '../services/api_service.dart';
 import 'message_controller.dart';
 
 class CreateStoryController extends GetxController {
-  final MessageController messageController = Get.find<MessageController>();
+  final MessageController messageController = Get.put(MessageController());
   final UserController userController = Get.find<UserController>();
   final ApiService _api = ApiService();
   final ImagePicker _picker = ImagePicker();
@@ -29,34 +29,31 @@ class CreateStoryController extends GetxController {
 
       final currentUserId = userController.userInfo.value!.id;
 
-// Wait a tiny bit to ensure messageController.stories is ready
-await Future.delayed(const Duration(seconds: 3));
+      // Wait a tiny bit to ensure messageController.stories is ready
+      await Future.delayed(const Duration(seconds: 3));
 
+      final myStories = messageController.stories
+          .where(
+            (story) =>
+                story["author"] != null &&
+                (story["author"] is Map
+                    ? story["author"]["_id"] == currentUserId
+                    : false),
+          )
+          .toList();
 
-final myStories = messageController.stories
-    .where(
-      (story) =>
-          story["author"] != null &&
-          (story["author"] is Map
-              ? story["author"]["_id"] == currentUserId
-              : false),
-    )
-    .toList();
+      if (myStories.isNotEmpty) {
+        Get.offAllNamed(AppRoutes.messageScreen);
+        Get.snackbar(
+          "Limit Reached",
+          "You have already uploaded your Story for the day 🙂",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: AppColors.primaryColor,
+        );
+        return;
+      }
 
-    
-
-if (myStories.isNotEmpty) {
-  Get.offAllNamed(AppRoutes.messageScreen);
-  Get.snackbar(
-    "Limit Reached",
-    "You have already uploaded your Story for the day 🙂",
-    snackPosition: SnackPosition.BOTTOM,
-    backgroundColor: Colors.redAccent,
-  );
-  return;
-}
-
-// ↓ Continue with the rest of the story upload logic
+      // ↓ Continue with the rest of the story upload logic
 
       if (imagePath != null) {
         mediaType = 'image';
