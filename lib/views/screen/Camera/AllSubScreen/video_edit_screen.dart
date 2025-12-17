@@ -3,11 +3,12 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
+import 'package:ree_social_media_app/controllers/message_controller.dart';
 import 'package:ree_social_media_app/controllers/send_message_controller.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
 import 'package:ree_social_media_app/views/screen/Camera/AllSubScreen/send_message_with_friend_screen.dart';
 import 'package:video_player/video_player.dart';
-import '../../../../controllers/camera_controller.dart';
+import '../../../../controllers/story_controller.dart';
 import '../../../../helpers/route.dart';
 import '../../../../utils/file_utils.dart';
 
@@ -36,6 +37,7 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
   final SendMessageController sendMessageController = Get.put(
     SendMessageController(),
   );
+  final MessageController messageController = Get.find<MessageController>();
   CameraController? _frontCam;
   VideoPlayerController? _video;
 
@@ -49,6 +51,7 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
     if (widget.isVideo) {
       _initFlow();
     }
+    messageController.fetchStories();
   }
 
   Future<void> _initFlow() async {

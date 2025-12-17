@@ -169,7 +169,7 @@ class _ContactAccessScreenState extends State<ContactAccessScreen> with WidgetsB
                         title: "Permission Required",
                         backgroundColor: Colors.white,
                         middleText:
-                            "Please enable Contacts permission from Settings to continue.",
+                            "Please enable access to Contacts from Settings to continue.",
                         confirm: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryColor,
