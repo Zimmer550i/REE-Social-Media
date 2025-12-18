@@ -76,21 +76,19 @@ class ContactController extends GetxController {
     String number,
     String name,
   ) async {
-    String link = Platform.isIOS
-        ? ""
-        : "https://play.google.com/store/apps/details?id=com.re.socialmedia";
-    // 1️⃣ Create the message
+    String link = "https://resocial.info/download-now";
+    //Create the message
     final message =
         "Join me on re: The app that makes sharing photos and videos more fun by capturing real reactions. Download here - $link";
 
-    // 2️⃣ Encode the message for URI
+    //Encode the message for URI
     final encodedMessage = Uri.encodeComponent(message);
 
-    // 3️⃣ Build the SMS URI
+    //Build the SMS URI
     final smsUri = Uri.parse('sms:$number?body=$encodedMessage');
 
     try {
-      // 4️⃣ Launch the SMS app explicitly
+      //Launch the SMS app explicitly
       if (await canLaunchUrl(smsUri)) {
         await launchUrl(
           smsUri,

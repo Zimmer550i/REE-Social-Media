@@ -48,6 +48,7 @@ class CreateStoryController extends GetxController {
           "Limit Reached",
           "You have already uploaded your Story for the day 🙂",
           snackPosition: SnackPosition.BOTTOM,
+          colorText: Colors.white,
           backgroundColor: AppColors.primaryColor,
         );
         return;
