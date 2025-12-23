@@ -14,6 +14,8 @@ import 'package:ree_social_media_app/utils/show_snackbar.dart';
 import 'package:ree_social_media_app/views/screen/Contact/contact_screen.dart';
 import 'package:ree_social_media_app/views/screen/Message/AllSubScreen/AllSubScreen/see_all_story_screen.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import '../../../services/one_signal_manager.dart';
+import '../../../services/shared_prefs_service.dart';
 import '../../base/bottom_menu.dart';
 import '../Notification/notification_screen.dart';
 import 'AllSubScreen/AllSubScreen/video_preview_screen.dart';
@@ -68,6 +70,13 @@ class _MessageScreenState extends State<MessageScreen> {
       }
     });
     userController.setSubscriptionId();
+    enablePushNotification();
+  }
+
+  void enablePushNotification() async {
+    await SharedPrefsService.set('push_notifications_status', 'true');
+    OneSignalHelper.requestPushPermission();
+    OneSignalHelper.optIn();
   }
 
   Future<void> _loadMoreChats() async {
@@ -454,7 +463,7 @@ class _MessageScreenState extends State<MessageScreen> {
   Widget _buildStoryCard(
     String mediaUrl,
     String name,
-    String image,
+    String authorImage,
     bool isVideo,
     String authorId,
     String postId,
@@ -464,8 +473,20 @@ class _MessageScreenState extends State<MessageScreen> {
 
     return FutureBuilder<Widget>(
       future: isVideo
-          ? _buildVideoThumbnailWidget(mediaUrl, name, image, authorId, postId)
-          : _buildImageStoryWidget(mediaUrl, name, image, authorId, postId),
+          ? _buildVideoThumbnailWidget(
+              mediaUrl,
+              name,
+              authorImage,
+              authorId,
+              postId,
+            )
+          : _buildImageStoryWidget(
+              mediaUrl,
+              name,
+              authorImage,
+              authorId,
+              postId,
+            ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Container(
@@ -475,9 +496,32 @@ class _MessageScreenState extends State<MessageScreen> {
             decoration: BoxDecoration(
               color: Colors.black12,
               borderRadius: BorderRadius.circular(8),
+              image: DecorationImage(
+                image: NetworkImage(authorImage),
+                fit: BoxFit.cover,
+              ),
             ),
-            child: Center(
-              child: SpinKitWave(color: AppColors.primaryColor, size: 30.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                // SpinKitWave(color: AppColors.primaryColor, size: 30.0),
+                Container(
+                  height: 32,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  alignment: Alignment.centerLeft,
+                  color: Colors.black.withValues(alpha: 0.42),
+                  child: Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
             ),
           );
         }

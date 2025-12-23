@@ -62,7 +62,7 @@ class ContactController extends GetxController {
           '',
         );
         if (!cleanedNumber.startsWith("+")) {
-          cleanedNumber = "+1$cleanedNumber"; // default country code
+          cleanedNumber = "+1$cleanedNumber";
         }
         return {"name": c["displayName"], "phone": cleanedNumber};
       });

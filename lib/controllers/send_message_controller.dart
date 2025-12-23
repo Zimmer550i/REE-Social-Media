@@ -19,6 +19,7 @@ class SendMessageController extends GetxController {
   final RxSet<String> selectedIds = <String>{}.obs;
   final RxList<Map<String, dynamic>> friends = <Map<String, dynamic>>[].obs;
   final RxBool isLoading = true.obs;
+  final RxBool customLoadin = false.obs;
   final RxString searchQuery = ''.obs;
 
   @override
@@ -26,6 +27,8 @@ class SendMessageController extends GetxController {
     super.onInit();
     initData();
   }
+
+  
 
   Future<void> initData() async {
     isLoading.value = true;

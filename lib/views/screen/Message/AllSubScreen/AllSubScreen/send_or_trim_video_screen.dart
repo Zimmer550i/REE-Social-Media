@@ -500,35 +500,41 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        InkWell(
-          onTap: () async {
-            await _captureAndSaveScreenshot();
-            Get.to(
-              () => FrameSelectionScreen(
-                frontVideoUrl: widget.reactionVideo,
-                userProfile: widget.userProfile,
-                userName: widget.userName,
-                chatId: widget.chatId,
-                isInbox: widget.isInbox,
-                thumbnail: thumbnail,
+        Obx(
+          () => InkWell(
+            onTap: () async {
+              sendMessageController.customLoadin.value = true;
+              await _captureAndSaveScreenshot();
+              sendMessageController.customLoadin.value = false;
+              Get.to(
+                () => FrameSelectionScreen(
+                  frontVideoUrl: widget.reactionVideo,
+                  userProfile: widget.userProfile,
+                  userName: widget.userName,
+                  chatId: widget.chatId,
+                  isInbox: widget.isInbox,
+                  thumbnail: thumbnail,
+                ),
+              );
+            },
+            child: Container(
+              width: 130,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(32),
+                color: Colors.grey,
               ),
-            );
-          },
-          child: Container(
-            width: 130,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(32),
-              color: Colors.grey,
-            ),
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Text(
-                  "Select Image",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: sendMessageController.customLoadin.value
+                      ? SpinKitWave(color: Colors.white, size: 20)
+                      : Text(
+                          "Select Image",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
             ),
@@ -537,7 +543,9 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
         Obx(
           () => InkWell(
             onTap: () async {
+              sendMessageController.isLoading.value = true;
               await _captureAndSaveScreenshot();
+              // sendMessageController.isLoading.value = false;
               await sendMessageController.sendMediaToSingleChat(
                 chatId: widget.chatId,
                 filePath: widget.reactionVideo,

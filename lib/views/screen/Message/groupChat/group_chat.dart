@@ -151,10 +151,10 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     }
                     return false;
                   },
-                  child: ListView.builder(
+                  child: ListView.separated(
                     reverse: true,
                     controller: chatController.scrollController,
-                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     cacheExtent: 1000,
                     itemCount: msgs.length,
                     itemBuilder: (_, index) {
@@ -166,6 +166,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                         child: _buildMessage(msg),
                       );
                     },
+                    separatorBuilder: (_, __) => const SizedBox(height: 6),
                   ),
                 );
               }),
@@ -272,7 +273,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   Widget _buildTextMessage(Map<String, dynamic> msg, String name) {
     final isMe = msg["isMe"];
     final time = msg["time"];
-    debugPrint("Name=======> $name");
     String formattedTime = formatServerTime(time);
     return Column(
       crossAxisAlignment: isMe
@@ -350,6 +350,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             formattedTime,
             style: const TextStyle(fontSize: 10, color: Colors.grey),
           ),
+          const SizedBox(height: 16),
         ],
       ],
     );
@@ -397,6 +398,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
           const SizedBox(height: 4),
           _buildImageFooter(msg, imageUrl.toString()),
+          const SizedBox(height: 16),
         ],
 
         if (!isMe) ...[
@@ -432,6 +434,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   ),
                   const SizedBox(height: 4),
                   _buildImageFooter(msg, imageUrl.toString()),
+                  const SizedBox(height: 16),
                 ],
               ),
             ],
@@ -465,7 +468,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
           return SizedBox(
-            height: 260,
+            height: 300,
             width: 180,
             child: Center(
               child: SpinKitWave(color: AppColors.primaryColor, size: 30.0),
@@ -507,6 +510,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
               // Footer (Save + Time)
               _buildVideoFooter(msg, localVideo.path),
+              const SizedBox(height: 16),
             ],
             if (!isMe) ...[
               Row(
@@ -547,6 +551,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
                       // Footer (Save + Time)
                       _buildVideoFooter(msg, localVideo.path),
+                      const SizedBox(height: 16),
                     ],
                   ),
                 ],
