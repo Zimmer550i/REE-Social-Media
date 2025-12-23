@@ -154,7 +154,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   child: ListView.builder(
                     reverse: true,
                     controller: chatController.scrollController,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    cacheExtent: 1000,
                     itemCount: msgs.length,
                     itemBuilder: (_, index) {
                       final msg = msgs[index];
@@ -162,10 +163,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                         alignment: msg["isMe"]
                             ? Alignment.centerRight
                             : Alignment.centerLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 6),
-                          child: _buildMessage(msg),
-                        ),
+                        child: _buildMessage(msg),
                       );
                     },
                   ),
@@ -321,6 +319,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     formattedTime,
                     style: const TextStyle(fontSize: 10, color: Colors.grey),
                   ),
+                  SizedBox(height: 16),
                 ],
               ),
             ],
@@ -467,7 +466,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         if (snap.connectionState == ConnectionState.waiting) {
           return SizedBox(
             height: 260,
-                    width: 180,
+            width: 180,
             child: Center(
               child: SpinKitWave(color: AppColors.primaryColor, size: 30.0),
             ),
@@ -477,7 +476,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         if (!snap.hasData) {
           return const SizedBox(
             height: 260,
-                    width: 180,
+            width: 180,
             child: Center(child: Icon(Icons.error)),
           );
         }
