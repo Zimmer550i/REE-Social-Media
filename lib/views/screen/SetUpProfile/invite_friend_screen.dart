@@ -194,7 +194,7 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
             // Body
             Expanded(
               child: Obx(() {
-                final matched = contactController.filteredMatchedContacts;
+                // final matched = contactController.filteredMatchedContacts;
                 final unmatched = contactController.filteredUnmatchedContacts;
                 final isLoading = contactController.isLoading.value;
 
@@ -266,17 +266,17 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
                         )
                       else ...[
                         // Friends on re:
-                        if (matched.isNotEmpty) ...[
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: matched.length,
-                            itemBuilder: (context, index) => _buildContactTile(
-                              matched[index],
-                              isMatched: true,
-                            ),
-                          ),
-                        ],
+                        // if (matched.isNotEmpty) ...[
+                        //   ListView.builder(
+                        //     shrinkWrap: true,
+                        //     physics: const NeverScrollableScrollPhysics(),
+                        //     itemCount: matched.length,
+                        //     itemBuilder: (context, index) => _buildContactTile(
+                        //       matched[index],
+                        //       isMatched: true,
+                        //     ),
+                        //   ),
+                        // ],
 
                         // Invite to join
                         if (unmatched.isNotEmpty) ...[

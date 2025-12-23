@@ -98,7 +98,6 @@ class _BlurImageCardState extends State<BlurImageCard> {
                     ),
               child: Image.network(
                 widget.hasThumbnail ? widget.thumbnail : widget.imageUrl,
-                // widget.imageUrl,
                 height: 260,
                 width: 180,
                 fit: BoxFit.contain,

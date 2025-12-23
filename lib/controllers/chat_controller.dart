@@ -621,6 +621,7 @@ class ChatController extends GetxController {
       "temp": false,
       "view": m["view"],
       "reaction": m["reaction"],
+      "name": m["sender"]["name"],
     };
   }
 

@@ -515,7 +515,7 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
             );
           },
           child: Container(
-            width: 120,
+            width: 130,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(32),
               color: Colors.grey,
@@ -547,7 +547,7 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
               );
             },
             child: Container(
-              width: 120,
+              width: 130,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(32),
                 color: AppColors.primaryColor,
