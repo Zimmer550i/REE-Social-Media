@@ -95,8 +95,8 @@ class AuthController extends GetxController {
         if (data == null) {
           return "Account not found";
         }
-        String name = data.name.toString();
-        String image = data.image.toString();
+        String name = data.name ?? "";
+        String image = data.image ?? "";
         if (name.isEmpty || image.isEmpty) {
           return "Account not found";
         }
