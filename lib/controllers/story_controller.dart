@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -96,7 +95,8 @@ class CreateStoryController extends GetxController {
         "Error",
         "Something went wrong while uploading story.",
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent.withValues(alpha: .2),
+          colorText: Colors.white,
+          backgroundColor: AppColors.primaryColor,
       );
     } finally {
       isLoading.value = false;
@@ -155,30 +155,27 @@ class CreateStoryController extends GetxController {
 
       final response = await _api.postMultipartData(
         "/story/create-story",
-        {}, // You can add text fields like {"caption": "Nice view!"}
+        {},
         multipartBody: multipartBody,
         authReq: true,
       );
-
-      debugPrint("📥 Server Response: ${response.statusCode}");
-      debugPrint("📦 Body: ${response.body}");
-      final resData = jsonDecode(response.body);
-
       if (response.statusCode == 200 || response.statusCode == 201) {
       } else {
         try {
           Get.snackbar(
             "Upload Failed",
-            resData['message'] ?? "Server rejected upload.",
+            "Could not upload story. Please try again.",
             snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.redAccent.withValues(alpha: .2),
+          colorText: Colors.white,
+          backgroundColor: AppColors.primaryColor,
           );
         } catch (_) {
           Get.snackbar(
             "Upload Failed",
             "Server error: ${response.statusCode}",
             snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.redAccent.withValues(alpha: .2),
+          colorText: Colors.white,
+          backgroundColor: AppColors.primaryColor,
           );
         }
       }
@@ -188,7 +185,9 @@ class CreateStoryController extends GetxController {
         "Error",
         "Could not upload story. Please try again.",
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent.withValues(alpha: .2),
+          colorText: Colors.white,
+          backgroundColor: AppColors.primaryColor,
+        
       );
     }
   }

@@ -344,7 +344,8 @@ class MessageController extends GetxController {
           "Upload Failed",
           "Could not upload your $mediaType story.",
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.redAccent.withValues(alpha: .2),
+          colorText: Colors.white,
+          backgroundColor: AppColors.primaryColor,
         );
       }
     } catch (e) {
@@ -353,7 +354,8 @@ class MessageController extends GetxController {
         "Error",
         "Something went wrong while uploading story.",
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent.withValues(alpha: .2),
+          colorText: Colors.white,
+          backgroundColor: AppColors.primaryColor,
       );
     }
   }

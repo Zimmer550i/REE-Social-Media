@@ -179,10 +179,8 @@ class OnboardScreen2 extends StatelessWidget {
                             "Permission Required",
                             "Camera, Microphone, Photo Library, and Contacts access are needed to continue.",
                             snackPosition: SnackPosition.BOTTOM,
-                            backgroundColor: Colors.redAccent.withValues(
-                              alpha: .8,
-                            ),
                             colorText: Colors.white,
+                            backgroundColor: AppColors.primaryColor,
                             margin: const EdgeInsets.all(16),
                             borderRadius: 10,
                             duration: const Duration(seconds: 3),

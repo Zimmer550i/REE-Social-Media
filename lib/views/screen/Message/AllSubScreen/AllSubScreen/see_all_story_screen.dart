@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:ree_social_media_app/controllers/user_controller.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
@@ -162,11 +161,34 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
           if (snap.connectionState == ConnectionState.waiting) {
             return Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
                 color: Colors.black12,
+                borderRadius: BorderRadius.circular(8),
+                image: DecorationImage(
+                  image: NetworkImage(userImage),
+                  fit: BoxFit.cover,
+                ),
               ),
-              child: Center(
-                child: SpinKitWave(color: AppColors.primaryColor, size: 30.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // SpinKitWave(color: AppColors.primaryColor, size: 30.0),
+                  Container(
+                    height: 32,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    alignment: Alignment.centerLeft,
+                    color: Colors.black.withValues(alpha: 0.42),
+                    child: Text(
+                      name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             );
           }
@@ -220,7 +242,7 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
             fit: StackFit.expand,
             children: [
               Image.network(
-                mediaUrl,
+                userImage,
                 fit: BoxFit.cover,
                 errorBuilder: (_, _, _) =>
                     const Center(child: Icon(Icons.broken_image)),
@@ -296,7 +318,8 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
             fit: StackFit.expand,
             children: [
               if (thumbPath != null)
-                Image.file(File(thumbPath), fit: BoxFit.cover)
+                // Image.file(File(thumbPath), fit: BoxFit.cover)
+                Image.network(userImage, fit: BoxFit.cover)
               else
                 Container(
                   color: Colors.black26,
