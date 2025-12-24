@@ -151,10 +151,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     }
                     return false;
                   },
-                  child: ListView.builder(
+                  child: ListView.separated(
                     reverse: true,
                     controller: chatController.scrollController,
                     padding: const EdgeInsets.symmetric(horizontal: 12),
+                    cacheExtent: 1000,
                     itemCount: msgs.length,
                     itemBuilder: (_, index) {
                       final msg = msgs[index];
@@ -162,12 +163,10 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                         alignment: msg["isMe"]
                             ? Alignment.centerRight
                             : Alignment.centerLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 6),
-                          child: _buildMessage(msg),
-                        ),
+                        child: _buildMessage(msg),
                       );
                     },
+                    separatorBuilder: (_, __) => const SizedBox(height: 6),
                   ),
                 );
               }),
@@ -216,7 +215,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                         groupChatController.groupName.isNotEmpty
                             ? groupChatController.groupName.value[0]
                                   .toUpperCase()
-                            : "?",
+                            : "",
                       )
                     : null,
               ),
@@ -260,60 +259,104 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   }
 
   Widget _buildMessage(Map<String, dynamic> msg) {
+    final name = msg["name"] ?? "";
     switch (msg["type"]) {
       case "image":
-        return _buildImageMessage(msg);
+        return _buildImageMessage(msg, name);
       case "video":
-        return _buildVideoMessage(msg);
+        return _buildVideoMessage(msg, name);
       default:
-        return _buildTextMessage(msg);
+        return _buildTextMessage(msg, name);
     }
   }
 
-  Widget _buildTextMessage(Map<String, dynamic> msg) {
+  Widget _buildTextMessage(Map<String, dynamic> msg, String name) {
+    final isMe = msg["isMe"];
     final time = msg["time"];
     String formattedTime = formatServerTime(time);
     return Column(
-      crossAxisAlignment: msg["isMe"]
+      crossAxisAlignment: isMe
           ? CrossAxisAlignment.end
           : CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          constraints: const BoxConstraints(maxWidth: 260),
-          decoration: BoxDecoration(
-            color: msg["isMe"]
-                ? AppColors.primaryColor
-                : const Color(0xFFECECEC),
-            borderRadius: BorderRadius.only(
-              topLeft: const Radius.circular(32),
-              topRight: const Radius.circular(32),
-              bottomLeft: msg["isMe"]
-                  ? const Radius.circular(32)
-                  : const Radius.circular(0),
-              bottomRight: msg["isMe"]
-                  ? const Radius.circular(0)
-                  : const Radius.circular(32),
+        if (isMe == false) ...[
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 22,
+                backgroundColor: AppColors.primaryColor,
+                child: Text(name[0].toUpperCase()),
+              ),
+              SizedBox(width: 10),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    constraints: const BoxConstraints(maxWidth: 260),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFECECEC),
+                      borderRadius: BorderRadius.only(
+                        topLeft: const Radius.circular(32),
+                        topRight: const Radius.circular(32),
+                        bottomLeft: const Radius.circular(0),
+                        bottomRight: const Radius.circular(32),
+                      ),
+                    ),
+                    child: Text(
+                      msg["message"] ?? "",
+                      style: TextStyle(color: Colors.black87, fontSize: 16),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    formattedTime,
+                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  ),
+                  SizedBox(height: 16),
+                ],
+              ),
+            ],
+          ),
+        ],
+        if (isMe) ...[
+          Container(
+            padding: const EdgeInsets.all(12),
+            constraints: const BoxConstraints(maxWidth: 260),
+            decoration: BoxDecoration(
+              color: AppColors.primaryColor,
+              borderRadius: BorderRadius.only(
+                topLeft: const Radius.circular(32),
+                topRight: const Radius.circular(32),
+                bottomLeft: const Radius.circular(32),
+
+                bottomRight: const Radius.circular(0),
+              ),
+            ),
+            child: Text(
+              msg["message"] ?? "",
+              style: TextStyle(color: Colors.white, fontSize: 16),
             ),
           ),
-          child: Text(
-            msg["message"] ?? "",
-            style: TextStyle(
-              color: msg["isMe"] ? Colors.white : Colors.black87,
-              fontSize: 16,
-            ),
+
+          const SizedBox(height: 4),
+          Text(
+            formattedTime,
+            style: const TextStyle(fontSize: 10, color: Colors.grey),
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          formattedTime,
-          style: const TextStyle(fontSize: 10, color: Colors.grey),
-        ),
+          const SizedBox(height: 16),
+        ],
       ],
     );
   }
 
-  Widget _buildImageMessage(Map<String, dynamic> msg) {
+  Widget _buildImageMessage(Map<String, dynamic> msg, String name) {
     final imageUrl = userController.addBaseUrl(msg["media"] ?? "");
     bool isMe = msg["isMe"] ?? false;
     bool view = msg["view"] ?? false;
@@ -338,27 +381,70 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           ? CrossAxisAlignment.end
           : CrossAxisAlignment.start,
       children: [
-        BlurImageCard(
-          hasThumbnail: hasThumbnail,
-          thumbnail: thumbnail,
-          isMe: isMe,
-          isReaction: isReaction,
-          chatController: chatController,
-          msgId: msg["_id"],
-          imageUrl: imageUrl.toString(),
-          receiverName: groupChatController.groupName.value,
-          chatId: widget.chatId,
-          isView: isViewed,
-          receiverImage: groupChatController.groupImage.value,
-        ),
+        if (isMe) ...[
+          BlurImageCard(
+            hasThumbnail: hasThumbnail,
+            thumbnail: thumbnail,
+            isMe: isMe,
+            isReaction: isReaction,
+            chatController: chatController,
+            msgId: msg["_id"],
+            imageUrl: imageUrl.toString(),
+            receiverName: groupChatController.groupName.value,
+            chatId: widget.chatId,
+            isView: isViewed,
+            receiverImage: groupChatController.groupImage.value,
+          ),
 
-        const SizedBox(height: 4),
-        _buildImageFooter(msg, imageUrl.toString()),
+          const SizedBox(height: 4),
+          _buildImageFooter(msg, imageUrl.toString()),
+          const SizedBox(height: 16),
+        ],
+
+        if (!isMe) ...[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 22,
+                backgroundColor: AppColors.primaryColor,
+                child: Text(name[0].toUpperCase()),
+              ),
+              SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 4),
+                  BlurImageCard(
+                    hasThumbnail: hasThumbnail,
+                    thumbnail: thumbnail,
+                    isMe: isMe,
+                    isReaction: isReaction,
+                    chatController: chatController,
+                    msgId: msg["_id"],
+                    imageUrl: imageUrl.toString(),
+                    receiverName: groupChatController.groupName.value,
+                    chatId: widget.chatId,
+                    isView: isViewed,
+                    receiverImage: groupChatController.groupImage.value,
+                  ),
+                  const SizedBox(height: 4),
+                  _buildImageFooter(msg, imageUrl.toString()),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
 
-  Widget _buildVideoMessage(Map<String, dynamic> msg) {
+  Widget _buildVideoMessage(Map<String, dynamic> msg, String name) {
     final videoUrl = userController.addBaseUrl(msg["media"] ?? "");
     bool isMe = msg["isMe"] ?? false;
     bool isReaction = msg["reaction"] ?? false;
@@ -382,8 +468,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
           return SizedBox(
-            height: 180,
-            width: 240,
+            height: 300,
+            width: 180,
             child: Center(
               child: SpinKitWave(color: AppColors.primaryColor, size: 30.0),
             ),
@@ -392,8 +478,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
         if (!snap.hasData) {
           return const SizedBox(
-            height: 180,
-            width: 240,
+            height: 260,
+            width: 180,
             child: Center(child: Icon(Icons.error)),
           );
         }
@@ -405,24 +491,72 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               ? CrossAxisAlignment.end
               : CrossAxisAlignment.start,
           children: [
-            BlurVideoCard(
-              hasThumbnail: hasThumbnail,
-              isMe: isMe,
-              isReaction: isReaction,
-              thumbnail: thumbnail.toString(),
-              isView: isViewed,
-              videoFile: localVideo,
-              msg: msg,
-              receiverImage: groupChatController.groupImage.value,
-              receiverName: groupChatController.groupName.value,
-              chatId: widget.chatId,
-              msgId: msg["_id"],
-              chatController: chatController,
-            ),
-            const SizedBox(height: 6),
+            if (isMe) ...[
+              BlurVideoCard(
+                hasThumbnail: hasThumbnail,
+                isMe: isMe,
+                isReaction: isReaction,
+                thumbnail: thumbnail.toString(),
+                isView: isViewed,
+                videoFile: localVideo,
+                msg: msg,
+                receiverImage: groupChatController.groupImage.value,
+                receiverName: groupChatController.groupName.value,
+                chatId: widget.chatId,
+                msgId: msg["_id"],
+                chatController: chatController,
+              ),
+              const SizedBox(height: 6),
 
-            // Footer (Save + Time)
-            _buildVideoFooter(msg, localVideo.path),
+              // Footer (Save + Time)
+              _buildVideoFooter(msg, localVideo.path),
+              const SizedBox(height: 16),
+            ],
+            if (!isMe) ...[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    radius: 22,
+                    backgroundColor: AppColors.primaryColor,
+                    child: Text(name[0].toUpperCase()),
+                  ),
+                  SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      BlurVideoCard(
+                        hasThumbnail: hasThumbnail,
+                        isMe: isMe,
+                        isReaction: isReaction,
+                        thumbnail: thumbnail.toString(),
+                        isView: isViewed,
+                        videoFile: localVideo,
+                        msg: msg,
+                        receiverImage: groupChatController.groupImage.value,
+                        receiverName: groupChatController.groupName.value,
+                        chatId: widget.chatId,
+                        msgId: msg["_id"],
+                        chatController: chatController,
+                      ),
+                      const SizedBox(height: 6),
+
+                      // Footer (Save + Time)
+                      _buildVideoFooter(msg, localVideo.path),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ],
+              ),
+            ],
           ],
         );
       },

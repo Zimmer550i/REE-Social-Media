@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:ree_social_media_app/controllers/chat_controller.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
@@ -98,7 +99,6 @@ class _BlurImageCardState extends State<BlurImageCard> {
                     ),
               child: Image.network(
                 widget.hasThumbnail ? widget.thumbnail : widget.imageUrl,
-                // widget.imageUrl,
                 height: 260,
                 width: 180,
                 fit: BoxFit.contain,
@@ -114,9 +114,9 @@ class _BlurImageCardState extends State<BlurImageCard> {
                       width: 180,
                       color: Colors.black12.withValues(alpha: .1),
                       child: Center(
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
+                        child: SpinKitWave(
                           color: AppColors.primaryColor,
+                          size: 30.0,
                         ),
                       ),
                     );

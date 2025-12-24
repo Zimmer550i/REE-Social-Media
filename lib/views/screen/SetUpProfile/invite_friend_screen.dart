@@ -101,64 +101,68 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
           const SizedBox(width: 8),
 
           // Action Button
-          GestureDetector(
-            onTap: () {
-              // Only mark added if not already
-              final key = isMatched ? id : contact["phone"];
-              if (!addedFriends.contains(key)) {
-                addedFriends.add(key);
+          if (isMatched == false) ...[
+            GestureDetector(
+              onTap: () {
+                // Only mark added if not already
+                final key = isMatched ? id : contact["phone"];
+                if (!addedFriends.contains(key)) {
+                  addedFriends.add(key);
 
-                if (isMatched && id != null) {
-                  // Only create chat if we have an id
-                  contactController.createPrivateChat(id);
-                } else if (!isMatched) {
-                  // Send invite by phone number
-                  contactController.sendInviteSms(
-                    context,
-                    contact["phone"],
-                    contact["name"],
-                  );
+                  if (isMatched && id != null) {
+                    // Only create chat if we have an id
+                    contactController.createPrivateChat(id);
+                  } else if (!isMatched) {
+                    // Send invite by phone number
+                    contactController.sendInviteSms(
+                      context,
+                      contact["phone"],
+                      contact["name"],
+                    );
+                  }
                 }
-              }
-            },
-            child: Container(
-              height: 38,
-              width: 80,
-              decoration: BoxDecoration(
-                color: isMatched ? AppColors.primaryColor : Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: isMatched
-                        ? const Color(0xFF002329).withValues(alpha: .07)
-                        : Colors.black.withValues(alpha: 0.3),
-                    offset: isMatched ? const Offset(0, 2) : const Offset(0, 0),
-                    blurRadius: 4,
-                  ),
-                ],
-                border: isMatched
-                    ? null
-                    : Border.all(
-                        color: Colors.grey.withValues(alpha: .5),
-                        width: 1,
+              },
+              child: Container(
+                height: 38,
+                width: 80,
+                decoration: BoxDecoration(
+                  color: isMatched ? AppColors.primaryColor : Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isMatched
+                          ? const Color(0xFF002329).withValues(alpha: .07)
+                          : Colors.black.withValues(alpha: 0.3),
+                      offset: isMatched
+                          ? const Offset(0, 2)
+                          : const Offset(0, 0),
+                      blurRadius: 4,
+                    ),
+                  ],
+                  border: isMatched
+                      ? null
+                      : Border.all(
+                          color: Colors.grey.withValues(alpha: .5),
+                          width: 1,
+                        ),
+                ),
+                child: Center(
+                  child: Obx(
+                    () => Text(
+                      addedFriends.contains(isMatched ? id : contact["phone"])
+                          ? ("Invited")
+                          : ("Invite"),
+                      style: TextStyle(
+                        color: isMatched ? Colors.white : Colors.grey,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
                       ),
-              ),
-              child: Center(
-                child: Obx(
-                  () => Text(
-                    addedFriends.contains(isMatched ? id : contact["phone"])
-                        ? (isMatched ? "Added" : "Invited")
-                        : (isMatched ? "Add" : "Invite"),
-                    style: TextStyle(
-                      color: isMatched ? Colors.white : Colors.grey,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
                     ),
                   ),
                 ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -233,7 +237,7 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
                               ),
                             ),
                             TextSpan(
-                              text: " invite 5 friends",
+                              text: " invite friends",
                               style: TextStyle(
                                 color: Color(0xFF676565),
                                 fontSize: 14,
@@ -301,36 +305,20 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: Obx(() {
-        final canProceed = addedFriends.length >= 5;
-
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeInOut,
-              child: CustomButton(
-                onTap: canProceed
-                    ? () => Get.to(() => const EnableNotificationScreen())
-                    : () {
-                        Get.snackbar(
-                          "Invite More Friends",
-                          "Please invite at least 5 friends to continue.",
-                          snackPosition: SnackPosition.BOTTOM,
-                          backgroundColor: Colors.redAccent,
-                          colorText: Colors.white,
-                        );
-                      },
-                text: "Next",
-                color: canProceed
-                    ? AppColors.primaryColor
-                    : AppColors.greyColor,
-              ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeInOut,
+            child: CustomButton(
+              onTap: () => Get.to(() => const EnableNotificationScreen()),
+              text: "Next",
+              color: AppColors.primaryColor,
             ),
           ),
-        );
-      }),
+        ),
+      ),
     );
   }
 }

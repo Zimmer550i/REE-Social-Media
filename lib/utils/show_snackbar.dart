@@ -16,7 +16,7 @@ void showSnackBar(String message, bool isError) {
     reverseAnimationCurve: Curves.easeIn,
     messageText: Container(
       decoration: BoxDecoration(
-        color: isError ? Colors.redAccent : AppColors.primaryColor,
+        color: AppColors.primaryColor,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(

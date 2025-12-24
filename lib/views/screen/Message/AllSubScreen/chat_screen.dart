@@ -170,7 +170,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     }
                     return false;
                   },
-                  child: ListView.builder(
+                  child: ListView.separated(
                     reverse: true,
                     controller: chatController.scrollController,
                     padding: const EdgeInsets.symmetric(
@@ -180,6 +180,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     itemCount: msgs.length,
                     addAutomaticKeepAlives: true,
                     cacheExtent: 1000,
+                    separatorBuilder: (_, __) => const SizedBox(height: 6),
                     itemBuilder: (_, index) {
                       final msg = msgs[index];
                       return RepaintBoundary(
