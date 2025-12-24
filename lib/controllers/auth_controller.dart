@@ -96,8 +96,7 @@ class AuthController extends GetxController {
           return "Account not found";
         }
         String name = data.name ?? "";
-        String image = data.image ?? "";
-        if (name.isEmpty || image.isEmpty) {
+        if (name.isEmpty) {
           return "Account not found";
         }
         return "success";
@@ -310,9 +309,8 @@ class AuthController extends GetxController {
         if (data == null) {
           return false;
         }
-        String name = data.name.toString();
-        String image = data.image.toString();
-        if (name.isEmpty || image.isEmpty) {
+        String name = data.name ?? "";
+        if (name.isEmpty) {
           return false;
         }
         debugPrint("🟡 Token:======> $token");

@@ -16,16 +16,7 @@ class BottomMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // decoration: BoxDecoration(
-      //   // color: const Color(0xFFd4eeff),
-      //   borderRadius: const BorderRadius.only(
-      //     topRight: Radius.circular(16),
-      //     topLeft: Radius.circular(16),
-      //   ),
-      //   boxShadow: const [
-      //     BoxShadow(color: Colors.black38, spreadRadius: 0, blurRadius: 1),
-      //   ],
-      // ),
+      // color: Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: SafeArea(
         child: Row(
@@ -49,10 +40,13 @@ class BottomMenu extends StatelessWidget {
     );
   }
 
-
   Widget _buildMenuItemWithBadge(
-      String iconPath, int index, int selectedIndex, VoidCallback onTap,
-      {int badgeCount = 0}) {
+    String iconPath,
+    int index,
+    int selectedIndex,
+    VoidCallback onTap, {
+    int badgeCount = 0,
+  }) {
     bool isSelected = index == selectedIndex;
 
     return GestureDetector(
@@ -84,8 +78,10 @@ class BottomMenu extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Container(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 2,
+                  ),
                   decoration: const BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
@@ -106,9 +102,12 @@ class BottomMenu extends StatelessWidget {
     );
   }
 
-
   Widget _buildMenuItem(
-      String iconPath, int index, int selectedIndex, VoidCallback onTap) {
+    String iconPath,
+    int index,
+    int selectedIndex,
+    VoidCallback onTap,
+  ) {
     bool isSelected = index == selectedIndex;
 
     return GestureDetector(

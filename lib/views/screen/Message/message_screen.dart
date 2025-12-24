@@ -580,7 +580,7 @@ class _MessageScreenState extends State<MessageScreen> {
             fit: StackFit.expand,
             children: [
               Image.network(
-                mediaUrl,
+                image,
                 fit: BoxFit.cover,
                 errorBuilder: (_, _, _) => const Center(
                   child: Icon(Icons.broken_image, color: Colors.grey),
@@ -728,7 +728,8 @@ class _MessageScreenState extends State<MessageScreen> {
             fit: StackFit.expand,
             children: [
               thumbPath != null
-                  ? Image.file(File(thumbPath), fit: BoxFit.cover)
+                  // ? Image.file(File(thumbPath), fit: BoxFit.cover)
+                  ? Image.network(image, fit: BoxFit.cover)
                   : Container(
                       color: Colors.black26,
                       child: Center(
