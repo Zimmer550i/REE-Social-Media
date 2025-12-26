@@ -1,7 +1,7 @@
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:ree_social_media_app/utils/app_constants.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
 
 class OneSignalHelper {
   static Future<void> initialize() async {
@@ -201,32 +201,37 @@ class OneSignalHelper {
 
   // 🔴 iOS App Badge (Independent of OneSignal)
   static bool _isBadgeSupported = false;
-
+ 
   static int _badgeCount = 0;
-
+ 
   static Future<void> _initBadgeSupport() async {
-    _isBadgeSupported = await FlutterAppBadger.isAppBadgeSupported();
-    debugPrint("iOS Badge Supported: $_isBadgeSupported");
+    // Check if the app badge is supported on the device
+    _isBadgeSupported = await AppBadgePlus.isSupported();
+    debugPrint("Badge Supported: $_isBadgeSupported");
   }
-
+ 
   static void setBadge(int count) {
     _badgeCount = count;
     if (_isBadgeSupported) {
-      FlutterAppBadger.updateBadgeCount(count);
+      // Set the badge count
+      AppBadgePlus.updateBadge(count);
     }
   }
-
+ 
   static void incrementBadge() {
     _badgeCount++;
     if (_isBadgeSupported) {
-      FlutterAppBadger.updateBadgeCount(_badgeCount);
+      // Increment the badge count
+      AppBadgePlus.updateBadge(_badgeCount);
     }
   }
-
+ 
   static void clearBadge() {
     _badgeCount = 0;
     if (_isBadgeSupported) {
-      FlutterAppBadger.removeBadge();
+      // Clear the badge count
+      AppBadgePlus.updateBadge(0);
     }
   }
+ 
 }

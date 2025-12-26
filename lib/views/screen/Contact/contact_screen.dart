@@ -1,5 +1,4 @@
 // ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -91,69 +90,102 @@ class _ContactScreenState extends State<ContactScreen> {
   }
 
   // 👥 Contact List (Reactive)
-  Widget _buildContactList() {
-    return Obx(() {
-      if (contactController.isLoading.value) {
-        return Center(
-          child: SpinKitWave(color: AppColors.primaryColor, size: 30.0),
-        );
-      }
-
-      final matched = contactController.filteredMatchedContacts;
-      final unmatched = contactController.filteredUnmatchedContacts;
-      final apiUsers = userController.allUsers;
-
-      if (matched.isEmpty && unmatched.isEmpty) {
-        return const Center(
-          child: Text(
-            "No contacts found.",
-            style: TextStyle(color: Colors.grey, fontSize: 16),
-          ),
-        );
-      }
-
-      return ListView(
-        children: [
-          if (matched.isNotEmpty) ...[
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(
-                "Friends on re:",
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-              ),
-            ),
-            ...matched.map((c) => _buildMatchedContactTile(c, apiUsers)),
-          ],
-          if (unmatched.isNotEmpty) ...[
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(
-                "Invite Friends",
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-              ),
-            ),
-            ...unmatched.map(_buildUnmatchedContactTile),
-          ],
-        ],
+Widget _buildContactList() {
+  return Obx(() {
+    if (contactController.isLoading.value) {
+      return Center(
+        child: SpinKitWave(color: AppColors.primaryColor, size: 30.0),
       );
-    });
-  }
+    }
+
+    final allMatched = contactController.filteredMatchedContacts;
+    final allUnmatched = contactController.filteredUnmatchedContacts;
+    final matched = <Map<String, dynamic>>[];
+    final unmatched = <Map<String, dynamic>>[];
+
+    for (var c in allMatched) {
+      final name = c['name'] ?? '';
+      if (name.trim().isEmpty) {
+        unmatched.add(c);
+      } else {
+        matched.add(c);
+      }
+    }
+
+    for (var c in allUnmatched) {
+      if (!matched.contains(c) && !unmatched.contains(c)) {
+        unmatched.add(c);
+      }
+    }
+
+    final apiUsers = userController.allUsers;
+
+    if (matched.isEmpty && unmatched.isEmpty) {
+      return const Center(
+        child: Text(
+          "No contacts found.",
+          style: TextStyle(color: Colors.grey, fontSize: 16),
+        ),
+      );
+    }
+
+    return ListView(
+      children: [
+        if (matched.isNotEmpty) ...[
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              "Friends on re:",
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+            ),
+          ),
+          ...matched.map((c) => _buildMatchedContactTile(c, apiUsers)),
+        ],
+        if (unmatched.isNotEmpty) ...[
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              "Invite Friends",
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+            ),
+          ),
+          ...unmatched.map((c) => _buildUnmatchedContactTile(c)),
+        ],
+      ],
+    );
+  });
+}
 
   // ✅ Friend already on app
   Widget _buildMatchedContactTile(
     Map<String, dynamic> c,
     List<dynamic> apiUsers,
   ) {
-    final imageUrl = userController.addBaseUrl(c['image']);
-    final name = c["name"] ?? "No Name";
+    String? imageUrl;
+    if (c["image"] == null) {
+      imageUrl = "";
+    } else {
+      imageUrl = userController.addBaseUrl(c['image']);
+    }
+
+    final name = c["name"] ?? "";
     final phone = c["phone"] ?? "";
+
+    final hasImage = imageUrl != null && imageUrl.isNotEmpty;
 
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: AppColors.primaryColor,
-        backgroundImage: imageUrl != null
-            ? NetworkImage(imageUrl)
-            : const AssetImage("assets/images/dummy.jpg") as ImageProvider,
+        backgroundImage: hasImage ? NetworkImage(imageUrl) : null,
+        child: !hasImage
+            ? Text(
+                _getInitials(name),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              )
+            : null,
       ),
       title: Text(name),
       subtitle: Text(phone),
@@ -179,7 +211,7 @@ class _ContactScreenState extends State<ContactScreen> {
         radius: 24,
         backgroundColor: AppColors.primaryColor,
         child: Text(
-          _getInitials(c["name"] ?? ""),
+          _getInitials(name),
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
@@ -195,15 +227,12 @@ class _ContactScreenState extends State<ContactScreen> {
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.3),
+                color: Colors.black.withOpacity(0.3),
                 offset: const Offset(0, 0),
                 blurRadius: 4,
               ),
             ],
-            border: Border.all(
-              color: Colors.grey.withValues(alpha: .5),
-              width: 1,
-            ),
+            border: Border.all(color: Colors.grey.withOpacity(0.5), width: 1),
           ),
           child: Center(
             child: const Text(
