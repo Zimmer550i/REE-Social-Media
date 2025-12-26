@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:ree_social_media_app/utils/app_constants.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 
 class OneSignalHelper {
   static Future<void> initialize() async {
@@ -8,6 +9,8 @@ class OneSignalHelper {
     OneSignal.Debug.setAlertLevel(OSLogLevel.none);
     OneSignal.initialize(AppConstants.onesignalAppId);
     OneSignal.LiveActivities.setupDefault();
+
+    _initBadgeSupport();
 
     _addObservers();
   }
@@ -56,16 +59,22 @@ class OneSignalHelper {
     });
 
     // Notification Click Listener
-    OneSignal.Notifications.addClickListener((event) {
+    OneSignal.Notifications.addClickListener((event) async {
       debugPrint('NOTIFICATION CLICK LISTENER CALLED WITH EVENT: $event');
-      // Handle notification click
+
+      // Clear badge when user opens notification
+      clearBadge();
     });
 
     // Foreground Notification Listener
-    OneSignal.Notifications.addForegroundWillDisplayListener((event) {
+    OneSignal.Notifications.addForegroundWillDisplayListener((event) async {
       debugPrint(
         'NOTIFICATION WILL DISPLAY LISTENER CALLED WITH: ${event.notification.jsonRepresentation()}',
       );
+
+      // Increment iOS badge count
+      incrementBadge();
+
       event.preventDefault();
       event.notification.display();
     });
@@ -188,5 +197,36 @@ class OneSignalHelper {
   static void exitLiveActivity(String liveActivityId) {
     debugPrint("Exiting live activity with ID: $liveActivityId");
     OneSignal.LiveActivities.exitLiveActivity(liveActivityId);
+  }
+
+  // 🔴 iOS App Badge (Independent of OneSignal)
+  static bool _isBadgeSupported = false;
+
+  static int _badgeCount = 0;
+
+  static Future<void> _initBadgeSupport() async {
+    _isBadgeSupported = await FlutterAppBadger.isAppBadgeSupported();
+    debugPrint("iOS Badge Supported: $_isBadgeSupported");
+  }
+
+  static void setBadge(int count) {
+    _badgeCount = count;
+    if (_isBadgeSupported) {
+      FlutterAppBadger.updateBadgeCount(count);
+    }
+  }
+
+  static void incrementBadge() {
+    _badgeCount++;
+    if (_isBadgeSupported) {
+      FlutterAppBadger.updateBadgeCount(_badgeCount);
+    }
+  }
+
+  static void clearBadge() {
+    _badgeCount = 0;
+    if (_isBadgeSupported) {
+      FlutterAppBadger.removeBadge();
+    }
   }
 }

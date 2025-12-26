@@ -18,8 +18,8 @@ class InviteFriendScreen extends StatefulWidget {
 
 class _InviteFriendScreenState extends State<InviteFriendScreen> {
   final searchTextController = TextEditingController();
-  final ContactController contactController = Get.put(ContactController());
-  final UserController userController = Get.put(UserController());
+  final ContactController contactController = Get.find<ContactController>();
+  final UserController userController = Get.find<UserController>();
   final RxSet<String> addedFriends = <String>{}.obs;
 
   @override
@@ -54,7 +54,7 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
     Map<String, dynamic> contact, {
     bool isMatched = true,
   }) {
-    final id = contact["_id"]; // may be null for unmatched contacts
+    final id = contact["_id"];
     final image = userController.addBaseUrl(contact["image"].toString());
 
     return Container(
@@ -202,103 +202,104 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
                 final unmatched = contactController.filteredUnmatchedContacts;
                 final isLoading = contactController.isLoading.value;
 
-                return SingleChildScrollView(
+                return ListView(
                   padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Connect With Friends",
-                        style: TextStyle(
-                          color: Color(0xFF413E3E),
-                          fontSize: 24,
-                          fontWeight: FontWeight.w600,
-                        ),
+                  children: [
+                    const Text(
+                      "Connect With Friends",
+                      style: TextStyle(
+                        color: Color(0xFF413E3E),
+                        fontSize: 24,
+                        fontWeight: FontWeight.w600,
                       ),
-                      const SizedBox(height: 12),
-                      RichText(
-                        textAlign: TextAlign.start,
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: "To start your first messages on",
-                              style: TextStyle(
-                                color: Color(0xFF676565),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                              ),
+                    ),
+                    const SizedBox(height: 12),
+                    RichText(
+                      textAlign: TextAlign.start,
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "To start your first messages on",
+                            style: TextStyle(
+                              color: Color(0xFF676565),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
                             ),
-                            TextSpan(
-                              text: " re:",
-                              style: TextStyle(
-                                color: AppColors.primaryColor,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          ),
+                          TextSpan(
+                            text: " re:",
+                            style: TextStyle(
+                              color: AppColors.primaryColor,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
                             ),
-                            TextSpan(
-                              text: " invite friends",
-                              style: TextStyle(
-                                color: Color(0xFF676565),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                              ),
+                          ),
+                          TextSpan(
+                            text: " invite friends",
+                            style: TextStyle(
+                              color: Color(0xFF676565),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
+                    ),
+                    const SizedBox(height: 24),
 
-                      const SizedBox(height: 24),
-
-                      // Search bar
-                      CustomTextField(
-                        controller: searchTextController,
-                        suffixIcon: Padding(
-                          padding: const EdgeInsets.all(14.0),
-                          child: SvgPicture.asset('assets/icons/search.svg'),
-                        ),
-                        hintText: 'Search Contacts',
+                    CustomTextField(
+                      controller: searchTextController,
+                      suffixIcon: Padding(
+                        padding: const EdgeInsets.all(14.0),
+                        child: SvgPicture.asset('assets/icons/search.svg'),
                       ),
-                      const SizedBox(height: 24),
+                      hintText: 'Search Contacts',
+                    ),
+                    const SizedBox(height: 24),
 
-                      // Loading
-                      if (isLoading)
-                        Center(
+                    if (isLoading)
+                      Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 40),
                           child: CircularProgressIndicator(
                             color: AppColors.primaryColor,
                           ),
-                        )
-                      else ...[
-                        // Friends on re:
-                        if (matched.isNotEmpty) ...[
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: matched.length,
-                            itemBuilder: (context, index) => _buildContactTile(
-                              matched[index],
-                              isMatched: true,
+                        ),
+                      )
+                    else if (matched.isEmpty && unmatched.isEmpty)
+                      Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 60),
+                          child: Text(
+                            "No contacts found.\nPlease allow contacts permission.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 16,
                             ),
                           ),
-                        ],
-
-                        // Invite to join
-                        if (unmatched.isNotEmpty) ...[
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: unmatched.length,
-                            itemBuilder: (context, index) => _buildContactTile(
-                              unmatched[index],
-                              isMatched: false,
-                            ),
+                        ),
+                      )
+                    else ...[
+                      if (matched.isNotEmpty)
+                        ...matched.map(
+                          (contact) => _buildContactTile(
+                            contact,
+                            isMatched: true,
                           ),
-                        ],
-                      ],
+                        ),
 
-                      const SizedBox(height: 30),
+                      if (unmatched.isNotEmpty)
+                        ...unmatched.map(
+                          (contact) => _buildContactTile(
+                            contact,
+                            isMatched: false,
+                          ),
+                        ),
                     ],
-                  ),
+
+                    const SizedBox(height: 30),
+                  ],
                 );
               }),
             ),
