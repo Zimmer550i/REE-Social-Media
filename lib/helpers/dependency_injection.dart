@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:ree_social_media_app/controllers/auth_controller.dart';
+import 'package:ree_social_media_app/controllers/contact_controller.dart';
 import 'package:ree_social_media_app/controllers/user_controller.dart';
 
 
@@ -10,6 +11,7 @@ class InitialBindings extends Bindings {
     // Permanent controllers (stay in memory)
     Get.put(AuthController(), permanent: true);
     Get.put(UserController(), permanent: true);
+    Get.put(ContactController());
   }
 
   
