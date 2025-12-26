@@ -55,7 +55,11 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
     bool isMatched = true,
   }) {
     final id = contact["_id"];
-    final image = userController.addBaseUrl(contact["image"].toString());
+    final imageUrl = contact["image"]?.toString() ?? "";
+    final name = contact["name"]?.toString() ?? "Unknown";
+    final image = imageUrl.isNotEmpty
+        ? userController.addBaseUrl(imageUrl)
+        : null;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -66,16 +70,12 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
           CircleAvatar(
             radius: 24,
             backgroundColor: AppColors.primaryColor,
-            backgroundImage:
-                (contact["image"] != null &&
-                    contact["image"].toString().isNotEmpty)
-                ? NetworkImage(image.toString())
+            backgroundImage: (image != null && image.isNotEmpty)
+                ? NetworkImage(image)
                 : null,
-            child:
-                (contact["image"] == null ||
-                    contact["image"].toString().isEmpty)
+            child: (image == null || image.isEmpty)
                 ? Text(
-                    _getInitials(contact["name"] ?? ""),
+                    _getInitials(name),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -88,7 +88,7 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
           // Contact info
           Expanded(
             child: Text(
-              "${contact["name"] ?? "Unknown"}\n${contact["phone"] ?? ""}",
+              "$name\n${contact["phone"] ?? ""}",
               overflow: TextOverflow.ellipsis,
               maxLines: 2,
               style: const TextStyle(
@@ -195,12 +195,52 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
               ),
             ),
 
-            // Body
             Expanded(
               child: Obx(() {
-                final matched = contactController.filteredMatchedContacts;
-                final unmatched = contactController.filteredUnmatchedContacts;
+                final allMatched = contactController.filteredMatchedContacts;
+                final unmatched = <Map<String, dynamic>>[];
+                final matched = <Map<String, dynamic>>[];
+
+                for (var c in allMatched) {
+                  final name = c["name"]?.toString().trim() ?? "";
+                  if (name.isEmpty) {
+                    unmatched.add(c);
+                  } else {
+                    matched.add(c);
+                  }
+                }
+
+                final allUnmatched =
+                    contactController.filteredUnmatchedContacts;
+                for (var c in allUnmatched) {
+                  if (!matched.contains(c) && !unmatched.contains(c)) {
+                    unmatched.add(c);
+                  }
+                }
                 final isLoading = contactController.isLoading.value;
+                if (isLoading) {
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 40),
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryColor,
+                      ),
+                    ),
+                  );
+                }
+
+                if (matched.isEmpty && unmatched.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 60),
+                      child: Text(
+                        "No contacts found.\nPlease allow contacts permission.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                      ),
+                    ),
+                  );
+                }
 
                 return ListView(
                   padding: const EdgeInsets.all(20.0),
@@ -257,46 +297,16 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    if (isLoading)
-                      Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 40),
-                          child: CircularProgressIndicator(
-                            color: AppColors.primaryColor,
-                          ),
-                        ),
-                      )
-                    else if (matched.isEmpty && unmatched.isEmpty)
-                      Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 60),
-                          child: Text(
-                            "No contacts found.\nPlease allow contacts permission.",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      )
-                    else ...[
-                      if (matched.isNotEmpty)
-                        ...matched.map(
-                          (contact) => _buildContactTile(
-                            contact,
-                            isMatched: true,
-                          ),
-                        ),
-
-                      if (unmatched.isNotEmpty)
-                        ...unmatched.map(
-                          (contact) => _buildContactTile(
-                            contact,
-                            isMatched: false,
-                          ),
-                        ),
-                    ],
+                    if (matched.isNotEmpty)
+                      ...matched.map(
+                        (contact) =>
+                            _buildContactTile(contact, isMatched: true),
+                      ),
+                    if (unmatched.isNotEmpty)
+                      ...unmatched.map(
+                        (contact) =>
+                            _buildContactTile(contact, isMatched: false),
+                      ),
 
                     const SizedBox(height: 30),
                   ],
