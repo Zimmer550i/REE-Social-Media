@@ -61,9 +61,6 @@ class OneSignalHelper {
     // Notification Click Listener
     OneSignal.Notifications.addClickListener((event) async {
       debugPrint('NOTIFICATION CLICK LISTENER CALLED WITH EVENT: $event');
-
-      // Clear badge when user opens notification
-      clearBadge();
     });
 
     // Foreground Notification Listener

@@ -15,8 +15,6 @@ class SocketService {
 
     _socket = IO.io(
       'https://api.resocial.site',
-      // 'http://10.10.12.54:3000',
-      // auth.devUrl,
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
@@ -43,7 +41,6 @@ class SocketService {
 
   static bool get isConnected => _socket?.connected ?? false;
 
-  /// Listen to messages for a specific chatId (dynamic)
   static void onChatMessage(
     String chatId,
     void Function(dynamic data) handler,
@@ -54,7 +51,7 @@ class SocketService {
     }
 
     final eventName = "receive-message:$chatId";
-    _socket?.off(eventName); // avoid duplicates
+    _socket?.off(eventName);
     _socket?.on(eventName, (data) {
       log("📩 Message received on $eventName => $data");
       handler(data);
@@ -62,7 +59,6 @@ class SocketService {
     log("🟢 Subscribed to $eventName");
   }
 
-  /// Optionally: global fallback for systems that emit plain "receive-message"
   static void onGlobalMessage(void Function(dynamic data) handler) {
     _socket?.off("receive-message");
     _socket?.on("receive-message", (data) {
@@ -71,7 +67,6 @@ class SocketService {
     });
   }
 
-  /// Listen for typing indicator per chat
   static void onTyping(String chatId, void Function(dynamic data) handler) {
     final eventName = "typing:$chatId";
     _socket?.off(eventName);
@@ -82,14 +77,12 @@ class SocketService {
     log("🟡 Subscribed to typing:$chatId");
   }
 
-  /// Unsubscribe from a specific chat’s events
   static void clearChatListeners(String chatId) {
     _socket?.off("receive-message:$chatId");
     _socket?.off("typing:$chatId");
     log("🛑 Cleared listeners for chat: $chatId");
   }
 
-  /// Remove all listeners (global cleanup)
   static void clearAllListeners() {
     _socket?.clearListeners();
     log("🧹 Cleared all socket listeners");

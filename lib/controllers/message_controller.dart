@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ree_social_media_app/controllers/chat_controller.dart';
 import 'package:ree_social_media_app/controllers/user_controller.dart';
+import 'package:ree_social_media_app/services/one_signal_manager.dart';
+import 'package:ree_social_media_app/services/socket_manager.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
 import '../models/multi_body.dart';
 import '../services/api_service.dart';
@@ -34,6 +36,14 @@ class MessageController extends GetxController {
     super.onInit();
     fetchChats();
     fetchStories();
+    SocketService.onGlobalMessage(_handleIncomingMessage);
+  }
+
+  void _handleIncomingMessage(dynamic data) {
+    final String currentUserId = userController.userInfo.value?.id ?? '';
+
+    if (data['sender'] == currentUserId) return;
+    calculateUnreadMessages();
   }
 
   void calculateUnreadMessages() {
@@ -41,28 +51,36 @@ class MessageController extends GetxController {
 
     int total = 0;
 
-    for (final Map<String, dynamic> chat in groupChats) {
-      final last = chat["lastMessage"];
+    bool isUnread(Map<String, dynamic>? last) {
+      if (last == null) return false;
 
-      if (last != null &&
-          last["read"] == false &&
-          last["sender"] != currentUserId) {
+      final sender = last["sender"];
+      final read = last["read"];
+
+      // Only count as unread if:
+      // - sender is NOT current user
+      // - read is explicitly false (not null, not 0, not missing)
+      return sender != null &&
+          sender != currentUserId &&
+          read is bool &&
+          read == false;
+    }
+
+    for (final Map<String, dynamic> chat in groupChats) {
+      if (isUnread(chat["lastMessage"])) {
         total++;
       }
     }
 
     for (final Map<String, dynamic> chat in privateChats) {
-      final last = chat["lastMessage"];
-
-      if (last != null &&
-          last["read"] == false &&
-          last["sender"] != currentUserId) {
+      if (isUnread(chat["lastMessage"])) {
         total++;
       }
     }
 
     unreadCount.value = total;
-    debugPrint("Total unread messages: $total");
+    OneSignalHelper.setBadge(total);
+    debugPrint("Total unread messages (calculated): $total");
   }
 
   Future<String?> getOrCreatePrivateChat(
