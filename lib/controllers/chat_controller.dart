@@ -153,17 +153,14 @@ class ChatController extends GetxController {
     });
   }
 
-  // ==============================
-  // CREATE CHATS
-  // ==============================
-
   Future<void> createPrivateChat(
     String name,
-    String image,
+    String? image,
     String memberId,
   ) async {
     isLoading.value = true;
     try {
+      
       final response = await api.post("/chat/create-private", {
         "member": memberId,
       }, authReq: true);
@@ -175,7 +172,7 @@ class ChatController extends GetxController {
           () => ChatScreen(
             chatId: chatId,
             receiverName: name,
-            receiverImage: image,
+            receiverImage: image ?? "",
             receiverid: memberId,
           ),
         );

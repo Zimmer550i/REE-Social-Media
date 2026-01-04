@@ -10,7 +10,6 @@ import 'package:ree_social_media_app/utils/app_colors.dart';
 import 'package:ree_social_media_app/views/base/custom_button.dart';
 import 'package:ree_social_media_app/views/base/custom_text_field.dart';
 import 'package:ree_social_media_app/views/screen/Contact/create_group_screen.dart';
-
 import '../../base/bottom_menu.dart';
 
 class ContactScreen extends StatefulWidget {
@@ -26,6 +25,8 @@ class _ContactScreenState extends State<ContactScreen> {
   final ContactController contactController = Get.put(ContactController());
   final ChatController chatController = Get.put(ChatController());
   final UserController userController = Get.put(UserController());
+
+  final RxString _loadingContactId = ''.obs;
 
   @override
   void initState() {
@@ -89,74 +90,79 @@ class _ContactScreenState extends State<ContactScreen> {
     );
   }
 
-  // 👥 Contact List (Reactive)
-Widget _buildContactList() {
-  return Obx(() {
-    if (contactController.isLoading.value) {
-      return Center(
-        child: SpinKitWave(color: AppColors.primaryColor, size: 30.0),
-      );
-    }
-
-    final allMatched = contactController.filteredMatchedContacts;
-    final allUnmatched = contactController.filteredUnmatchedContacts;
-    final matched = <Map<String, dynamic>>[];
-    final unmatched = <Map<String, dynamic>>[];
-
-    for (var c in allMatched) {
-      final name = c['name'] ?? '';
-      if (name.trim().isEmpty) {
-        unmatched.add(c);
-      } else {
-        matched.add(c);
+  Widget _buildContactList() {
+    return Obx(() {
+      if (contactController.isLoading.value) {
+        return Center(
+          child: SpinKitWave(color: AppColors.primaryColor, size: 30.0),
+        );
       }
-    }
+      final currenUserNumber = Get.find<UserController>().userInfo.value!.phone;
+      final myNumber = currenUserNumber?.trim();
+      final allMatched = contactController.filteredMatchedContacts;
+      final allUnmatched = contactController.filteredUnmatchedContacts;
+      final matched = <Map<String, dynamic>>[];
+      final unmatched = <Map<String, dynamic>>[];
 
-    for (var c in allUnmatched) {
-      if (!matched.contains(c) && !unmatched.contains(c)) {
-        unmatched.add(c);
+      for (var c in allMatched) {
+        final phone = c['phone']?.toString().trim();
+        if (phone != null && phone == myNumber) continue;
+
+        final name = c['name'] ?? '';
+        if (name.trim().isEmpty) {
+          unmatched.add(c);
+        } else {
+          matched.add(c);
+        }
       }
-    }
 
-    final apiUsers = userController.allUsers;
+      for (var c in allUnmatched) {
+        final phone = c['phone']?.toString().trim();
+        if (phone != null && phone == myNumber) continue;
 
-    if (matched.isEmpty && unmatched.isEmpty) {
-      return const Center(
-        child: Text(
-          "No contacts found.",
-          style: TextStyle(color: Colors.grey, fontSize: 16),
-        ),
+        if (!matched.contains(c) && !unmatched.contains(c)) {
+          unmatched.add(c);
+        }
+      }
+
+      final apiUsers = userController.allUsers;
+
+      if (matched.isEmpty && unmatched.isEmpty) {
+        return const Center(
+          child: Text(
+            "No contacts found.",
+            style: TextStyle(color: Colors.grey, fontSize: 16),
+          ),
+        );
+      }
+
+      return ListView(
+        children: [
+          if (matched.isNotEmpty) ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                "Friends on re:",
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              ),
+            ),
+            ...matched.map((c) => _buildMatchedContactTile(c, apiUsers)),
+          ],
+          if (unmatched.isNotEmpty) ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                "Invite Friends",
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              ),
+            ),
+            ...unmatched.map((c) => _buildUnmatchedContactTile(c)),
+          ],
+        ],
       );
-    }
+    });
+  }
 
-    return ListView(
-      children: [
-        if (matched.isNotEmpty) ...[
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              "Friends on re:",
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-            ),
-          ),
-          ...matched.map((c) => _buildMatchedContactTile(c, apiUsers)),
-        ],
-        if (unmatched.isNotEmpty) ...[
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              "Invite Friends",
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-            ),
-          ),
-          ...unmatched.map((c) => _buildUnmatchedContactTile(c)),
-        ],
-      ],
-    );
-  });
-}
-
-  // ✅ Friend already on app
   Widget _buildMatchedContactTile(
     Map<String, dynamic> c,
     List<dynamic> apiUsers,
@@ -189,15 +195,40 @@ Widget _buildContactList() {
       ),
       title: Text(name),
       subtitle: Text(phone),
-      trailing: InkWell(
-        onTap: () =>
-            chatController.createPrivateChat(name, c['image'], c["_id"]),
-        child: SvgPicture.asset(
-          "assets/icons/message.svg",
-          color: AppColors.primaryColor,
-          height: 22,
-        ),
-      ),
+      trailing: Obx(() {
+        final isThisTileLoading = _loadingContactId.value == c["_id"];
+        return GestureDetector(
+          onTap: isThisTileLoading
+              ? null
+              : () async {
+                  _loadingContactId.value = c["_id"];
+
+                  try {
+                    await chatController.createPrivateChat(
+                      name,
+                      c['image'],
+                      c["_id"],
+                    );
+                  } finally {
+                    _loadingContactId.value = '';
+                  }
+                },
+          child: isThisTileLoading
+              ? SizedBox(
+                  height: 22,
+                  width: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.primaryColor,
+                  ),
+                )
+              : SvgPicture.asset(
+                  "assets/icons/message.svg",
+                  color: AppColors.primaryColor,
+                  height: 22,
+                ),
+        );
+      }),
     );
   }
 

@@ -193,6 +193,8 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
   Future<void> _onNextPressed(bool isVideo) async {
     await _stopRecordingIfNeeded();
 
+    debugPrint("ChatId: ${storyChatId}");
+
     if (recordedFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

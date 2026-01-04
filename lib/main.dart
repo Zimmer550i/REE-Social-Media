@@ -20,12 +20,7 @@ List<CameraDescription> cameras = [];
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await OneSignalHelper.initialize();
-  // await GlobalCameraManager.dispose();
-  // GlobalVideoPlayerManager.dispose();
-
   await Future.delayed(const Duration(milliseconds: 200));
-
-  // Initialize DI
   Map<String, Map<String, String>> languages = await di.init();
   InitialBindings().dependencies();
   try {

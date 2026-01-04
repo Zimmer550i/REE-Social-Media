@@ -546,6 +546,7 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
               sendMessageController.isLoading.value = true;
               await _captureAndSaveScreenshot();
               // sendMessageController.isLoading.value = false;
+              debugPrint("ChatID : ${widget.chatId}");
               await sendMessageController.sendMediaToSingleChat(
                 chatId: widget.chatId,
                 filePath: widget.reactionVideo,

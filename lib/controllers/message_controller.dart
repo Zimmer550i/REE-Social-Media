@@ -71,22 +71,13 @@ class MessageController extends GetxController {
     String image,
   ) async {
     try {
-      // Step 1 — Check if chat exists
       final Map<String, dynamic>? existingChat = _findChatByUserId(userId);
 
       if (existingChat != null) {
         return existingChat["_id"];
       }
-
-      // Step 2 — Create new chat
-      await createChatAndSendReaction(name, image, userId);
-
-      // Step 3 — Re-check after creation
-      final Map<String, dynamic>? newChat = _findChatByUserId(userId);
-
-      debugPrint("Chat ID: ${newChat?['_id']}");
-
-      return newChat?['_id'];
+      String? newChatId = await createChatAndSendReaction(name, image, userId);
+      return newChatId;
     } catch (e) {
       debugPrint("❌ Error in getOrCreatePrivateChat: $e");
       return null;
@@ -104,11 +95,11 @@ class MessageController extends GetxController {
         return members.any((m) => m is Map && m["_id"] == userId);
       });
     } catch (_) {
-      return null; // No chat found → return null safely
+      return null;
     }
   }
 
-  Future<void> createChatAndSendReaction(
+  Future<String?> createChatAndSendReaction(
     String name,
     String image,
     String memberId,
@@ -121,12 +112,15 @@ class MessageController extends GetxController {
 
       final body = jsonDecode(response.body);
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // final chatId = body['data']['_id'];
+        final chatId = body['data']['_id'];
+        return chatId;
       } else {
         debugPrint("⚠️ Failed: ${body['message']}");
+        return null;
       }
     } catch (e) {
       debugPrint("❌ Error creating private chat: $e");
+      return null;
     } finally {
       isLoading.value = false;
     }
@@ -354,8 +348,8 @@ class MessageController extends GetxController {
         "Error",
         "Something went wrong while uploading story.",
         snackPosition: SnackPosition.BOTTOM,
-          colorText: Colors.white,
-          backgroundColor: AppColors.primaryColor,
+        colorText: Colors.white,
+        backgroundColor: AppColors.primaryColor,
       );
     }
   }
