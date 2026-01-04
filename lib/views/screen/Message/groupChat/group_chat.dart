@@ -194,31 +194,20 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         children: [
           ReBack(onTap: () => Get.offAllNamed(AppRoutes.messageScreen)),
           const SizedBox(width: 12),
-          InkWell(
-            onTap: () {
-              Get.to(() => GroupDetailsScreen(chatId: widget.chatId))?.then((
-                _,
-              ) {
-                groupChatController.fetchGroupDetails(widget.chatId);
-              });
-            },
-
-            child: Obx(
-              () => CircleAvatar(
-                radius: 22,
-                backgroundColor: AppColors.primaryColor,
-                backgroundImage: groupChatController.groupImage.isNotEmpty
-                    ? NetworkImage(groupChatController.groupImage.value)
-                    : null,
-                child: groupChatController.groupImage.isEmpty
-                    ? Text(
-                        groupChatController.groupName.isNotEmpty
-                            ? groupChatController.groupName.value[0]
-                                  .toUpperCase()
-                            : "",
-                      )
-                    : null,
-              ),
+          Obx(
+            () => CircleAvatar(
+              radius: 22,
+              backgroundColor: AppColors.primaryColor,
+              backgroundImage: groupChatController.groupImage.isNotEmpty
+                  ? NetworkImage(groupChatController.groupImage.value)
+                  : null,
+              child: groupChatController.groupImage.isEmpty
+                  ? Text(
+                      groupChatController.groupName.isNotEmpty
+                          ? groupChatController.groupName.value[0].toUpperCase()
+                          : "",
+                    )
+                  : null,
             ),
           ),
           const SizedBox(width: 12),
