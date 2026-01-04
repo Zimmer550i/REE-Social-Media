@@ -32,11 +32,16 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     allFriends = widget.matchedContacts.map((c) {
       return {
         "_id": c["_id"],
-        "name": c["name"] ?? "No Name",
-        "image": c["image"] ?? "assets/images/dummy.jpg",
+        "name": c["name"] ?? "Unknown",
+        "image": c["image"] ?? "",
         "isInvite": false,
       };
     }).toList();
+    allFriends.sort((a, b) {
+      final nameA = (a['name'] ?? '').toString().toLowerCase();
+      final nameB = (b['name'] ?? '').toString().toLowerCase();
+      return nameA.compareTo(nameB);
+    });
 
     filteredFriends = List.from(allFriends);
     searchTextController.addListener(_onSearchChanged);
@@ -60,6 +65,11 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
           final name = (friend['name'] ?? '').toLowerCase();
           return name.contains(query);
         }).toList();
+        filteredFriends.sort((a, b) {
+          final nameA = (a['name'] ?? '').toString().toLowerCase();
+          final nameB = (b['name'] ?? '').toString().toLowerCase();
+          return nameA.compareTo(nameB);
+        });
       }
     });
   }
@@ -73,24 +83,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 24),
-            Row(
-              children: [
-                ReBack(onTap: () => Get.back()),
-                // IconButton(
-                //   onPressed: Get.back,
-                //   icon: const Icon(Icons.arrow_back_ios),
-                // ),
-                // const SizedBox(width: 8),
-                // Text(
-                //   "Create Group",
-                //   style: TextStyle(
-                //     color: AppColors.textColor,
-                //     fontSize: 24,
-                //     fontWeight: FontWeight.w600,
-                //   ),
-                // ),
-              ],
-            ),
+            Row(children: [ReBack(onTap: () => Get.back())]),
             const SizedBox(height: 24),
 
             // 🔍 Search box
@@ -117,16 +110,28 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                         final imageUrl = userController.addBaseUrl(
                           item['image'],
                         );
+                        final hasImage =
+                            imageUrl != null &&
+                            imageUrl.isNotEmpty &&
+                            imageUrl != "";
 
                         return Row(
                           children: [
                             CircleAvatar(
                               radius: 22,
                               backgroundColor: AppColors.primaryColor,
-                              backgroundImage: imageUrl != null
+                              backgroundImage: hasImage
                                   ? NetworkImage(imageUrl)
-                                  : const AssetImage("assets/images/dummy.jpg")
-                                        as ImageProvider,
+                                  : null,
+                              child: !hasImage
+                                  ? Text(
+                                      _getInitials(item['name']),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : null,
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -182,5 +187,16 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         ),
       ),
     );
+  }
+
+  String _getInitials(String name) {
+    if (name.isEmpty) return "";
+    List<String> parts = name.trim().split(' ');
+    if (parts.length > 1 && parts.last.isNotEmpty) {
+      return (parts.first[0] + parts.last[0]).toUpperCase();
+    } else if (parts.isNotEmpty && parts.first.isNotEmpty) {
+      return parts.first[0].toUpperCase();
+    }
+    return "";
   }
 }
