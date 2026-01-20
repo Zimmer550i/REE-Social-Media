@@ -23,6 +23,7 @@ import 'AllSubScreen/chat_screen.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'dart:async';
 import 'groupChat/group_chat.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
@@ -33,7 +34,7 @@ class MessageScreen extends StatefulWidget {
   State<MessageScreen> createState() => _MessageScreenState();
 }
 
-class _MessageScreenState extends State<MessageScreen> {
+class _MessageScreenState extends State<MessageScreen> with WidgetsBindingObserver {
   final MessageController controller = Get.put(MessageController());
   final UserController userController = Get.put(UserController());
   final NotificationController notificationController = Get.put(
@@ -44,14 +45,14 @@ class _MessageScreenState extends State<MessageScreen> {
   final Map<String, String?> _thumbCache = {};
   bool _isFetchingMoreChats = false;
   bool _isFetchingMoreStories = false;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     notificationController.fetchNotifications();
-
-    controller.fetchAllChats();
-    controller.fetchAllStories();
+    // Periodic polling will handle fetching chats and stories.
 
     /// Pagination listener for chats
     _chatScrollController.addListener(() {
@@ -74,6 +75,30 @@ class _MessageScreenState extends State<MessageScreen> {
     });
     userController.setSubscriptionId();
     enablePushNotification();
+    _startPolling();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _startPolling();
+    } else if (state == AppLifecycleState.paused) {
+      _stopPolling();
+    }
+  }
+
+  void _startPolling() {
+    _stopPolling();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      notificationController.fetchNotifications();
+      controller.fetchAllChats();
+      controller.fetchAllStories();
+    });
+  }
+
+  void _stopPolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = null;
   }
 
   void enablePushNotification() async {
@@ -96,7 +121,8 @@ class _MessageScreenState extends State<MessageScreen> {
 
   @override
   void dispose() {
-    // GlobalCameraManager.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    _stopPolling();
     GlobalVideoPlayerManager.dispose();
     super.dispose();
   }

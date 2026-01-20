@@ -198,12 +198,14 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             () => CircleAvatar(
               radius: 22,
               backgroundColor: AppColors.primaryColor,
-              backgroundImage: groupChatController.groupImage.isNotEmpty
-                  ? NetworkImage(groupChatController.groupImage.value)
+              backgroundImage: (groupChatController.groupImage.value != null &&
+                      groupChatController.groupImage.value!.isNotEmpty)
+                  ? NetworkImage(groupChatController.groupImage.value!)
                   : null,
-              child: groupChatController.groupImage.isEmpty
+              child: (groupChatController.groupImage.value == null ||
+                      groupChatController.groupImage.value!.isEmpty)
                   ? Text(
-                      groupChatController.groupName.isNotEmpty
+                      groupChatController.groupName.value.isNotEmpty
                           ? groupChatController.groupName.value[0].toUpperCase()
                           : "",
                     )
@@ -274,7 +276,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               CircleAvatar(
                 radius: 22,
                 backgroundColor: AppColors.primaryColor,
-                child: Text(name[0].toUpperCase()),
+                child: name.isNotEmpty ? Text(name[0].toUpperCase()) : const SizedBox.shrink(),
               ),
               SizedBox(width: 10),
               Column(
@@ -382,7 +384,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             receiverName: groupChatController.groupName.value,
             chatId: widget.chatId,
             isView: isViewed,
-            receiverImage: groupChatController.groupImage.value,
+            receiverImage: groupChatController.groupImage.value ?? "",
           ),
 
           const SizedBox(height: 4),
@@ -397,7 +399,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               CircleAvatar(
                 radius: 22,
                 backgroundColor: AppColors.primaryColor,
-                child: Text(name[0].toUpperCase()),
+                child: name.isNotEmpty ? Text(name[0].toUpperCase()) : const SizedBox.shrink(),
               ),
               SizedBox(width: 10),
               Column(
@@ -412,14 +414,14 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     hasThumbnail: hasThumbnail,
                     thumbnail: thumbnail,
                     isMe: isMe,
+                    isView: false,
                     isReaction: isReaction,
                     chatController: chatController,
                     msgId: msg["_id"],
                     imageUrl: imageUrl.toString(),
                     receiverName: groupChatController.groupName.value,
                     chatId: widget.chatId,
-                    isView: isViewed,
-                    receiverImage: groupChatController.groupImage.value,
+                    receiverImage: groupChatController.groupImage.value ?? "",
                   ),
                   const SizedBox(height: 4),
                   _buildImageFooter(msg, imageUrl.toString()),
@@ -489,7 +491,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 isView: isViewed,
                 videoFile: localVideo,
                 msg: msg,
-                receiverImage: groupChatController.groupImage.value,
+                receiverImage: groupChatController.groupImage.value ?? "",
                 receiverName: groupChatController.groupName.value,
                 chatId: widget.chatId,
                 msgId: msg["_id"],
@@ -508,7 +510,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   CircleAvatar(
                     radius: 22,
                     backgroundColor: AppColors.primaryColor,
-                    child: Text(name[0].toUpperCase()),
+                    child: name.isNotEmpty ? Text(name[0].toUpperCase()) : const SizedBox.shrink(),
                   ),
                   SizedBox(width: 10),
                   Column(
@@ -525,12 +527,12 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                       BlurVideoCard(
                         hasThumbnail: hasThumbnail,
                         isMe: isMe,
+                        isView: false,
                         isReaction: isReaction,
                         thumbnail: thumbnail.toString(),
-                        isView: isViewed,
                         videoFile: localVideo,
                         msg: msg,
-                        receiverImage: groupChatController.groupImage.value,
+                        receiverImage: groupChatController.groupImage.value ?? "",
                         receiverName: groupChatController.groupName.value,
                         chatId: widget.chatId,
                         msgId: msg["_id"],

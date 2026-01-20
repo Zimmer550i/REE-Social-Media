@@ -155,6 +155,12 @@ class _SendMessageWithFriendScreenState
               name.contains(controller.searchQuery.value);
         }).toList();
 
+        filtered.sort((a, b) {
+          final nameA = (a['name'] ?? '').toLowerCase();
+          final nameB = (b['name'] ?? '').toLowerCase();
+          return nameA.compareTo(nameB);
+        });
+
         if (filtered.isEmpty) {
           return const Center(child: Text("No private chat friends found."));
         }
@@ -186,7 +192,7 @@ class _SendMessageWithFriendScreenState
                     backgroundImage: imageUrl.isNotEmpty
                         ? NetworkImage(imageUrl)
                         : null,
-                    child: imageUrl.isEmpty
+                    child: (imageUrl.isEmpty && name.isNotEmpty)
                         ? Text(
                             name[0].toUpperCase(),
                             style: TextStyle(color: Colors.white),

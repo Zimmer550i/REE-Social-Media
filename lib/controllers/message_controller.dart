@@ -102,7 +102,6 @@ class MessageController extends GetxController {
     }
   }
 
-  /// Helper: Find private chat where member id matches userId
   Map<String, dynamic>? _findChatByUserId(String userId) {
     try {
       return privateChats.firstWhere((chat) {
@@ -361,9 +360,6 @@ class MessageController extends GetxController {
     }
   }
 
-  /// =====================================================
-  /// REFRESH (Both Chats & Stories)
-  /// =====================================================
   Future<void> refreshAll() async {
     chatPage.value = 1;
     storyPage.value = 1;
@@ -376,9 +372,6 @@ class MessageController extends GetxController {
     await Future.wait([fetchChats(), fetchStories()]);
   }
 
-  /// =====================================================
-  /// UPLOAD MEDIA (Story)
-  /// =====================================================
   Future<void> createStory() async {
     final mediaType = await Get.bottomSheet<String>(
       Container(
@@ -451,7 +444,6 @@ class MessageController extends GetxController {
     }
   }
 
-  /// Upload media file (image/video)
   Future<String?> _uploadStoryMedia(File file, String type) async {
     try {
       final multipartBody = [MultipartBody(key: type, file: file)];

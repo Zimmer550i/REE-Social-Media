@@ -126,6 +126,13 @@ class _ContactScreenState extends State<ContactScreen> {
         }
       }
 
+      // Sort matched contacts alphabetically by name (case-insensitive)
+      matched.sort((a, b) {
+        final nameA = (a['name'] ?? '').toString().toLowerCase();
+        final nameB = (b['name'] ?? '').toString().toLowerCase();
+        return nameA.compareTo(nameB);
+      });
+
       final apiUsers = userController.allUsers;
 
       if (matched.isEmpty && unmatched.isEmpty) {

@@ -31,12 +31,21 @@ class GroupChatController extends GetxController {
         groupName.value = data["name"] ?? "";
         groupImage.value = data["image"] ?? "";
         createdBy.value = data["createdBy"] ?? "";
-        members.value = List<Map<String, dynamic>>.from(data["members"]);
+        members.value = List<Map<String, dynamic>>.from(
+          (data["members"] as List<dynamic>).map((member) {
+            final m = member as Map<String, dynamic>;
+            return {
+              ...m,
+              "name": (m["name"] as String?) ?? "",
+              "image": (m["image"] as String?) ?? "",
+            };
+          }),
+        );
       } else {
         Get.snackbar("Error", "Failed to fetch groupChat details");
       }
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      debugPrint("Error ====> $e");
     } finally {
       isLoading.value = false;
     }
@@ -131,14 +140,18 @@ class GroupChatController extends GetxController {
         "groupId": chatId,
       }, authReq: true);
       if (res.statusCode == 200 || res.statusCode == 201) {
-        
         Get.offAllNamed(AppRoutes.messageScreen);
         Get.snackbar("Success", "You left the groupChat");
       } else {
-        Get.snackbar("Error", "Failed to leave groupChat");
+        String message = "Failed to leave groupChat";
+        try {
+          final body = jsonDecode(res.body);
+          message = body['message'] ?? message;
+        } catch (_) {}
+        Get.snackbar("Error", message);
       }
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      Get.snackbar("Error", e.toString() ?? "Unknown error");
     } finally {
       isLoading.value = false;
     }
@@ -156,10 +169,15 @@ class GroupChatController extends GetxController {
         Get.snackbar("Success", "Group deleted successfully");
         Get.offAll(() => MessageScreen());
       } else {
-        Get.snackbar("Error", "Failed to delete groupChat");
+        String message = "Failed to delete groupChat";
+        try {
+          final body = jsonDecode(res.body);
+          message = body['message'] ?? message;
+        } catch (_) {}
+        Get.snackbar("Error", message);
       }
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      Get.snackbar("Error", e.toString() ?? "Unknown error");
     } finally {
       isLoading.value = false;
     }

@@ -103,7 +103,7 @@ class _DateOfBirthFieldState extends State<DateOfBirthField> {
           height: 16,
           width: 16,
           child: SvgPicture.asset(
-            'assets/icons/calender_blue.svg',
+            'assets/icons/calender.svg',
             height: 16,
             width: 16,
           ),

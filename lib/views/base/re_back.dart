@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ree_social_media_app/utils/app_colors.dart';
+import 'package:flutter_svg/svg.dart';
 
 class ReBack extends StatelessWidget {
   final VoidCallback onTap;
@@ -9,14 +9,7 @@ class ReBack extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: AppColors.primaryColor,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(Icons.arrow_back, color: Colors.white),
-      ),
+      child: SvgPicture.asset("assets/icons/back.svg",height: 24,width: 24,),
     );
   }
 }

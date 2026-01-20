@@ -2,6 +2,7 @@ import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:ree_social_media_app/utils/app_constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OneSignalHelper {
   static Future<void> initialize() async {
@@ -13,6 +14,8 @@ class OneSignalHelper {
     _initBadgeSupport();
 
     _addObservers();
+
+    _setupNotificationHandlers();
   }
 
   static Future<String?> getPlayerId() async {
@@ -36,6 +39,9 @@ class OneSignalHelper {
       return null;
     }
   }
+
+
+
 
   // Add OneSignal observers for push notifications, user state, etc.
   static void _addObservers() {
@@ -61,6 +67,8 @@ class OneSignalHelper {
     // Notification Click Listener
     OneSignal.Notifications.addClickListener((event) async {
       debugPrint('NOTIFICATION CLICK LISTENER CALLED WITH EVENT: $event');
+      // Increment badge count when notification opened (background/terminated)
+      await _incrementBadgeFromBackground();
     });
 
     // Foreground Notification Listener
@@ -94,6 +102,24 @@ class OneSignalHelper {
     OneSignal.InAppMessages.addDidDismissListener((event) {
       debugPrint("Did Dismiss In-App Message: ${event.message.messageId}");
     });
+  }
+
+  static void _setupNotificationHandlers() {
+    // No longer using setNotificationWillShowInForegroundHandler and setNotificationOpenedHandler
+    // Handled via addForegroundWillDisplayListener and addClickListener in _addObservers()
+  }
+
+  static Future<void> _incrementBadgeFromBackground() async {
+    if (!_isBadgeSupported) {
+      return;
+    }
+    final prefs = await SharedPreferences.getInstance();
+    int currentBadge = prefs.getInt('badge_count') ?? 0;
+    currentBadge++;
+    await prefs.setInt('badge_count', currentBadge);
+    _badgeCount = currentBadge;
+    AppBadgePlus.updateBadge(_badgeCount);
+    debugPrint("Badge incremented in background to $_badgeCount");
   }
 
   // Send Tags to OneSignal
@@ -205,29 +231,42 @@ class OneSignalHelper {
     // Check if the app badge is supported on the device
     _isBadgeSupported = await AppBadgePlus.isSupported();
     debugPrint("Badge Supported: $_isBadgeSupported");
+    if (_isBadgeSupported) {
+      // Load persisted badge count from preferences
+      final prefs = await SharedPreferences.getInstance();
+      _badgeCount = prefs.getInt('badge_count') ?? 0;
+      AppBadgePlus.updateBadge(_badgeCount);
+      debugPrint("Loaded badge count: $_badgeCount");
+    }
   }
  
-  static void setBadge(int count) {
+  static void setBadge(int count) async {
     _badgeCount = count;
     if (_isBadgeSupported) {
       // Set the badge count
       AppBadgePlus.updateBadge(count);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('badge_count', count);
     }
   }
  
-  static void incrementBadge() {
+  static void incrementBadge() async {
     _badgeCount++;
     if (_isBadgeSupported) {
       // Increment the badge count
       AppBadgePlus.updateBadge(_badgeCount);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('badge_count', _badgeCount);
     }
   }
  
-  static void clearBadge() {
+  static void clearBadge() async {
     _badgeCount = 0;
     if (_isBadgeSupported) {
       // Clear the badge count
       AppBadgePlus.updateBadge(0);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('badge_count', 0);
     }
   }
  
