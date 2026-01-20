@@ -117,7 +117,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     InkWell(
                       onTap: _chooseImageSource,
                       child: Center(
-                        child: Container(
+                        child: SizedBox(
                           height: 160,
                           width: 160,
 

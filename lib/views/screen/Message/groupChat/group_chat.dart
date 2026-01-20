@@ -166,7 +166,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                         child: _buildMessage(msg),
                       );
                     },
-                    separatorBuilder: (_, __) => const SizedBox(height: 6),
+                    separatorBuilder: (_, _) => const SizedBox(height: 6),
                   ),
                 );
               }),

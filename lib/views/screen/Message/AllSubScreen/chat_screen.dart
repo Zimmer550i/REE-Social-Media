@@ -181,7 +181,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     itemCount: msgs.length,
                     addAutomaticKeepAlives: true,
                     cacheExtent: 1000,
-                    separatorBuilder: (_, __) => const SizedBox(height: 6),
+                    separatorBuilder: (_, _) => const SizedBox(height: 6),
                     itemBuilder: (_, index) {
                       final msg = msgs[index];
                       return RepaintBoundary(
