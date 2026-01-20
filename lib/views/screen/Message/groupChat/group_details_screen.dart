@@ -159,12 +159,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                       CircleAvatar(
                         radius: 60,
                         backgroundColor: AppColors.primaryColor,
-                        backgroundImage: (controller.groupImage.value != null &&
-                                controller.groupImage.value!.isNotEmpty)
-                            ? NetworkImage(controller.groupImage.value!)
+                        backgroundImage: (controller.groupImage.value.isNotEmpty)
+                            ? NetworkImage(controller.groupImage.value)
                             : null,
-                        child: (controller.groupImage.value == null ||
-                                controller.groupImage.value!.isEmpty)
+                        child: (controller.groupImage.value.isEmpty)
                             ? (controller.groupName.value.isNotEmpty
                                 ? Text(
                                     controller.groupName.value[0].toUpperCase(),

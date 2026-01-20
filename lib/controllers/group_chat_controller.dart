@@ -151,7 +151,7 @@ class GroupChatController extends GetxController {
         Get.snackbar("Error", message);
       }
     } catch (e) {
-      Get.snackbar("Error", e.toString() ?? "Unknown error");
+      debugPrint("Error====> $e");
     } finally {
       isLoading.value = false;
     }
@@ -177,7 +177,7 @@ class GroupChatController extends GetxController {
         Get.snackbar("Error", message);
       }
     } catch (e) {
-      Get.snackbar("Error", e.toString() ?? "Unknown error");
+      debugPrint("Error====> $e");
     } finally {
       isLoading.value = false;
     }
