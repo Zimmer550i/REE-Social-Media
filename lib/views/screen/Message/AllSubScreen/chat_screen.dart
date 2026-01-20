@@ -142,7 +142,8 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.backgroundColor,
+
       body: SafeArea(
         child: Column(
           children: [
@@ -603,13 +604,16 @@ class _ChatScreenState extends State<ChatScreen> {
                 if (isMe) ...[
                   SvgPicture.asset(
                     'assets/icons/download.svg',
-                    color: const Color(0xFF56BBFF),
+                    color: AppColors.primaryColor,
                     height: 18,
                   ),
                   SizedBox(width: 8),
-                  const Text(
+                  Text(
                     "Save",
-                    style: TextStyle(fontSize: 12, color: Color(0xFF56BBFF)),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.primaryColor,
+                    ),
                   ),
                   Spacer(),
                   timeText,
@@ -618,14 +622,17 @@ class _ChatScreenState extends State<ChatScreen> {
                 if (!isMe) ...[
                   timeText,
                   const Spacer(),
-                  const Text(
+                  Text(
                     "Save",
-                    style: TextStyle(fontSize: 12, color: Color(0xFF56BBFF)),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.primaryColor,
+                    ),
                   ),
                   const SizedBox(width: 6),
                   SvgPicture.asset(
                     'assets/icons/download.svg',
-                    color: const Color(0xFF56BBFF),
+                    color: AppColors.primaryColor,
                     height: 18,
                   ),
                 ],
@@ -665,13 +672,16 @@ class _ChatScreenState extends State<ChatScreen> {
                 if (isMe) ...[
                   SvgPicture.asset(
                     'assets/icons/download.svg',
-                    color: const Color(0xFF56BBFF),
+                    color: AppColors.primaryColor,
                     height: 18,
                   ),
                   const SizedBox(width: 8),
-                  const Text(
+                  Text(
                     "Save",
-                    style: TextStyle(fontSize: 12, color: Color(0xFF56BBFF)),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.primaryColor,
+                    ),
                   ),
                   Spacer(),
                   timeText,
@@ -679,14 +689,17 @@ class _ChatScreenState extends State<ChatScreen> {
                 if (!isMe) ...[
                   timeText,
                   const Spacer(),
-                  const Text(
+                  Text(
                     "Save",
-                    style: TextStyle(fontSize: 12, color: Color(0xFF56BBFF)),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.primaryColor,
+                    ),
                   ),
                   const SizedBox(width: 6),
                   SvgPicture.asset(
                     'assets/icons/download.svg',
-                    color: const Color(0xFF56BBFF),
+                    color: AppColors.primaryColor,
                     height: 18,
                   ),
                 ],

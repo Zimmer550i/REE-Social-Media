@@ -26,16 +26,23 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: padding,
-      child: InkWell(
-        onTap: loading ? null : onTap,
+    return InkWell(
+      onTap: loading ? null : onTap,
+      child: Padding(
+        padding: padding,
         child: Container(
           height: height,
           width: width,
           decoration: BoxDecoration(
-            color: color ?? AppColors.primaryColor,
+            color: color ?? AppColors.backgroundColor,
             borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: .15),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Center(
             child: loading
@@ -43,7 +50,7 @@ class CustomButton extends StatelessWidget {
                     height: 20,
                     width: 20,
                     child: CircularProgressIndicator(
-                      color: Colors.white,
+                      color: AppColors.primaryColor,
                     ),
                   )
                 : Text(
@@ -52,7 +59,7 @@ class CustomButton extends StatelessWidget {
                         textStyle ??
                         AppStyles.h3(
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: AppColors.primaryColor,
                         ),
                   ),
           ),

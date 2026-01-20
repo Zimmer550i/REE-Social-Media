@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
+import 'package:ree_social_media_app/utils/re_logo.dart';
 import 'package:ree_social_media_app/views/base/custom_button.dart';
 import 'package:ree_social_media_app/views/screen/Splash/Onboard/onboard_screen2.dart';
 
@@ -11,6 +12,7 @@ class OnboardScreen1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
@@ -20,11 +22,7 @@ class OnboardScreen1 extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  SvgPicture.asset(
-                    "assets/icons/re.svg",
-                    height: 35,
-                    width: 45,
-                  ),
+                  ReeLogo(),
                   Text(
                     "1 of 2",
                     style: TextStyle(
@@ -42,7 +40,7 @@ class OnboardScreen1 extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SvgPicture.asset(
-                    'assets/images/splash.svg',
+                    'assets/icons/splash.svg',
                     height: 72,
                     width: 123,
                   ),
@@ -50,7 +48,7 @@ class OnboardScreen1 extends StatelessWidget {
                   Text(
                     "Capture &\n Share Moments",
                     style: TextStyle(
-                      color: Color(0xFF413E3E),
+                      color: AppColors.primaryColor,
                       fontSize: 28,
                       fontWeight: FontWeight.w600,
                     ),
@@ -60,7 +58,7 @@ class OnboardScreen1 extends StatelessWidget {
                   Text(
                     "Send photos and videos that stay blurred until the countdown reveal",
                     style: TextStyle(
-                      color: Color(0xFF676565),
+                      color: AppColors.primaryColor,
                       fontSize: 16,
                       fontWeight: FontWeight.w400,
                     ),

@@ -61,6 +61,8 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -99,14 +101,18 @@ class _SearchScreenState extends State<SearchScreen> {
                 hintText: 'Search here',
               ),
               const SizedBox(height: 24),
-        
+
               // 🔹 Contact List
               Expanded(
                 child: Obx(() {
                   if (contactController.isLoading.value) {
-                    return Center(child: CircularProgressIndicator(color: AppColors.primaryColor));
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryColor,
+                      ),
+                    );
                   }
-        
+
                   if (filteredContacts.isEmpty) {
                     return const Center(
                       child: Text(
@@ -115,7 +121,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       ),
                     );
                   }
-        
+
                   return ListView.separated(
                     itemCount: filteredContacts.length,
                     padding: EdgeInsets.zero,
@@ -125,7 +131,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       final imageUrl = userController.addBaseUrl(c['image']);
                       final name = c['name'] ?? 'Unknown';
                       final phone = c['phone'] ?? '';
-        
+
                       return Row(
                         children: [
                           CircleAvatar(

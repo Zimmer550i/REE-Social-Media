@@ -50,6 +50,9 @@ class _MessageScreenState extends State<MessageScreen> {
     super.initState();
     notificationController.fetchNotifications();
 
+    controller.fetchAllChats();
+    controller.fetchAllStories();
+
     /// Pagination listener for chats
     _chatScrollController.addListener(() {
       if (_chatScrollController.position.pixels >=
@@ -101,6 +104,8 @@ class _MessageScreenState extends State<MessageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+
       bottomNavigationBar: Obx(
         () => BottomMenu(0, messageCount: controller.unreadCount.value),
       ),

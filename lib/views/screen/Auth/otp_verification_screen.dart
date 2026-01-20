@@ -113,6 +113,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+            backgroundColor: AppColors.backgroundColor,
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: SafeArea(

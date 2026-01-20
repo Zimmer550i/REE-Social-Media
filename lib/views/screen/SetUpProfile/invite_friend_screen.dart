@@ -142,7 +142,7 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
                   border: isMatched
                       ? null
                       : Border.all(
-                          color: Colors.grey.withValues(alpha: .5),
+                          color: AppColors.primaryColor.withValues(alpha: .1),
                           width: 1,
                         ),
                 ),
@@ -171,6 +171,8 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+
       body: SafeArea(
         child: Column(
           children: [
@@ -184,7 +186,7 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
                   Text(
                     "2 of 4",
                     style: TextStyle(
-                      color: const Color(0xFF413E3E),
+                      color: AppColors.primaryColor,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       decoration: TextDecoration.underline,
@@ -245,10 +247,10 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
                 return ListView(
                   padding: const EdgeInsets.all(20.0),
                   children: [
-                    const Text(
+                    Text(
                       "Connect With Friends",
                       style: TextStyle(
-                        color: Color(0xFF413E3E),
+                        color: AppColors.primaryColor,
                         fontSize: 24,
                         fontWeight: FontWeight.w600,
                       ),
@@ -261,7 +263,7 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
                           TextSpan(
                             text: "To start your first messages on",
                             style: TextStyle(
-                              color: Color(0xFF676565),
+                              color: AppColors.primaryColor,
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
                             ),
@@ -277,7 +279,7 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
                           TextSpan(
                             text: " invite friends",
                             style: TextStyle(
-                              color: Color(0xFF676565),
+                              color: AppColors.primaryColor,
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
                             ),
@@ -325,7 +327,6 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
             child: CustomButton(
               onTap: () => Get.to(() => const EnableNotificationScreen()),
               text: "Next",
-              color: AppColors.primaryColor,
             ),
           ),
         ),

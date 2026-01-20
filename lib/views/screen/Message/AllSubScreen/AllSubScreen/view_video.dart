@@ -105,6 +105,7 @@ class _ViewMediaState extends State<ViewMedia> {
     final videoReady = isVideo ? _video?.value.isInitialized == true : true;
 
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Row(children: [ReBack(onTap: () => Get.back())]),

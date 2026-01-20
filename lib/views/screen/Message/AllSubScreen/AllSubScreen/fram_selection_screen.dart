@@ -101,6 +101,8 @@ class _FrameSelectionScreenState extends State<FrameSelectionScreen> {
   Widget build(BuildContext context) {
     if (!_isInitialized) {
       return Scaffold(
+        backgroundColor: AppColors.backgroundColor,
+
         body: Center(
           child: SpinKitWave(color: AppColors.primaryColor, size: 30.0),
         ),
@@ -108,6 +110,8 @@ class _FrameSelectionScreenState extends State<FrameSelectionScreen> {
     }
 
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: _buildAppBarTitle(),

@@ -19,6 +19,8 @@ class _EnableNotificationScreenState extends State<EnableNotificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -32,7 +34,7 @@ class _EnableNotificationScreenState extends State<EnableNotificationScreen> {
                   Text(
                     "3 of 4",
                     style: TextStyle(
-                      color: Color(0xFF413E3E),
+                      color: AppColors.primaryColor,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       decoration: TextDecoration.underline,
@@ -46,7 +48,7 @@ class _EnableNotificationScreenState extends State<EnableNotificationScreen> {
               Text(
                 "Enable Push Notifications",
                 style: TextStyle(
-                  color: Color(0xFF413E3E),
+                  color: AppColors.primaryColor,
                   fontSize: 28,
                   fontWeight: FontWeight.w600,
                 ),
@@ -55,7 +57,7 @@ class _EnableNotificationScreenState extends State<EnableNotificationScreen> {
               Text(
                 "Allow notifications to see friend's messages and respond in real time",
                 style: TextStyle(
-                  color: Color(0xFF413E3E),
+                  color: AppColors.primaryColor,
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
                 ),
@@ -70,13 +72,16 @@ class _EnableNotificationScreenState extends State<EnableNotificationScreen> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Color(0xFFC4C3C3), width: 0.5),
+                    border: Border.all(
+                      color: AppColors.primaryColor,
+                      width: 0.5,
+                    ),
                   ),
-                  child: Center(
+                  child: Center(  
                     child: Text(
                       "Not Now",
                       style: TextStyle(
-                        color: Color(0xFF676565),
+                        color: AppColors.primaryColor,
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
                       ),

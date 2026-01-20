@@ -90,8 +90,8 @@ class _VideoTrimAndSendScreenState extends State<VideoTrimAndSendScreen> {
       final path = await VideoThumbnail.thumbnailFile(
         video: widget.videoUrl,
         maxHeight: 0,
-      maxWidth: 0,
-      quality: 100,
+        maxWidth: 0,
+        quality: 100,
         timeMs: i * interval,
       );
       if (path != null) _thumbnailPaths.add(path);
@@ -360,6 +360,8 @@ class _VideoTrimAndSendScreenState extends State<VideoTrimAndSendScreen> {
   Widget build(BuildContext context) {
     if (!_isInitialized) {
       return Scaffold(
+        backgroundColor: AppColors.backgroundColor,
+
         body: Center(
           child: CircularProgressIndicator(color: AppColors.primaryColor),
         ),
@@ -367,6 +369,7 @@ class _VideoTrimAndSendScreenState extends State<VideoTrimAndSendScreen> {
     }
 
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
         title: const Text(
           "Trim & Send Video",

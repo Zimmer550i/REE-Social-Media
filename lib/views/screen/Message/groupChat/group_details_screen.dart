@@ -102,6 +102,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+
       body: SafeArea(
         child: Obx(() {
           if (controller.isLoading.value) {
@@ -206,17 +208,17 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF56BBFF).withValues(alpha: .2),
+                      color: AppColors.primaryColor,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           "Change Group Name",
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF413E3E),
+                            color: AppColors.backgroundColor,
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -365,7 +367,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         final members = controller.members.map((m) {
           return {
             "name": m["name"],
-            "image": userController.addBaseUrl(m["image"]),
+            "image": m["image"] ?? "",
             "_id": m["_id"],
           };
         }).toList();

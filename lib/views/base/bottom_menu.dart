@@ -57,7 +57,7 @@ class BottomMenu extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
             decoration: BoxDecoration(
-              color: isSelected ? Color(0xFFb4e1ff) : Colors.transparent,
+              color: isSelected ? AppColors.primaryColor : Colors.transparent,
               borderRadius: BorderRadius.circular(12),
             ),
             child: SvgPicture.asset(
@@ -115,7 +115,7 @@ class BottomMenu extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFb4e1ff) : Colors.transparent,
+          color: isSelected ? AppColors.primaryColor : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: SvgPicture.asset(

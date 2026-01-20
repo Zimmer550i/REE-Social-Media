@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ree_social_media_app/controllers/auth_controller.dart';
+import 'package:ree_social_media_app/utils/app_colors.dart';
 import 'package:ree_social_media_app/views/screen/Splash/Onboard/onboard_screen1.dart';
 import '../Message/message_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
-
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> {
   final AuthController authController = Get.put(AuthController());
-
   @override
   void initState() {
     Future.delayed(Duration(seconds: 3), () async {
@@ -33,20 +32,14 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Container(
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF56BBFF), Color(0xFFE6E6E6)],
-          ),
-        ),
+        color: AppColors.backgroundColor,
         child: Center(
           child: Text(
             "re:",
             style: TextStyle(
-              fontSize: 100,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+              fontSize: 126,
+              color: AppColors.primaryColor,
+              fontFamily: "LibreDisplay"
             ),
           ),
         ),

@@ -50,6 +50,7 @@ class MyApp extends StatelessWidget {
               title: AppConstants.appName,
               debugShowCheckedModeBanner: false,
               theme: light(),
+              
               defaultTransition: Transition.topLevel,
               locale: localizeController.locale,
               translations: Messages(languages: languages),

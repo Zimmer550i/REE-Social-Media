@@ -284,6 +284,8 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+            backgroundColor: AppColors.backgroundColor,
+
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Row(
@@ -545,8 +547,6 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
             onTap: () async {
               sendMessageController.isLoading.value = true;
               await _captureAndSaveScreenshot();
-              // sendMessageController.isLoading.value = false;
-              debugPrint("ChatID : ${widget.chatId}");
               await sendMessageController.sendMediaToSingleChat(
                 chatId: widget.chatId,
                 filePath: widget.reactionVideo,

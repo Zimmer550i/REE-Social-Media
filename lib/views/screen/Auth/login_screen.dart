@@ -32,6 +32,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+  
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -112,7 +114,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         passwordTextController.text,
                       );
                       if (message == "success") {
-                        
                         OneSignalHelper.optIn();
                         Get.offAll(() => MessageScreen());
                       } else if (message == "verify") {

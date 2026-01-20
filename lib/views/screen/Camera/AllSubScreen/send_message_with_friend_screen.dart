@@ -56,6 +56,8 @@ class _SendMessageWithFriendScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+            backgroundColor: AppColors.backgroundColor,
+
       body: SafeArea(
         child: Obx(() {
           if (controller.isLoading.value) {

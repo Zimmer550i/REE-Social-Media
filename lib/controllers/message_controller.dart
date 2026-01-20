@@ -252,6 +252,85 @@ class MessageController extends GetxController {
     }
   }
 
+
+  Future<void> fetchAllStories() async {
+    try {
+      final response = await _api.get(
+        "/story/all-stories",
+        queryParams: {
+          "page": storyPage.value.toString(),
+          "limit": "10",
+        },
+        authReq: true,
+      );
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        if (body["success"] == true) {
+          final newStories = body["data"] ?? [];
+          stories.assignAll(newStories);
+
+          final meta = body["meta"] ?? {};
+          final totalPage = meta["totalPage"] ?? 1;
+          hasMoreStories.value = storyPage.value < totalPage;
+          if (hasMoreStories.value) storyPage.value++;
+        } else {
+          debugPrint("⚠️ Fetch stories failed: ${body["message"]}");
+        }
+      } else {
+        debugPrint("⚠️ Story fetch failed: ${response.body}");
+      }
+    } catch (e) {
+      debugPrint("❌ Error fetching stories: $e");
+    }
+  }
+
+
+  Future<void> fetchAllChats() async {
+    try {
+      final response = await _api.get(
+        "/chat/private-chat-list",
+        queryParams: {"limit": "10", "page": chatPage.value.toString()},
+        authReq: true,
+      );
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+
+        if (body["success"] == true) {
+          final List data = body["data"] ?? [];
+
+          final List<Map<String, dynamic>> privates = data
+              .where((c) => c['type'] == "private")
+              .map((c) => Map<String, dynamic>.from(c))
+              .toList();
+
+          final List<Map<String, dynamic>> groups = data
+              .where((c) => c['type'] == "group")
+              .map((c) => Map<String, dynamic>.from(c))
+              .toList();
+
+          privateChats.assignAll(privates);
+            groupChats.assignAll(groups);
+
+          calculateUnreadMessages();
+
+          final meta = body['meta'] ?? {};
+          final totalPage = meta['totalPage'] ?? 1;
+          hasMoreChats.value = chatPage.value < totalPage;
+          if (hasMoreChats.value) chatPage.value++;
+        } else {
+          debugPrint("⚠️ Fetch chats failed: ${body["message"]}");
+        }
+      } else {
+        debugPrint("⚠️ Chat fetch failed: ${response.body}");
+      }
+    } catch (e) {
+      debugPrint("❌ Error fetching chats: $e");
+    }
+  }
+
+
   String getLastMessage(Map<String, dynamic> chat) {
     final msg = chat["lastMessage"];
     final sender = msg?["sender"];
