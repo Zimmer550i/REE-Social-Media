@@ -299,7 +299,7 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
                   ? null
                   : NetworkImage(widget.userProfile),
               child: widget.userProfile.isEmpty
-                  ? Text(widget.userName[0].toUpperCase())
+                  ? Text(widget.userName[0].toUpperCase(),style: TextStyle(fontFamily: "LibreText"),)
                   : null,
             ),
             const SizedBox(width: 12),
@@ -308,6 +308,7 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
               style: const TextStyle(
                 color: Colors.black,
                 fontSize: 22,
+                fontFamily: "LibreText",
                 fontWeight: FontWeight.w600,
               ),
             ),

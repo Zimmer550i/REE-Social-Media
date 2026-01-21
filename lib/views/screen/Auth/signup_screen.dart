@@ -49,6 +49,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   color: AppColors.textColor,
                   fontSize: 28,
                   fontWeight: FontWeight.w600,
+                  fontFamily: "LibreText",
                 ),
               ),
               const SizedBox(height: 12),

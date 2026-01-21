@@ -61,6 +61,7 @@ class _ContactScreenState extends State<ContactScreen> {
                   color: AppColors.textColor,
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
+                  fontFamily: "LibreText"
                 ),
               ),
               const SizedBox(height: 20),

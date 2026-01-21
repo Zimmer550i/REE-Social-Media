@@ -117,6 +117,7 @@ class _ContactAccessScreenState extends State<ContactAccessScreen>
                 style: TextStyle(
                   color: AppColors.primaryColor,
                   fontSize: 28,
+                  fontFamily: "LibreText",
                   fontWeight: FontWeight.w600,
                 ),
               ),

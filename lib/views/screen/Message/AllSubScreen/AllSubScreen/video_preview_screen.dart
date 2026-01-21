@@ -340,6 +340,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                       widget.userName[0].toUpperCase(),
                       style: const TextStyle(
                         color: Colors.white,
+                        fontFamily: "LibreText",
                         fontWeight: FontWeight.bold,
                       ),
                     )
@@ -348,6 +349,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                       widget.userName.toUpperCase(),
                       style: const TextStyle(
                         color: Colors.white,
+                        fontFamily: "LibreText",
                         fontWeight: FontWeight.bold,
                       ),
                     )
@@ -356,7 +358,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
             const SizedBox(width: 12),
             Text(
               widget.userName,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600,fontFamily: "LibreText"),
             ),
           ],
         ),

@@ -1,5 +1,4 @@
 // ignore_for_file: deprecated_member_use
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -91,20 +90,16 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // 🧠 Cache map for already downloaded videos
   final Map<String, File> _videoCache = {};
 
   Future<File> _downloadVideoToLocal(String url) async {
     try {
-      // If already cached in memory
       if (_videoCache.containsKey(url)) {
         return _videoCache[url]!;
       }
 
-      // Generate unique file name (based on url hash)
       final fileName = "${url.hashCode}.mp4";
 
-      // Create a cache directory for videos
       final dir = await getTemporaryDirectory();
       final videoDir = Directory("${dir.path}/videos");
       if (!await videoDir.exists()) {
@@ -114,14 +109,12 @@ class _ChatScreenState extends State<ChatScreen> {
       final filePath = "${videoDir.path}/$fileName";
       final cachedFile = File(filePath);
 
-      // If file already exists locally, use it directly
       if (await cachedFile.exists()) {
         _videoCache[url] = cachedFile;
         debugPrint("✅ Using cached video for: $url");
         return cachedFile;
       }
 
-      // Otherwise, download from network
       debugPrint("⬇️ Downloading video from: $url");
       final response = await http.get(Uri.parse(url));
 
@@ -148,8 +141,6 @@ class _ChatScreenState extends State<ChatScreen> {
         child: Column(
           children: [
             _buildHeader(),
-
-            // 🌀 Messages List
             Expanded(
               child: Obx(() {
                 final msgs = chatController.messages;
@@ -204,7 +195,7 @@ class _ChatScreenState extends State<ChatScreen> {
               () => chatController.isLoading.value
                   ? LinearProgressIndicator(
                       color: AppColors.primaryColor,
-                      backgroundColor: AppColors.primaryColor,
+                      backgroundColor: AppColors.backgroundColor,
                     )
                   : const SizedBox.shrink(),
             ),
@@ -286,6 +277,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF413E3E),
+                fontFamily: "LibreText",
               ),
               maxLines: 1,
             ),
@@ -569,8 +561,6 @@ class _ChatScreenState extends State<ChatScreen> {
               chatController: chatController,
             ),
             const SizedBox(height: 6),
-
-            // Footer (Save + Time)
             _buildVideoFooter(msg, localVideo.path),
           ],
         );

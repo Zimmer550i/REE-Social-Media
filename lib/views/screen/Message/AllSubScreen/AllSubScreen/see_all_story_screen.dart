@@ -54,6 +54,7 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
                       color: AppColors.textColor,
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
+                      fontFamily: "LibreText"
                     ),
                   ),
                 ],

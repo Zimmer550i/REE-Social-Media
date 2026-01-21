@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
-  
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -49,6 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: AppColors.textColor,
                   fontSize: 28,
                   fontWeight: FontWeight.w600,
+                  fontFamily: "LibreText",
                 ),
               ),
               SizedBox(height: 40),

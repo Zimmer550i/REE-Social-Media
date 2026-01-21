@@ -50,6 +50,7 @@ class OnboardScreen1 extends StatelessWidget {
                     style: TextStyle(
                       color: AppColors.primaryColor,
                       fontSize: 28,
+                      fontFamily: "LibreText",
                       fontWeight: FontWeight.w600,
                     ),
                     textAlign: TextAlign.center,

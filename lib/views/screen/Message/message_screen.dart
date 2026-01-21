@@ -34,7 +34,8 @@ class MessageScreen extends StatefulWidget {
   State<MessageScreen> createState() => _MessageScreenState();
 }
 
-class _MessageScreenState extends State<MessageScreen> with WidgetsBindingObserver {
+class _MessageScreenState extends State<MessageScreen>
+    with WidgetsBindingObserver {
   final MessageController controller = Get.put(MessageController());
   final UserController userController = Get.put(UserController());
   final NotificationController notificationController = Get.put(
@@ -89,10 +90,8 @@ class _MessageScreenState extends State<MessageScreen> with WidgetsBindingObserv
 
   void _startPolling() {
     _stopPolling();
-    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      notificationController.fetchNotifications();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 2), (_) {
       controller.fetchAllChats();
-      controller.fetchAllStories();
     });
   }
 
@@ -161,6 +160,7 @@ class _MessageScreenState extends State<MessageScreen> with WidgetsBindingObserv
                             color: Color(0xFF413E3E),
                             fontSize: 24,
                             fontWeight: FontWeight.w600,
+                            fontFamily: "LibreText",
                           ),
                         ),
                         _buildChatList(),
@@ -302,6 +302,7 @@ class _MessageScreenState extends State<MessageScreen> with WidgetsBindingObserv
                   color: Color(0xFF413E3E),
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
+                  fontFamily: "LibreText"
                 ),
               ),
             ),

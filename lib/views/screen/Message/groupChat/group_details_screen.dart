@@ -146,6 +146,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF413E3E),
+                          fontFamily: "LibreText",
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -159,19 +160,26 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                       CircleAvatar(
                         radius: 60,
                         backgroundColor: AppColors.primaryColor,
-                        backgroundImage: (controller.groupImage.value.isNotEmpty)
+                        backgroundImage:
+                            (controller.groupImage.value.isNotEmpty)
                             ? NetworkImage(controller.groupImage.value)
                             : null,
                         child: (controller.groupImage.value.isEmpty)
                             ? (controller.groupName.value.isNotEmpty
-                                ? Text(
-                                    controller.groupName.value[0].toUpperCase(),
-                                    style: const TextStyle(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  )
-                                : const Icon(Icons.group, size: 40, color: Colors.white))
+                                  ? Text(
+                                      controller.groupName.value[0]
+                                          .toUpperCase(),
+                                      style: const TextStyle(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: "LibreText",
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.group,
+                                      size: 40,
+                                      color: Colors.white,
+                                    ))
                             : null,
                       ),
                       if (userController.userInfo.value!.id ==

@@ -206,6 +206,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                       groupChatController.groupName.value.isNotEmpty
                           ? groupChatController.groupName.value[0].toUpperCase()
                           : "",
+                      style: TextStyle(fontFamily: "LibreText"),
                     )
                   : null,
             ),
@@ -221,6 +222,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   color: Color(0xFF413E3E),
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
+                  fontFamily: "LibreText",
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -274,7 +276,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               CircleAvatar(
                 radius: 22,
                 backgroundColor: AppColors.primaryColor,
-                child: name.isNotEmpty ? Text(name[0].toUpperCase()) : const SizedBox.shrink(),
+                child: name.isNotEmpty
+                    ? Text(name[0].toUpperCase())
+                    : const SizedBox.shrink(),
               ),
               SizedBox(width: 10),
               Column(
@@ -397,7 +401,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               CircleAvatar(
                 radius: 22,
                 backgroundColor: AppColors.primaryColor,
-                child: name.isNotEmpty ? Text(name[0].toUpperCase()) : const SizedBox.shrink(),
+                child: name.isNotEmpty
+                    ? Text(name[0].toUpperCase())
+                    : const SizedBox.shrink(),
               ),
               SizedBox(width: 10),
               Column(
@@ -508,7 +514,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   CircleAvatar(
                     radius: 22,
                     backgroundColor: AppColors.primaryColor,
-                    child: name.isNotEmpty ? Text(name[0].toUpperCase()) : const SizedBox.shrink(),
+                    child: name.isNotEmpty
+                        ? Text(name[0].toUpperCase())
+                        : const SizedBox.shrink(),
                   ),
                   SizedBox(width: 10),
                   Column(

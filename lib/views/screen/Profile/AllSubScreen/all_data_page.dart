@@ -47,6 +47,7 @@ class _AllDataScreenState extends State<AllDataScreen> {
                       color: Color(0xFF0D1C12),
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
+                      fontFamily: "LibreText",
                     ),
                   ),
                 ],

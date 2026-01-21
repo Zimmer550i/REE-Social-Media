@@ -47,7 +47,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   return Container(
                     padding: const EdgeInsets.all(20),
                     width: double.infinity,
-
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                      border: Border.all(
+                        color: AppColors.primaryColor,
+                        width: 1,
+                      ),
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -77,6 +83,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: const TextStyle(
                             color: Color(0xFF333333),
                             fontSize: 20,
+                            fontFamily: "LibreText",
                             fontWeight: FontWeight.w600,
                           ),
                         ),

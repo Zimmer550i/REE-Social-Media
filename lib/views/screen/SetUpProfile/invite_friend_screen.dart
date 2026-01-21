@@ -252,6 +252,7 @@ class _InviteFriendScreenState extends State<InviteFriendScreen> {
                       style: TextStyle(
                         color: AppColors.primaryColor,
                         fontSize: 24,
+                        fontFamily: "LibreText",
                         fontWeight: FontWeight.w600,
                       ),
                     ),

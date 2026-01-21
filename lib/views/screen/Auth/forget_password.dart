@@ -41,6 +41,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                   color: Color(0xFF413E3E),
                   fontSize: 28,
                   fontWeight: FontWeight.w600,
+                  fontFamily: "LibreText"
                 ),
               ),
               SizedBox(height: 40),

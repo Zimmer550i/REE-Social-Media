@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
 
 ThemeData light() => ThemeData(
-  fontFamily: 'LibreText',
+  fontFamily: 'Inter',
   primaryColor: AppColors.primaryColor,
   secondaryHeaderColor: Color(0xFF1ED7AA),
   disabledColor: Color(0xFFBABFC4),

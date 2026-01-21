@@ -142,7 +142,6 @@ class _ViewMediaState extends State<ViewMedia> {
       );
     }
 
-    //Image view (supports both local and network images)
     if (widget.mediaUrl.startsWith('http')) {
       return ResponsiveImage(url: widget.mediaUrl);
     } else {

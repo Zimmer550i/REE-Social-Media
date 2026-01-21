@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
@@ -28,7 +27,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            backgroundColor: AppColors.backgroundColor,
+      backgroundColor: AppColors.backgroundColor,
 
       body: SafeArea(
         child: Padding(
@@ -37,7 +36,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             children: [
               Row(
                 children: [
-                  ReBack(onTap: ()=> Get.back()),
+                  ReBack(onTap: () => Get.back()),
                   // InkWell(
                   //   onTap: () {
                   //     Get.back();
@@ -50,6 +49,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     style: TextStyle(
                       color: AppColors.textColor,
                       fontSize: 24,
+                      fontFamily: "LibreText",
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -77,15 +77,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
               SizedBox(height: 20),
               Expanded(
                 child: Obx(() {
-                  if (controller.isLoading.value) {
-                    return Center(
-                      child: SpinKitWave(
-                        color: AppColors.primaryColor,
-                        size: 30.0,
-                      ),
-                    );
-                  }
-
                   if (controller.notifications.isEmpty) {
                     return const Center(child: Text("No notifications found"));
                   }

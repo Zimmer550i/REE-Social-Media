@@ -34,6 +34,7 @@ class _GetStartScreenState extends State<GetStartScreen> {
                 style: TextStyle(
                   color: AppColors.primaryColor,
                   fontSize: 28,
+                  fontFamily: "LibreText",
                   fontWeight: FontWeight.w600,
                 ),
               ),

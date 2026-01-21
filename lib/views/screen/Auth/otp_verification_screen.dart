@@ -113,7 +113,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            backgroundColor: AppColors.backgroundColor,
+      backgroundColor: AppColors.backgroundColor,
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -127,6 +127,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
                 "Check Your\nMessages",
                 style: TextStyle(
                   color: Color(0xFF413E3E),
+                  fontFamily: "LibreText",
                   fontSize: 28,
                   fontWeight: FontWeight.w600,
                 ),
