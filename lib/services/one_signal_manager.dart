@@ -67,7 +67,7 @@ class OneSignalHelper {
     // Notification Click Listener
     OneSignal.Notifications.addClickListener((event) async {
       debugPrint('NOTIFICATION CLICK LISTENER CALLED WITH EVENT: $event');
-      // Increment badge count when notification opened (background/terminated)
+      // Sync badge when notification is opened from background or terminated state
       await _incrementBadgeFromBackground();
     });
 
@@ -77,7 +77,7 @@ class OneSignalHelper {
         'NOTIFICATION WILL DISPLAY LISTENER CALLED WITH: ${event.notification.jsonRepresentation()}',
       );
 
-      // Increment iOS badge count
+      // Increment badge for foreground notifications only
       incrementBadge();
 
       event.preventDefault();
