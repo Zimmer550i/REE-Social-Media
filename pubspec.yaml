@@ -3,7 +3,7 @@ description: "A new Flutter project."
 publish_to: 'none'
 
 
-version: 1.0.3+1
+version: 1.0.8+1
 
 environment:
   sdk: ^3.9.0
@@ -68,13 +68,20 @@ flutter:
 
 
   fonts:
-     - family: OpenSans
-       fonts:
-         - asset: assets/fonts/OpenSans-Bold.ttf
-         - asset: assets/fonts/OpenSans-ExtraBold.ttf
-         - asset: assets/fonts/OpenSans-Light.ttf
-         - asset: assets/fonts/OpenSans-Regular.ttf
-         - asset: assets/fonts/OpenSans-Semibold.ttf
+      - family: Inter
+        fonts:
+          - asset: assets/fonts/inter.ttf
+
+      - family: LibreText
+        fonts:
+          - asset: assets/fonts/LibreCaslonText-Regular.ttf
+
+      - family: LibreDisplay
+        fonts:
+          - asset: assets/fonts/LibreCaslonDisplay-Regular.ttf
+
+
+        
 
   #         style: italic
   #   - family: Trajan Pro

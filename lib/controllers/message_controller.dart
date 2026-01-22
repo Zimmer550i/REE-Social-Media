@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ree_social_media_app/controllers/chat_controller.dart';
 import 'package:ree_social_media_app/controllers/user_controller.dart';
+import 'package:ree_social_media_app/services/one_signal_manager.dart';
+import 'package:ree_social_media_app/services/socket_manager.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
 import '../models/multi_body.dart';
 import '../services/api_service.dart';
@@ -34,6 +36,14 @@ class MessageController extends GetxController {
     super.onInit();
     fetchChats();
     fetchStories();
+    SocketService.onGlobalMessage(_handleIncomingMessage);
+  }
+
+  void _handleIncomingMessage(dynamic data) {
+    final String currentUserId = userController.userInfo.value?.id ?? '';
+
+    if (data['sender'] == currentUserId) return;
+    calculateUnreadMessages();
   }
 
   void calculateUnreadMessages() {
@@ -41,28 +51,36 @@ class MessageController extends GetxController {
 
     int total = 0;
 
-    for (final Map<String, dynamic> chat in groupChats) {
-      final last = chat["lastMessage"];
+    bool isUnread(Map<String, dynamic>? last) {
+      if (last == null) return false;
 
-      if (last != null &&
-          last["read"] == false &&
-          last["sender"] != currentUserId) {
+      final sender = last["sender"];
+      final read = last["read"];
+
+      // Only count as unread if:
+      // - sender is NOT current user
+      // - read is explicitly false (not null, not 0, not missing)
+      return sender != null &&
+          sender != currentUserId &&
+          read is bool &&
+          read == false;
+    }
+
+    for (final Map<String, dynamic> chat in groupChats) {
+      if (isUnread(chat["lastMessage"])) {
         total++;
       }
     }
 
     for (final Map<String, dynamic> chat in privateChats) {
-      final last = chat["lastMessage"];
-
-      if (last != null &&
-          last["read"] == false &&
-          last["sender"] != currentUserId) {
+      if (isUnread(chat["lastMessage"])) {
         total++;
       }
     }
 
     unreadCount.value = total;
-    debugPrint("Total unread messages: $total");
+    OneSignalHelper.setBadge(total);
+    debugPrint("Total unread messages (calculated): $total");
   }
 
   Future<String?> getOrCreatePrivateChat(
@@ -71,29 +89,19 @@ class MessageController extends GetxController {
     String image,
   ) async {
     try {
-      // Step 1 — Check if chat exists
       final Map<String, dynamic>? existingChat = _findChatByUserId(userId);
 
       if (existingChat != null) {
         return existingChat["_id"];
       }
-
-      // Step 2 — Create new chat
-      await createChatAndSendReaction(name, image, userId);
-
-      // Step 3 — Re-check after creation
-      final Map<String, dynamic>? newChat = _findChatByUserId(userId);
-
-      debugPrint("Chat ID: ${newChat?['_id']}");
-
-      return newChat?['_id'];
+      String? newChatId = await createChatAndSendReaction(name, image, userId);
+      return newChatId;
     } catch (e) {
       debugPrint("❌ Error in getOrCreatePrivateChat: $e");
       return null;
     }
   }
 
-  /// Helper: Find private chat where member id matches userId
   Map<String, dynamic>? _findChatByUserId(String userId) {
     try {
       return privateChats.firstWhere((chat) {
@@ -104,11 +112,11 @@ class MessageController extends GetxController {
         return members.any((m) => m is Map && m["_id"] == userId);
       });
     } catch (_) {
-      return null; // No chat found → return null safely
+      return null;
     }
   }
 
-  Future<void> createChatAndSendReaction(
+  Future<String?> createChatAndSendReaction(
     String name,
     String image,
     String memberId,
@@ -121,12 +129,15 @@ class MessageController extends GetxController {
 
       final body = jsonDecode(response.body);
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // final chatId = body['data']['_id'];
+        final chatId = body['data']['_id'];
+        return chatId;
       } else {
         debugPrint("⚠️ Failed: ${body['message']}");
+        return null;
       }
     } catch (e) {
       debugPrint("❌ Error creating private chat: $e");
+      return null;
     } finally {
       isLoading.value = false;
     }
@@ -240,6 +251,85 @@ class MessageController extends GetxController {
     }
   }
 
+
+  Future<void> fetchAllStories() async {
+    try {
+      final response = await _api.get(
+        "/story/all-stories",
+        queryParams: {
+          "page": storyPage.value.toString(),
+          "limit": "10",
+        },
+        authReq: true,
+      );
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        if (body["success"] == true) {
+          final newStories = body["data"] ?? [];
+          stories.assignAll(newStories);
+
+          final meta = body["meta"] ?? {};
+          final totalPage = meta["totalPage"] ?? 1;
+          hasMoreStories.value = storyPage.value < totalPage;
+          if (hasMoreStories.value) storyPage.value++;
+        } else {
+          debugPrint("⚠️ Fetch stories failed: ${body["message"]}");
+        }
+      } else {
+        debugPrint("⚠️ Story fetch failed: ${response.body}");
+      }
+    } catch (e) {
+      debugPrint("❌ Error fetching stories: $e");
+    }
+  }
+
+
+  Future<void> fetchAllChats() async {
+    try {
+      final response = await _api.get(
+        "/chat/private-chat-list",
+        queryParams: {"limit": "10", "page": chatPage.value.toString()},
+        authReq: true,
+      );
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+
+        if (body["success"] == true) {
+          final List data = body["data"] ?? [];
+
+          final List<Map<String, dynamic>> privates = data
+              .where((c) => c['type'] == "private")
+              .map((c) => Map<String, dynamic>.from(c))
+              .toList();
+
+          final List<Map<String, dynamic>> groups = data
+              .where((c) => c['type'] == "group")
+              .map((c) => Map<String, dynamic>.from(c))
+              .toList();
+
+          privateChats.assignAll(privates);
+            groupChats.assignAll(groups);
+
+          calculateUnreadMessages();
+
+          final meta = body['meta'] ?? {};
+          final totalPage = meta['totalPage'] ?? 1;
+          hasMoreChats.value = chatPage.value < totalPage;
+          if (hasMoreChats.value) chatPage.value++;
+        } else {
+          debugPrint("⚠️ Fetch chats failed: ${body["message"]}");
+        }
+      } else {
+        debugPrint("⚠️ Chat fetch failed: ${response.body}");
+      }
+    } catch (e) {
+      debugPrint("❌ Error fetching chats: $e");
+    }
+  }
+
+
   String getLastMessage(Map<String, dynamic> chat) {
     final msg = chat["lastMessage"];
     final sender = msg?["sender"];
@@ -270,9 +360,6 @@ class MessageController extends GetxController {
     }
   }
 
-  /// =====================================================
-  /// REFRESH (Both Chats & Stories)
-  /// =====================================================
   Future<void> refreshAll() async {
     chatPage.value = 1;
     storyPage.value = 1;
@@ -285,9 +372,6 @@ class MessageController extends GetxController {
     await Future.wait([fetchChats(), fetchStories()]);
   }
 
-  /// =====================================================
-  /// UPLOAD MEDIA (Story)
-  /// =====================================================
   Future<void> createStory() async {
     final mediaType = await Get.bottomSheet<String>(
       Container(
@@ -354,13 +438,12 @@ class MessageController extends GetxController {
         "Error",
         "Something went wrong while uploading story.",
         snackPosition: SnackPosition.BOTTOM,
-          colorText: Colors.white,
-          backgroundColor: AppColors.primaryColor,
+        colorText: Colors.white,
+        backgroundColor: AppColors.primaryColor,
       );
     }
   }
 
-  /// Upload media file (image/video)
   Future<String?> _uploadStoryMedia(File file, String type) async {
     try {
       final multipartBody = [MultipartBody(key: type, file: file)];

@@ -3,6 +3,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:ree_social_media_app/controllers/profile_controller.dart';
+import 'package:ree_social_media_app/utils/app_colors.dart';
 import 'package:ree_social_media_app/views/base/re_back.dart';
 import '../../../base/custom_loading.dart';
 
@@ -27,6 +28,8 @@ class _AllDataScreenState extends State<AllDataScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,6 +47,7 @@ class _AllDataScreenState extends State<AllDataScreen> {
                       color: Color(0xFF0D1C12),
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
+                      fontFamily: "LibreText",
                     ),
                   ),
                 ],

@@ -284,6 +284,8 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+            backgroundColor: AppColors.backgroundColor,
+
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Row(
@@ -297,7 +299,7 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
                   ? null
                   : NetworkImage(widget.userProfile),
               child: widget.userProfile.isEmpty
-                  ? Text(widget.userName[0].toUpperCase())
+                  ? Text(widget.userName[0].toUpperCase(),style: TextStyle(fontFamily: "LibreText"),)
                   : null,
             ),
             const SizedBox(width: 12),
@@ -306,6 +308,7 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
               style: const TextStyle(
                 color: Colors.black,
                 fontSize: 22,
+                fontFamily: "LibreText",
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -545,7 +548,6 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
             onTap: () async {
               sendMessageController.isLoading.value = true;
               await _captureAndSaveScreenshot();
-              // sendMessageController.isLoading.value = false;
               await sendMessageController.sendMediaToSingleChat(
                 chatId: widget.chatId,
                 filePath: widget.reactionVideo,

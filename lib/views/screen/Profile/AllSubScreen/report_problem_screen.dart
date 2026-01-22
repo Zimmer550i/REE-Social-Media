@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:ree_social_media_app/controllers/auth_controller.dart';
 import 'package:ree_social_media_app/controllers/user_controller.dart';
+import 'package:ree_social_media_app/utils/app_colors.dart';
 import 'package:ree_social_media_app/views/base/custom_button.dart';
 import 'package:ree_social_media_app/views/base/custom_text_field.dart';
 import 'package:ree_social_media_app/views/base/re_back.dart';
@@ -23,6 +24,8 @@ class _ReportProblemScreenState extends State<ReportProblemScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -41,6 +44,7 @@ class _ReportProblemScreenState extends State<ReportProblemScreen> {
                         color: Color(0xFF0D1C12),
                         fontSize: 24,
                         fontWeight: FontWeight.w600,
+                        fontFamily: "LibreText",
                       ),
                     ),
                   ],
@@ -141,7 +145,7 @@ class _ReportProblemScreenState extends State<ReportProblemScreen> {
                           SizedBox(height: 8),
                           CustomTextField(
                             controller: reportController,
-                            filColor: Color(0xFF56BBFF).withValues(alpha: 0.25),
+                            filColor: AppColors.backgroundColor,
                             maxLines: 3,
                             hintText: 'Write your comment ',
                           ),

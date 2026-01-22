@@ -17,7 +17,6 @@ class ChatController extends GetxController {
   final userCtrl = Get.find<UserController>();
   final api = ApiService();
 
-  /// Reactive State
   final RxBool isLoading = false.obs;
   final RxBool isPaginating = false.obs;
   final RxList<Map<String, dynamic>> messages = <Map<String, dynamic>>[].obs;
@@ -25,12 +24,10 @@ class ChatController extends GetxController {
   final ImagePicker _picker = ImagePicker();
   late ScrollController scrollController;
 
-  /// Pagination
   int _currentPage = 1;
   final int _limit = 15;
   bool _hasMore = true;
 
-  /// Session data
   String _chatId = '';
   late String _currentUserId;
   late String token;
@@ -98,10 +95,6 @@ class ChatController extends GetxController {
     }
   }
 
-  // ==============================
-  // CHAT FLOW
-  // ==============================
-
   Future<void> initChat({
     required String chatId,
     required String currentUserId,
@@ -111,15 +104,11 @@ class ChatController extends GetxController {
     _currentUserId = currentUserId;
     this.token = token;
 
-    /// 1️⃣ Fetch initial messages
     await fetchMessages();
 
-    /// 2️⃣ Connect to socket
     SocketService.connect(token);
 
-    /// 3️⃣ Delay a bit to ensure connection is ready
     Future.delayed(const Duration(milliseconds: 500), () {
-      /// ✅ Listen for messages only for this chat
       SocketService.onChatMessage(_chatId, (data) {
         final msg = _mapMessage(data, _currentUserId);
 
@@ -137,8 +126,6 @@ class ChatController extends GetxController {
         }
         _scrollToBottom();
       });
-
-      /// ✍️ Typing listener
       SocketService.onTyping(_chatId, (data) {
         debugPrint("✍️ Typing: $data");
       });
@@ -153,17 +140,14 @@ class ChatController extends GetxController {
     });
   }
 
-  // ==============================
-  // CREATE CHATS
-  // ==============================
-
   Future<void> createPrivateChat(
     String name,
-    String image,
+    String? image,
     String memberId,
   ) async {
     isLoading.value = true;
     try {
+      
       final response = await api.post("/chat/create-private", {
         "member": memberId,
       }, authReq: true);
@@ -175,7 +159,7 @@ class ChatController extends GetxController {
           () => ChatScreen(
             chatId: chatId,
             receiverName: name,
-            receiverImage: image,
+            receiverImage: image ?? "",
             receiverid: memberId,
           ),
         );

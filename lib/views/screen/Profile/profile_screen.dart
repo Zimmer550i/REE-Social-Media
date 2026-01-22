@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:ree_social_media_app/utils/re_logo.dart';
 import '../../base/bottom_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -27,6 +28,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -39,34 +42,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   final imageUrl = userController.getImageUrl();
                   final userName =
                       userController.userInfo.value?.name ?? "Loading...";
-                  final userPhone = userController.userInfo.value?.phone ?? "N/A";
+                  final userPhone =
+                      userController.userInfo.value?.phone ?? "N/A";
                   return Container(
                     padding: const EdgeInsets.all(20),
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [AppColors.primaryColor, Colors.white],
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                      border: Border.all(
+                        color: AppColors.primaryColor,
+                        width: 1,
                       ),
-                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: Text(
-                            "re:",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-          
-                        /// Avatar + Logo Row
+                        Align(alignment: Alignment.topRight, child: ReeLogo()),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -79,19 +70,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   : const AssetImage("assets/images/demo1.png")
                                         as ImageProvider,
                             ),
-          
+
                             // ReeLogo(),
                           ],
                         ),
-          
+
                         const SizedBox(height: 8),
-          
+
                         /// User Info
                         Text(
                           userName,
                           style: const TextStyle(
                             color: Color(0xFF333333),
                             fontSize: 20,
+                            fontFamily: "LibreText",
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -111,7 +103,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 40),
                 NotificationSettings(),
                 const SizedBox(height: 18),
-          
+
                 /// Settings List
                 _customRow(
                   onTap: () => Get.to(() => const EditProfileScreen()),
@@ -163,12 +155,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onTap: () => Get.to(
                     () => AllDataScreen(title: "About Us", endPoint: '/about'),
                   ),
-          
+
                   title: 'About',
                   imagePath: 'assets/icons/about.svg',
                 ),
                 const SizedBox(height: 17),
-          
+
                 /// Logout
                 InkWell(
                   onTap: () => _confirmLogout(context),
@@ -301,7 +293,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Expanded(
           child: ElevatedButton(
             onPressed: () => Get.back(),
-            
+
             style: ElevatedButton.styleFrom(
               overlayColor: Colors.white,
               backgroundColor: Colors.white,

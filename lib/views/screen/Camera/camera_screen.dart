@@ -419,7 +419,6 @@ class _CameraScreenState extends State<CameraScreen>
     );
   }
 
-  /// 🎚 Mode button
   Widget _buildModeButton(String asset, bool active, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
@@ -457,7 +456,6 @@ class _CameraScreenState extends State<CameraScreen>
     );
   }
 
-  /// 📸 Capture / Record button
   Widget _buildCaptureButton() {
     return GestureDetector(
       onTap: _onCapturePressed,
@@ -467,8 +465,8 @@ class _CameraScreenState extends State<CameraScreen>
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: _isRecording ? Colors.red : Colors.white30,
-            width: 4,
+            color: _isRecording ? Colors.red : AppColors.primaryColor,
+            width: 10,
           ),
         ),
       ),

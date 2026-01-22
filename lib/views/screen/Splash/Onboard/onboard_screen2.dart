@@ -1,5 +1,6 @@
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
@@ -14,6 +15,7 @@ class OnboardScreen2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
@@ -40,22 +42,19 @@ class OnboardScreen2 extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  CircleAvatar(
-                    radius: 60,
-                    backgroundColor: Color(0xFFECECEC).withValues(alpha: 0.50),
-                    child: Image.asset(
-                      'assets/images/comment2.png',
-                      height: 62,
-                      width: 62,
-                    ),
+                  SvgPicture.asset(
+                    'assets/icons/splash2.svg',
+                    height: 120,
+                    width: 120,
                   ),
 
                   SizedBox(height: 20),
                   Text(
                     "See Real Reactions \nin Real Time",
                     style: TextStyle(
-                      color: Color(0xFF413E3E),
+                      color: AppColors.primaryColor,
                       fontSize: 28,
+                      fontFamily: "LibreText",
                       fontWeight: FontWeight.w600,
                     ),
                     textAlign: TextAlign.center,
@@ -69,7 +68,7 @@ class OnboardScreen2 extends StatelessWidget {
                         TextSpan(
                           text: "When your media is revealed",
                           style: TextStyle(
-                            color: Color(0xFF676565),
+                            color: AppColors.primaryColor,
                             fontSize: 16,
                             fontWeight: FontWeight.w400,
                           ),
@@ -78,14 +77,14 @@ class OnboardScreen2 extends StatelessWidget {
                           text: " re:",
                           style: TextStyle(
                             color: AppColors.primaryColor,
-                            fontSize: 20,
+                            fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         TextSpan(
                           text: " captures genuine reactions instantly",
                           style: TextStyle(
-                            color: Color(0xFF676565),
+                            color: AppColors.primaryColor,
                             fontSize: 16,
                             fontWeight: FontWeight.w400,
                           ),

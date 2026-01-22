@@ -118,6 +118,8 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -132,7 +134,7 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                   Text(
                     "4 of 4",
                     style: TextStyle(
-                      color: const Color(0xFF413E3E),
+                      color: AppColors.primaryColor,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       decoration: TextDecoration.underline,
@@ -144,19 +146,20 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
               const SizedBox(height: 45),
 
               /// Title
-              const Text(
+              Text(
                 "Set Up Your \nProfile",
                 style: TextStyle(
-                  color: Color(0xFF413E3E),
+                  color: AppColors.primaryColor,
                   fontSize: 28,
+                  fontFamily: "LibreText",
                   fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 "Add your details so friends can recognize you",
                 style: TextStyle(
-                  color: Color(0xFF413E3E),
+                  color: AppColors.primaryColor,
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
                 ),
@@ -175,7 +178,7 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                       image: DecorationImage(
                         image: _profileImage != null
                             ? FileImage(_profileImage!)
-                            : const AssetImage('assets/images/demo1.png')
+                            : const AssetImage('assets/images/upload.png')
                                   as ImageProvider,
                         fit: BoxFit.cover,
                       ),

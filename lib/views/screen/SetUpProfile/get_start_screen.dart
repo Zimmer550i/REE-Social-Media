@@ -19,6 +19,7 @@ class _GetStartScreenState extends State<GetStartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+            backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(20),
@@ -31,8 +32,9 @@ class _GetStartScreenState extends State<GetStartScreen> {
               Text(
                 "You’re All Set!",
                 style: TextStyle(
-                  color: Color(0xFF413E3E),
+                  color: AppColors.primaryColor,
                   fontSize: 28,
+                  fontFamily: "LibreText",
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -40,7 +42,7 @@ class _GetStartScreenState extends State<GetStartScreen> {
               Text(
                 "Start sharing moments and see real reactions",
                 style: TextStyle(
-                  color: Color(0xFF413E3E),
+                  color: AppColors.primaryColor,
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
                 ),

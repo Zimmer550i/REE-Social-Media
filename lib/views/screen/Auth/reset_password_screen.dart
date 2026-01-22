@@ -25,6 +25,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+
       body: SingleChildScrollView(
         padding: EdgeInsets.all(20),
         child: SafeArea(
@@ -39,6 +41,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 style: TextStyle(
                   color: Color(0xFF413E3E),
                   fontSize: 28,
+                  fontFamily: "LibreText",
                   fontWeight: FontWeight.w600,
                 ),
               ),

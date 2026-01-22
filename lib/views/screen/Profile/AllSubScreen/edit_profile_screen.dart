@@ -90,6 +90,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+
       body: SafeArea(
         child: Column(
           children: [
@@ -115,15 +117,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     InkWell(
                       onTap: _chooseImageSource,
                       child: Center(
-                        child: Container(
+                        child: SizedBox(
                           height: 160,
                           width: 160,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                              image: AssetImage('assets/images/circle.png'),
-                            ),
-                          ),
+
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
@@ -137,18 +134,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     image: _profileImage != null
                                         ? FileImage(_profileImage!)
                                         : const AssetImage(
-                                                'assets/images/demo1.png',
+                                                'assets/images/upload.png',
                                               )
                                               as ImageProvider,
                                     fit: BoxFit.cover,
                                   ),
                                 ),
                               ),
-                              Positioned(
-                                child: SvgPicture.asset(
-                                  'assets/icons/edit2.svg',
-                                ),
-                              ),
+                              // Positioned(
+                              //   child: SvgPicture.asset(
+                              //     'assets/icons/upload.svg',
+                              //   ),
+                              // ),
                             ],
                           ),
                         ),

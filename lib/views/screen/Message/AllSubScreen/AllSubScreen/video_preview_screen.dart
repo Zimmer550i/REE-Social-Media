@@ -189,9 +189,10 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
     });
   }
 
-  /// Stop and navigate when user presses “Next”
   Future<void> _onNextPressed(bool isVideo) async {
     await _stopRecordingIfNeeded();
+
+    debugPrint("ChatId: $storyChatId");
 
     if (recordedFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -331,17 +332,33 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
             CircleAvatar(
               radius: 22,
               backgroundColor: AppColors.primaryColor,
-              backgroundImage: widget.userProfile.isEmpty
-                  ? null
-                  : NetworkImage(widget.userProfile),
-              child: widget.userProfile.isEmpty
-                  ? Text(widget.userName[0].toUpperCase())
+              backgroundImage: (widget.userProfile.isNotEmpty)
+                  ? NetworkImage(widget.userProfile)
+                  : null,
+              child: (widget.userProfile.isEmpty && widget.userName.isNotEmpty)
+                  ? Text(
+                      widget.userName[0].toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontFamily: "LibreText",
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  : (widget.userProfile.isEmpty && widget.userName.isEmpty)
+                  ? Text(
+                      widget.userName.toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontFamily: "LibreText",
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
                   : null,
             ),
             const SizedBox(width: 12),
             Text(
               widget.userName,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600,fontFamily: "LibreText"),
             ),
           ],
         ),

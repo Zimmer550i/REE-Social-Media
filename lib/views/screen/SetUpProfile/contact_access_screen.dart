@@ -16,7 +16,8 @@ class ContactAccessScreen extends StatefulWidget {
   State<ContactAccessScreen> createState() => _ContactAccessScreenState();
 }
 
-class _ContactAccessScreenState extends State<ContactAccessScreen> with WidgetsBindingObserver {
+class _ContactAccessScreenState extends State<ContactAccessScreen>
+    with WidgetsBindingObserver {
   bool _permissionGranted = false;
 
   @override
@@ -84,6 +85,8 @@ class _ContactAccessScreenState extends State<ContactAccessScreen> with WidgetsB
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: SafeArea(
@@ -98,7 +101,7 @@ class _ContactAccessScreenState extends State<ContactAccessScreen> with WidgetsB
                   Text(
                     "1 of 4",
                     style: TextStyle(
-                      color: const Color(0xFF413E3E),
+                      color: AppColors.primaryColor,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       decoration: TextDecoration.underline,
@@ -109,11 +112,12 @@ class _ContactAccessScreenState extends State<ContactAccessScreen> with WidgetsB
               ),
 
               const SizedBox(height: 110),
-              const Text(
+              Text(
                 "Access Your \nContacts",
                 style: TextStyle(
-                  color: Color(0xFF413E3E),
+                  color: AppColors.primaryColor,
                   fontSize: 28,
+                  fontFamily: "LibreText",
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -122,10 +126,10 @@ class _ContactAccessScreenState extends State<ContactAccessScreen> with WidgetsB
               RichText(
                 text: TextSpan(
                   children: [
-                    const TextSpan(
+                    TextSpan(
                       text: "We'll use your contacts to invite friends to",
                       style: TextStyle(
-                        color: Color(0xFF413E3E),
+                        color: AppColors.primaryColor,
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
                       ),
@@ -138,11 +142,11 @@ class _ContactAccessScreenState extends State<ContactAccessScreen> with WidgetsB
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const TextSpan(
+                    TextSpan(
                       text:
                           " and show you who is already on the app. Your info stays private",
                       style: TextStyle(
-                        color: Color(0xFF413E3E),
+                        color: AppColors.primaryColor,
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
                       ),
@@ -159,7 +163,8 @@ class _ContactAccessScreenState extends State<ContactAccessScreen> with WidgetsB
                     await _saveContactsToLocal();
                     Get.off(() => const InviteFriendScreen());
                   } else {
-                    final permission = await FlutterContacts.requestPermission();
+                    final permission =
+                        await FlutterContacts.requestPermission();
 
                     if (permission) {
                       await _saveContactsToLocal();

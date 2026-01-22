@@ -101,6 +101,8 @@ class _FrameSelectionScreenState extends State<FrameSelectionScreen> {
   Widget build(BuildContext context) {
     if (!_isInitialized) {
       return Scaffold(
+        backgroundColor: AppColors.backgroundColor,
+
         body: Center(
           child: SpinKitWave(color: AppColors.primaryColor, size: 30.0),
         ),
@@ -108,6 +110,8 @@ class _FrameSelectionScreenState extends State<FrameSelectionScreen> {
     }
 
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: _buildAppBarTitle(),
@@ -151,7 +155,10 @@ class _FrameSelectionScreenState extends State<FrameSelectionScreen> {
             ? null
             : NetworkImage(widget.userProfile),
         child: widget.userProfile.isEmpty
-            ? Text(widget.userName[0].toUpperCase())
+            ? Text(
+                widget.userName[0].toUpperCase(),
+                style: TextStyle(fontFamily: "LibreText"),
+              )
             : null,
       ),
       const SizedBox(width: 12),
@@ -160,6 +167,7 @@ class _FrameSelectionScreenState extends State<FrameSelectionScreen> {
         style: const TextStyle(
           color: Color(0xFF413E3E),
           fontSize: 24,
+          fontFamily: "LibreText",
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -176,9 +184,14 @@ class _FrameSelectionScreenState extends State<FrameSelectionScreen> {
           SizedBox(width: 12),
           IconButton(
             onPressed: () => Get.offAllNamed(AppRoutes.messageScreen),
-            icon: Icon(Icons.delete, color: AppColors.primaryColor),
+            icon: SvgPicture.asset(
+              'assets/icons/delete2.svg',
+              // ignore: deprecated_member_use
+              color: AppColors.primaryColor,
+              height: 24,
+            ),
           ),
-          Spacer(),
+          SizedBox(width: 12),
           Obx(
             () => InkWell(
               onTap: _handleFrameAndSend,
@@ -201,7 +214,7 @@ class _FrameSelectionScreenState extends State<FrameSelectionScreen> {
   Widget _buildFrameSelector() {
     return SizedBox(
       height: 60,
-      width: MediaQuery.of(context).size.width / 1.6,
+      width: MediaQuery.of(context).size.width / 1.5,
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.primaryColor,

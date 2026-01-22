@@ -166,7 +166,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                         child: _buildMessage(msg),
                       );
                     },
-                    separatorBuilder: (_, __) => const SizedBox(height: 6),
+                    separatorBuilder: (_, _) => const SizedBox(height: 6),
                   ),
                 );
               }),
@@ -194,31 +194,21 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         children: [
           ReBack(onTap: () => Get.offAllNamed(AppRoutes.messageScreen)),
           const SizedBox(width: 12),
-          InkWell(
-            onTap: () {
-              Get.to(() => GroupDetailsScreen(chatId: widget.chatId))?.then((
-                _,
-              ) {
-                groupChatController.fetchGroupDetails(widget.chatId);
-              });
-            },
-
-            child: Obx(
-              () => CircleAvatar(
-                radius: 22,
-                backgroundColor: AppColors.primaryColor,
-                backgroundImage: groupChatController.groupImage.isNotEmpty
-                    ? NetworkImage(groupChatController.groupImage.value)
-                    : null,
-                child: groupChatController.groupImage.isEmpty
-                    ? Text(
-                        groupChatController.groupName.isNotEmpty
-                            ? groupChatController.groupName.value[0]
-                                  .toUpperCase()
-                            : "",
-                      )
-                    : null,
-              ),
+          Obx(
+            () => CircleAvatar(
+              radius: 22,
+              backgroundColor: AppColors.primaryColor,
+              backgroundImage: (groupChatController.groupImage.value.isNotEmpty)
+                  ? NetworkImage(groupChatController.groupImage.value)
+                  : null,
+              child: (groupChatController.groupImage.value.isEmpty)
+                  ? Text(
+                      groupChatController.groupName.value.isNotEmpty
+                          ? groupChatController.groupName.value[0].toUpperCase()
+                          : "",
+                      style: TextStyle(fontFamily: "LibreText"),
+                    )
+                  : null,
             ),
           ),
           const SizedBox(width: 12),
@@ -232,6 +222,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   color: Color(0xFF413E3E),
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
+                  fontFamily: "LibreText",
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -285,7 +276,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               CircleAvatar(
                 radius: 22,
                 backgroundColor: AppColors.primaryColor,
-                child: Text(name[0].toUpperCase()),
+                child: name.isNotEmpty
+                    ? Text(name[0].toUpperCase())
+                    : const SizedBox.shrink(),
               ),
               SizedBox(width: 10),
               Column(
@@ -408,7 +401,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               CircleAvatar(
                 radius: 22,
                 backgroundColor: AppColors.primaryColor,
-                child: Text(name[0].toUpperCase()),
+                child: name.isNotEmpty
+                    ? Text(name[0].toUpperCase())
+                    : const SizedBox.shrink(),
               ),
               SizedBox(width: 10),
               Column(
@@ -423,13 +418,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     hasThumbnail: hasThumbnail,
                     thumbnail: thumbnail,
                     isMe: isMe,
+                    isView: false,
                     isReaction: isReaction,
                     chatController: chatController,
                     msgId: msg["_id"],
                     imageUrl: imageUrl.toString(),
                     receiverName: groupChatController.groupName.value,
                     chatId: widget.chatId,
-                    isView: isViewed,
                     receiverImage: groupChatController.groupImage.value,
                   ),
                   const SizedBox(height: 4),
@@ -519,7 +514,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   CircleAvatar(
                     radius: 22,
                     backgroundColor: AppColors.primaryColor,
-                    child: Text(name[0].toUpperCase()),
+                    child: name.isNotEmpty
+                        ? Text(name[0].toUpperCase())
+                        : const SizedBox.shrink(),
                   ),
                   SizedBox(width: 10),
                   Column(
@@ -536,9 +533,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                       BlurVideoCard(
                         hasThumbnail: hasThumbnail,
                         isMe: isMe,
+                        isView: false,
                         isReaction: isReaction,
                         thumbnail: thumbnail.toString(),
-                        isView: isViewed,
                         videoFile: localVideo,
                         msg: msg,
                         receiverImage: groupChatController.groupImage.value,
@@ -589,13 +586,16 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 if (isMe) ...[
                   SvgPicture.asset(
                     'assets/icons/download.svg',
-                    color: const Color(0xFF56BBFF),
+                    color: AppColors.primaryColor,
                     height: 18,
                   ),
                   SizedBox(width: 8),
-                  const Text(
+                  Text(
                     "Save",
-                    style: TextStyle(fontSize: 12, color: Color(0xFF56BBFF)),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.primaryColor,
+                    ),
                   ),
                   Spacer(),
                   timeText,
@@ -604,14 +604,17 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 if (!isMe) ...[
                   timeText,
                   const Spacer(),
-                  const Text(
+                  Text(
                     "Save",
-                    style: TextStyle(fontSize: 12, color: Color(0xFF56BBFF)),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.primaryColor,
+                    ),
                   ),
                   const SizedBox(width: 6),
                   SvgPicture.asset(
                     'assets/icons/download.svg',
-                    color: const Color(0xFF56BBFF),
+                    color: AppColors.primaryColor,
                     height: 18,
                   ),
                 ],
@@ -651,13 +654,16 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 if (isMe) ...[
                   SvgPicture.asset(
                     'assets/icons/download.svg',
-                    color: const Color(0xFF56BBFF),
+                    color: AppColors.primaryColor,
                     height: 18,
                   ),
                   const SizedBox(width: 8),
-                  const Text(
+                  Text(
                     "Save",
-                    style: TextStyle(fontSize: 12, color: Color(0xFF56BBFF)),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.primaryColor,
+                    ),
                   ),
                   Spacer(),
                   timeText,
@@ -665,14 +671,17 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 if (!isMe) ...[
                   timeText,
                   const Spacer(),
-                  const Text(
+                  Text(
                     "Save",
-                    style: TextStyle(fontSize: 12, color: Color(0xFF56BBFF)),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.primaryColor,
+                    ),
                   ),
                   const SizedBox(width: 6),
                   SvgPicture.asset(
                     'assets/icons/download.svg',
-                    color: const Color(0xFF56BBFF),
+                    color: AppColors.primaryColor,
                     height: 18,
                   ),
                 ],

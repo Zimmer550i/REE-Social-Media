@@ -25,6 +25,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -42,6 +44,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       style: TextStyle(
                         color: Color(0xFF0D1C12),
                         fontSize: 24,
+                        fontFamily: "LibreText",
                         fontWeight: FontWeight.w600,
                       ),
                     ),

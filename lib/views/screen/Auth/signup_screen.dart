@@ -33,6 +33,8 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -47,6 +49,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   color: AppColors.textColor,
                   fontSize: 28,
                   fontWeight: FontWeight.w600,
+                  fontFamily: "LibreText",
                 ),
               ),
               const SizedBox(height: 12),

@@ -112,6 +112,7 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
       body: Stack(
         alignment: Alignment.center,
         children: [
