@@ -107,6 +107,7 @@ class _ViewMediaState extends State<ViewMedia> {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
+        backgroundColor: AppColors.backgroundColor,
         automaticallyImplyLeading: false,
         title: Row(children: [ReBack(onTap: () => Get.back())]),
         actions: [
@@ -132,11 +133,9 @@ class _ViewMediaState extends State<ViewMedia> {
 
   Widget _buildMediaView() {
     if (isVideo && _video != null) {
-      return FittedBox(
-        fit: BoxFit.cover,
-        child: SizedBox(
-          width: _video!.value.size.width,
-          height: _video!.value.size.height,
+      return Center(
+        child: AspectRatio(
+          aspectRatio: _video!.value.aspectRatio,
           child: VideoPlayer(_video!),
         ),
       );
@@ -166,7 +165,7 @@ class _ViewMediaState extends State<ViewMedia> {
       right: 0,
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-        color: Colors.black.withValues(alpha: .3),
+        color: Colors.black.withValues(alpha: .2),
         child: SafeArea(
           child: Row(
             children: [

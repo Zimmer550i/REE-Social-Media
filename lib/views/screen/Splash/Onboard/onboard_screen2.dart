@@ -77,14 +77,14 @@ class OnboardScreen2 extends StatelessWidget {
                           text: " re:",
                           style: TextStyle(
                             color: AppColors.primaryColor,
-                            fontSize: 20,
+                            fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         TextSpan(
                           text: " captures genuine reactions instantly",
                           style: TextStyle(
-                            color: Color(0xFF676565),
+                            color: AppColors.primaryColor,
                             fontSize: 16,
                             fontWeight: FontWeight.w400,
                           ),
