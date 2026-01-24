@@ -107,9 +107,8 @@ class AuthController extends GetxController {
         return body['message'] ?? "Connection Error";
       }
     } catch (e) {
-      
       return "Unexpected error: ${e.toString()}";
-    }finally{
+    } finally {
       isLoading.value = false;
     }
   }
@@ -345,7 +344,7 @@ class AuthController extends GetxController {
   }
 
   Future<void> logout() async {
-    await SharedPrefsService.remove('token');
+    await SharedPrefsService.clear();
     OneSignalHelper.optOut();
     await Get.offAll(() => LoginScreen());
     isLoggedIn.value = false;
