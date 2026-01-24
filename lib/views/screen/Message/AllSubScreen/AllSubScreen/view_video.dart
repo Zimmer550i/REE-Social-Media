@@ -14,7 +14,7 @@ import 'package:video_player/video_player.dart';
 class ViewMedia extends StatefulWidget {
   const ViewMedia({super.key, required this.mediaUrl});
 
-  final String mediaUrl;
+  final String mediaUrl; // can be video or image
 
   @override
   State<ViewMedia> createState() => _ViewMediaState();
@@ -105,9 +105,7 @@ class _ViewMediaState extends State<ViewMedia> {
     final videoReady = isVideo ? _video?.value.isInitialized == true : true;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundColor,
         automaticallyImplyLeading: false,
         title: Row(children: [ReBack(onTap: () => Get.back())]),
         actions: [
@@ -133,14 +131,17 @@ class _ViewMediaState extends State<ViewMedia> {
 
   Widget _buildMediaView() {
     if (isVideo && _video != null) {
-      return Center(
-        child: AspectRatio(
-          aspectRatio: _video!.value.aspectRatio,
+      return FittedBox(
+        fit: BoxFit.cover,
+        child: SizedBox(
+          width: _video!.value.size.width,
+          height: _video!.value.size.height,
           child: VideoPlayer(_video!),
         ),
       );
     }
 
+    //Image view (supports both local and network images)
     if (widget.mediaUrl.startsWith('http')) {
       return ResponsiveImage(url: widget.mediaUrl);
     } else {
@@ -165,7 +166,7 @@ class _ViewMediaState extends State<ViewMedia> {
       right: 0,
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-        color: Colors.black.withValues(alpha: .2),
+        color: Colors.black.withValues(alpha: .3),
         child: SafeArea(
           child: Row(
             children: [

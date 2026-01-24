@@ -92,6 +92,7 @@ class _MessageScreenState extends State<MessageScreen>
     _stopPolling();
     _pollingTimer = Timer.periodic(const Duration(seconds: 2), (_) {
       controller.fetchAllChats();
+      controller.fetchAllStories();
     });
   }
 
@@ -302,7 +303,7 @@ class _MessageScreenState extends State<MessageScreen>
                   color: Color(0xFF413E3E),
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
-                  fontFamily: "LibreText"
+                  fontFamily: "LibreText",
                 ),
               ),
             ),
