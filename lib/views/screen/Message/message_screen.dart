@@ -1,6 +1,10 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -13,19 +17,15 @@ import 'package:ree_social_media_app/utils/app_colors.dart';
 import 'package:ree_social_media_app/utils/show_snackbar.dart';
 import 'package:ree_social_media_app/views/screen/Contact/contact_screen.dart';
 import 'package:ree_social_media_app/views/screen/Message/AllSubScreen/AllSubScreen/see_all_story_screen.dart';
+import 'package:ree_social_media_app/views/screen/Message/AllSubScreen/AllSubScreen/video_preview_screen.dart';
+import 'package:ree_social_media_app/views/screen/Message/AllSubScreen/chat_screen.dart';
+import 'package:ree_social_media_app/views/screen/Message/groupChat/group_chat.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:http/http.dart' as http;
 import '../../../services/one_signal_manager.dart';
 import '../../../services/shared_prefs_service.dart';
 import '../../base/bottom_menu.dart';
 import '../Notification/notification_screen.dart';
-import 'AllSubScreen/AllSubScreen/video_preview_screen.dart';
-import 'AllSubScreen/chat_screen.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
-import 'dart:io';
-import 'package:http/http.dart' as http;
-import 'dart:async';
-import 'groupChat/group_chat.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class MessageScreen extends StatefulWidget {
   const MessageScreen({super.key});
@@ -41,21 +41,36 @@ class _MessageScreenState extends State<MessageScreen>
   final NotificationController notificationController = Get.put(
     NotificationController(),
   );
+
   final ScrollController _chatScrollController = ScrollController();
   final ScrollController _storyScrollController = ScrollController();
-  final Map<String, String?> _thumbCache = {};
+
   bool _isFetchingMoreChats = false;
   bool _isFetchingMoreStories = false;
   Timer? _pollingTimer;
+
+  // videoUrl -> localFilePath (for cached stories)
+  Map<String, String> _cachedVideos = {};
+
+  // which story is currently downloading/playing (for loader in play button)
+  String? _loadingStoryId;
+
+  // UI caches for stories and chats (prevent unnecessary UI refresh when data is identical)
+  List<dynamic> _storiesUiCache = [];
+  String _storiesSignature = "";
+
+  List<dynamic> _chatsUiCache = [];
+  String _chatsSignature = "";
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    notificationController.fetchNotifications();
-    // Periodic polling will handle fetching chats and stories.
 
-    /// Pagination listener for chats
+    _loadCachedVideos();
+    notificationController.fetchNotifications();
+
+    // Pagination listener for chats
     _chatScrollController.addListener(() {
       if (_chatScrollController.position.pixels >=
               _chatScrollController.position.maxScrollExtent - 200 &&
@@ -65,7 +80,7 @@ class _MessageScreenState extends State<MessageScreen>
       }
     });
 
-    /// Pagination listener for stories
+    // Pagination listener for stories
     _storyScrollController.addListener(() {
       if (_storyScrollController.position.pixels >=
               _storyScrollController.position.maxScrollExtent - 100 &&
@@ -74,6 +89,7 @@ class _MessageScreenState extends State<MessageScreen>
         _loadMoreStories();
       }
     });
+
     userController.setSubscriptionId();
     enablePushNotification();
     _startPolling();
@@ -85,6 +101,18 @@ class _MessageScreenState extends State<MessageScreen>
       _startPolling();
     } else if (state == AppLifecycleState.paused) {
       _stopPolling();
+    }
+  }
+
+  Future<void> _loadCachedVideos() async {
+    try {
+      final jsonStr = await SharedPrefsService.get('cached_story_videos');
+      if (jsonStr != null && jsonStr.isNotEmpty) {
+        final Map<String, dynamic> data = json.decode(jsonStr);
+        _cachedVideos = data.map((k, v) => MapEntry(k, v.toString()));
+      }
+    } catch (e) {
+      debugPrint('⚠️ Error loading cached videos: $e');
     }
   }
 
@@ -115,7 +143,7 @@ class _MessageScreenState extends State<MessageScreen>
 
   Future<void> _loadMoreStories() async {
     setState(() => _isFetchingMoreStories = true);
-    await controller.fetchChats(loadMore: true);
+    await controller.fetchStories(loadMore: true);
     setState(() => _isFetchingMoreStories = false);
   }
 
@@ -131,7 +159,6 @@ class _MessageScreenState extends State<MessageScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
-
       bottomNavigationBar: Obx(
         () => BottomMenu(0, messageCount: controller.unreadCount.value),
       ),
@@ -157,7 +184,7 @@ class _MessageScreenState extends State<MessageScreen>
                         const SizedBox(height: 24),
                         Text(
                           "Chats",
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Color(0xFF413E3E),
                             fontSize: 24,
                             fontWeight: FontWeight.w600,
@@ -168,7 +195,7 @@ class _MessageScreenState extends State<MessageScreen>
                         if (_isFetchingMoreChats)
                           Center(
                             child: Padding(
-                              padding: EdgeInsets.all(12.0),
+                              padding: const EdgeInsets.all(12.0),
                               child: CircularProgressIndicator(
                                 color: AppColors.primaryColor,
                               ),
@@ -199,11 +226,6 @@ class _MessageScreenState extends State<MessageScreen>
             onTap: () => Get.to(() => const ContactScreen()),
           ),
         ),
-        // const SizedBox(width: 12),
-        // _iconButton(
-        //   'assets/icons/search.svg',
-        //   onTap: () => Get.to(() => const SearchScreen()),
-        // ),
         const SizedBox(width: 12),
         InkWell(
           onTap: () => Get.to(() => const NotificationScreen()),
@@ -238,7 +260,7 @@ class _MessageScreenState extends State<MessageScreen>
               child: Obx(
                 () => Text(
                   notificationController.totalNotificationCount.toString(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
@@ -274,12 +296,33 @@ class _MessageScreenState extends State<MessageScreen>
     );
   }
 
-  /// Stories Section
+  /// Stories Section (with cache-based update)
   Widget _buildStoriesSection() {
     return Obx(() {
-      // Filter out stories from the logged-in user
+      final rawStories = controller.stories;
+
+      // Build a signature only from stable fields (id + updatedAt/createdAt)
+      final newSignature = rawStories
+          .map((s) {
+            final map = s as Map<dynamic, dynamic>;
+            final id = map["_id"]?.toString() ?? "";
+            final updatedAt =
+                map["updatedAt"]?.toString() ??
+                map["createdAt"]?.toString() ??
+                "";
+            return "$id-$updatedAt";
+          })
+          .join("|");
+
+      // Only update UI cache when signature changes (i.e., new data from API)
+      if (newSignature != _storiesSignature) {
+        _storiesSignature = newSignature;
+        _storiesUiCache = List<dynamic>.from(rawStories);
+      }
+
+      // Filter out stories from the logged-in user using cached list
       final currentUserId = userController.userInfo.value!.id;
-      final filteredStories = controller.stories
+      final filteredStories = _storiesUiCache
           .where(
             (story) =>
                 story["author"] != null &&
@@ -288,6 +331,7 @@ class _MessageScreenState extends State<MessageScreen>
                     : true),
           )
           .toList();
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -299,7 +343,7 @@ class _MessageScreenState extends State<MessageScreen>
               alignment: Alignment.centerRight,
               child: Text(
                 "See All",
-                style: TextStyle(
+                style: const TextStyle(
                   color: Color(0xFF413E3E),
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
@@ -325,7 +369,7 @@ class _MessageScreenState extends State<MessageScreen>
                     return _isFetchingMoreStories
                         ? Center(
                             child: Padding(
-                              padding: EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(8.0),
                               child: CircularProgressIndicator(
                                 color: AppColors.primaryColor,
                               ),
@@ -370,7 +414,7 @@ class _MessageScreenState extends State<MessageScreen>
     });
   }
 
-  //Add Story Card
+  // Add Story Card
   Widget _buildAddStoryCard() {
     final image = userController.userInfo.value!.image;
     final userImage = userController.addBaseUrl(image.toString());
@@ -394,7 +438,6 @@ class _MessageScreenState extends State<MessageScreen>
           topRight: Radius.circular(8),
           topLeft: Radius.circular(8),
         ),
-
         border: Border.all(
           color: myStories.isNotEmpty
               ? AppColors.primaryColor
@@ -450,7 +493,6 @@ class _MessageScreenState extends State<MessageScreen>
                             padding: const EdgeInsets.all(4.0),
                             child: SvgPicture.asset(
                               'assets/icons/camera.svg',
-                              // ignore: deprecated_member_use
                               color: AppColors.primaryColor,
                             ),
                           ),
@@ -463,7 +505,7 @@ class _MessageScreenState extends State<MessageScreen>
             ),
           ),
 
-          // ✅ Right side (background image) tap to open user's own stories
+          // Right side (background image) tap to open user's own stories
           Positioned.fill(
             left: 56, // only make the RIGHT side tappable
             child: InkWell(
@@ -504,85 +546,39 @@ class _MessageScreenState extends State<MessageScreen>
     const double cardW = 100;
     const double cardH = 132;
 
-    return FutureBuilder<Widget>(
-      future: isVideo
-          ? _buildVideoThumbnailWidget(
-              mediaUrl,
-              name,
-              authorImage,
-              authorId,
-              postId,
-            )
-          : _buildImageStoryWidget(
-              mediaUrl,
-              name,
-              authorImage,
-              authorId,
-              postId,
-            ),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Container(
-            width: cardW,
-            height: cardH,
-            margin: const EdgeInsets.only(right: 12),
-            decoration: BoxDecoration(
-              color: Colors.black12,
-              borderRadius: BorderRadius.circular(8),
-              image: DecorationImage(
-                image: NetworkImage(authorImage),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                // SpinKitWave(color: AppColors.primaryColor, size: 30.0),
-                Container(
-                  height: 32,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  alignment: Alignment.centerLeft,
-                  color: Colors.black.withValues(alpha: 0.42),
-                  child: Text(
-                    name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-        if (snapshot.hasError || !snapshot.hasData) {
-          return Container(
-            width: cardW,
-            height: cardH,
-            margin: const EdgeInsets.only(right: 12),
-            decoration: BoxDecoration(
-              color: Colors.black26,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Center(child: Icon(Icons.error, color: Colors.red)),
-          );
-        }
-        return snapshot.data!;
-      },
-    );
+    if (isVideo) {
+      // Directly build the video story card (no FutureBuilder)
+      return _buildVideoCardWidget(
+        name,
+        authorImage,
+        authorId,
+        mediaUrl,
+        cardW,
+        cardH,
+        32,
+        postId,
+      );
+    } else {
+      // Directly build the image story card (no FutureBuilder)
+      return _buildImageStoryWidget(
+        mediaUrl,
+        name,
+        authorImage,
+        authorId,
+        postId,
+      );
+    }
   }
 
   /// Handles image story preview
-  Future<Widget> _buildImageStoryWidget(
+  /// Handles image story preview
+  Widget _buildImageStoryWidget(
     String mediaUrl,
     String name,
     String image,
     String authorId,
     String postId,
-  ) async {
+  ) {
     const double cardW = 100;
     const double cardH = 132;
     const double barH = 32;
@@ -605,7 +601,7 @@ class _MessageScreenState extends State<MessageScreen>
         width: cardW,
         height: cardH,
         child: ClipRRect(
-          borderRadius: BorderRadius.only(
+          borderRadius: const BorderRadius.only(
             topRight: Radius.circular(8),
             topLeft: Radius.circular(8),
           ),
@@ -615,7 +611,7 @@ class _MessageScreenState extends State<MessageScreen>
               Image.network(
                 image,
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => const Center(
+                errorBuilder: (_, __, ___) => const Center(
                   child: Icon(Icons.broken_image, color: Colors.grey),
                 ),
               ),
@@ -647,85 +643,20 @@ class _MessageScreenState extends State<MessageScreen>
     );
   }
 
-  /// Handles video story preview with thumbnail + play icon + navigation
-  Future<Widget> _buildVideoThumbnailWidget(
-    String videoUrl,
-    String name,
-    String image,
-    String authorId,
-    String postId,
-  ) async {
-    const double cardW = 100;
-    const double cardH = 132;
-    const double barH = 32;
-
+  Future<String> _downloadAndCacheVideo(String url) async {
+    final file = await _downloadVideoToLocal(url);
+    _cachedVideos[url] = file.path;
     try {
-      // 1. Use cached thumbnail if available
-      if (_thumbCache.containsKey(videoUrl)) {
-        final cachedThumb = _thumbCache[videoUrl];
-        return _buildVideoCardWidget(
-          cachedThumb,
-          name,
-          image,
-          authorId,
-          videoUrl,
-          cardW,
-          cardH,
-          barH,
-          postId,
-        );
-      }
-
-      // 2. Download video locally
-      final localVideo = await _downloadVideoToLocal(videoUrl);
-
-      // 3. Generate thumbnail safely
-      final thumbPath = await VideoThumbnail.thumbnailFile(
-        video: localVideo.path,
-        imageFormat: ImageFormat.JPEG,
-        maxHeight: 0,
-        maxWidth: 0,
-        quality: 100,
-      );
-
-      // 4. Cache result for reuse
-      _thumbCache[videoUrl] = thumbPath;
-
-      // 5. Clean up temp video to free memory
-      if (await localVideo.exists()) {
-        await localVideo.delete();
-      }
-
-      // 6. Build widget
-      return _buildVideoCardWidget(
-        thumbPath,
-        name,
-        image,
-        authorId,
-        videoUrl,
-        cardW,
-        cardH,
-        barH,
-        postId,
-      );
+      final jsonStr = json.encode(_cachedVideos);
+      await SharedPrefsService.set('cached_story_videos', jsonStr);
     } catch (e) {
-      debugPrint("⚠️ Thumbnail generation error: $e");
-      return Container(
-        width: cardW,
-        height: cardH,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: Colors.black26,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: const Icon(Icons.error, color: Colors.red),
-      );
+      debugPrint('⚠️ Error saving cached videos: $e');
     }
+    return file.path;
   }
 
-  /// Extracted reusable card builder (cleaner)
+  /// Video story card (uses author image + play button + loader state)
   Widget _buildVideoCardWidget(
-    String? thumbPath,
     String name,
     String image,
     String authorId,
@@ -736,18 +667,45 @@ class _MessageScreenState extends State<MessageScreen>
     String postId,
   ) {
     return InkWell(
-      onTap: () {
-        Get.to(
-          () => VideoPreviewScreen(
-            videoUrl: videoUrl,
-            countdownSeconds: 3,
-            userProfile: image,
-            userName: name,
-            chatId: authorId,
-            postId: postId,
-          ),
-        );
+      onTap: () async {
+        setState(() => _loadingStoryId = postId);
+
+        String playPath = videoUrl;
+
+        try {
+          if (_cachedVideos.containsKey(videoUrl)) {
+            final localPath = _cachedVideos[videoUrl]!;
+            final file = File(localPath);
+
+            if (await file.exists()) {
+              playPath = localPath;
+            } else {
+              playPath = await _downloadAndCacheVideo(videoUrl);
+            }
+          } else {
+            playPath = await _downloadAndCacheVideo(videoUrl);
+          }
+
+          await Get.to(
+            () => VideoPreviewScreen(
+              videoUrl: playPath,
+              countdownSeconds: 3,
+              userProfile: image,
+              userName: name,
+              chatId: authorId,
+              postId: postId,
+            ),
+          );
+        } catch (e) {
+          debugPrint('⚠️ Error downloading video story: $e');
+          playPath = videoUrl;
+        } finally {
+          if (mounted) {
+            setState(() => _loadingStoryId = null);
+          }
+        }
       },
+
       child: Container(
         margin: const EdgeInsets.only(right: 12),
         width: cardW,
@@ -760,18 +718,20 @@ class _MessageScreenState extends State<MessageScreen>
           child: Stack(
             fit: StackFit.expand,
             children: [
-              thumbPath != null
-                  // ? Image.file(File(thumbPath), fit: BoxFit.cover)
-                  ? Image.network(image, fit: BoxFit.cover)
-                  : Container(
-                      color: Colors.black26,
-                      child: Center(
-                        child: SpinKitWave(
-                          color: AppColors.primaryColor,
-                          size: 30.0,
-                        ),
-                      ),
-                    ),
+              // Background: author image (same as before)
+              Image.network(
+                image,
+                fit: BoxFit.cover,
+                // ignore: unnecessary_underscores
+                errorBuilder: (_, __, ___) => Container(
+                  color: Colors.black26,
+                  child: const Center(
+                    child: Icon(Icons.person, color: Colors.white54),
+                  ),
+                ),
+              ),
+
+              // Center play button / loader
               Center(
                 child: Container(
                   width: 40,
@@ -781,13 +741,26 @@ class _MessageScreenState extends State<MessageScreen>
                     color: AppColors.primaryColor,
                     border: Border.all(color: Colors.white, width: 2),
                   ),
-                  child: const Icon(
-                    Icons.play_arrow,
-                    color: Colors.white,
-                    size: 26,
-                  ),
+                  child: _loadingStoryId == postId
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                      : const Icon(
+                          Icons.play_arrow,
+                          color: Colors.white,
+                          size: 26,
+                        ),
                 ),
               ),
+
+              // Bottom name bar (unchanged)
               Positioned(
                 left: 0,
                 right: 0,
@@ -816,7 +789,7 @@ class _MessageScreenState extends State<MessageScreen>
     );
   }
 
-  ///Safe temp video downloader
+  /// Safe temp video downloader (now actually used)
   Future<File> _downloadVideoToLocal(String url) async {
     final response = await http.get(Uri.parse(url));
     final dir = await getTemporaryDirectory();
@@ -827,13 +800,13 @@ class _MessageScreenState extends State<MessageScreen>
     return file;
   }
 
-  ///Chats Section
+  /// Chats Section (with cache-based update)
   Widget _buildChatList() {
     final currentUserId = userController.userInfo.value?.id ?? "";
 
     return Obx(() {
       if (controller.isLoadingChats.value) {
-        //Skeleton loading placeholder while chats are fetching
+        // Skeleton loading placeholder while chats are fetching
         return ListView.builder(
           itemCount: 6,
           shrinkWrap: true,
@@ -879,7 +852,30 @@ class _MessageScreenState extends State<MessageScreen>
         );
       }
 
-      final allChats = [...controller.privateChats, ...controller.groupChats];
+      final combined = [...controller.privateChats, ...controller.groupChats];
+
+      // Build signature using chat id + lastMessage id/timestamp to detect real changes
+      final newSignature = combined
+          .map((chat) {
+            final map = chat as Map<dynamic, dynamic>;
+            final id = map["_id"]?.toString() ?? "";
+            final last = map["lastMessage"] as Map<dynamic, dynamic>?;
+            final lastId = last?["_id"]?.toString() ?? "";
+            final lastUpdated =
+                last?["updatedAt"]?.toString() ??
+                last?["createdAt"]?.toString() ??
+                "";
+            return "$id-$lastId-$lastUpdated";
+          })
+          .join("|");
+
+      if (newSignature != _chatsSignature) {
+        _chatsSignature = newSignature;
+        _chatsUiCache = List<dynamic>.from(combined);
+      }
+
+      // Work on a local copy to sort without touching controller lists
+      final allChats = List<dynamic>.from(_chatsUiCache);
 
       allChats.sort((a, b) {
         final aTime =
@@ -900,7 +896,7 @@ class _MessageScreenState extends State<MessageScreen>
         physics: const NeverScrollableScrollPhysics(),
         itemCount: allChats.length,
         padding: EdgeInsets.zero,
-        separatorBuilder: (_, _) => const SizedBox(height: 1),
+        separatorBuilder: (_, __) => const SizedBox(height: 1),
         itemBuilder: (context, index) {
           var chat = allChats[index];
           String name = chat["name"] ?? "Unknown";
@@ -928,7 +924,6 @@ class _MessageScreenState extends State<MessageScreen>
           String formattedTime = '';
           if (lastTime != null) formattedTime = formatServerTime(lastTime);
 
-          // --- Chat UI ---
           final isPrivate = chat["type"] == "private";
 
           return Slidable(
@@ -1059,9 +1054,8 @@ class _MessageScreenState extends State<MessageScreen>
     // CASE 1 — already DateTime
     if (serverTime is DateTime) {
       parsedTime = serverTime;
-    }
-    // CASE 2 — serverTime as String
-    else {
+    } else {
+      // CASE 2 — serverTime as String
       String timeStr = serverTime.toString().trim();
 
       if (!timeStr.contains('-') &&
@@ -1072,8 +1066,8 @@ class _MessageScreenState extends State<MessageScreen>
       }
       parsedTime = DateTime.parse(timeStr);
     }
-    final DateTime localTime = parsedTime.toLocal();
 
+    final DateTime localTime = parsedTime.toLocal();
     return _formatLocalTime(localTime);
   }
 
@@ -1119,7 +1113,6 @@ class _MessageScreenState extends State<MessageScreen>
                 allChats.removeAt(index);
                 final message = await controller.deleteChat(chatId);
                 if (message == "success") {
-                  // Get.back();
                   Get.offAllNamed(AppRoutes.messageScreen);
                 } else {
                   Get.back();
@@ -1153,7 +1146,6 @@ class _MessageScreenState extends State<MessageScreen>
         Expanded(
           child: ElevatedButton(
             onPressed: () {
-              // No action taken if 'No' is pressed
               Get.back();
             },
             style: ElevatedButton.styleFrom(
