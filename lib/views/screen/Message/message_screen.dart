@@ -612,7 +612,14 @@ class _MessageScreenState extends State<MessageScreen>
                 image,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => const Center(
-                  child: Icon(Icons.broken_image, color: Colors.grey),
+                  child: SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
                 ),
               ),
               Positioned(

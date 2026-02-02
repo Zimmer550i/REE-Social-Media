@@ -132,7 +132,7 @@ class _ViewMediaState extends State<ViewMedia> {
   Widget _buildMediaView() {
     if (isVideo && _video != null) {
       return FittedBox(
-        fit: BoxFit.cover,
+        fit: BoxFit.contain,
         child: SizedBox(
           width: _video!.value.size.width,
           height: _video!.value.size.height,

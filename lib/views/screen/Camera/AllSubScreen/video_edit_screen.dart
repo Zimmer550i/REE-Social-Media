@@ -120,7 +120,7 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
             child: widget.isVideo
                 ? (_video != null && _video!.value.isInitialized
                       ? FittedBox(
-                          fit: BoxFit.cover,
+                          fit: BoxFit.contain,
                           child: SizedBox(
                             width: _video!.value.size.width,
                             height: _video!.value.size.height,

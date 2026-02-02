@@ -36,7 +36,7 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            backgroundColor: AppColors.backgroundColor,
+      backgroundColor: AppColors.backgroundColor,
 
       body: SafeArea(
         child: Padding(
@@ -54,7 +54,7 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
                       color: AppColors.textColor,
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
-                      fontFamily: "LibreText"
+                      fontFamily: "LibreText",
                     ),
                   ),
                 ],
@@ -95,13 +95,20 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
                     }
 
                     if (mediaUrl == null || mediaUrl.isEmpty) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: Colors.black12,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Center(
-                          child: Icon(Icons.error, color: Colors.red),
+                      return Image.network(
+                        userImage!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const Center(
+                          child: SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          ),
                         ),
                       );
                     }
@@ -324,9 +331,19 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
                 // Image.file(File(thumbPath), fit: BoxFit.cover)
                 Image.network(userImage, fit: BoxFit.cover)
               else
-                Container(
-                  color: Colors.black26,
-                  child: const Center(child: Icon(Icons.error)),
+                Image.network(
+                  userImage,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const Center(
+                    child: SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    ),
+                  ),
                 ),
 
               // ▶️ Play button overlay
@@ -349,7 +366,6 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
 
               _buildBottomNameBar(name),
 
-              // 🗑️ Delete button for your own stories
               if (widget.isMe == true)
                 Positioned(
                   right: 0,
@@ -363,7 +379,7 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
                           setState(() {
                             storiesList.removeAt(index);
                           });
-                          Get.back(); // close dialog
+                          Get.back();
                         },
                       );
                     },
