@@ -98,7 +98,7 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
                       return Image.network(
                         userImage!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Center(
+                        errorBuilder: (_, _, _) => const Center(
                           child: SizedBox(
                             width: 40,
                             height: 40,
@@ -334,7 +334,7 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
                 Image.network(
                   userImage,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Center(
+                  errorBuilder: (_, _, _) => const Center(
                     child: SizedBox(
                       width: 40,
                       height: 40,

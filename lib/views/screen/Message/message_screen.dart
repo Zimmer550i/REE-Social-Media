@@ -493,6 +493,7 @@ class _MessageScreenState extends State<MessageScreen>
                             padding: const EdgeInsets.all(4.0),
                             child: SvgPicture.asset(
                               'assets/icons/camera.svg',
+                              // ignore: deprecated_member_use
                               color: AppColors.primaryColor,
                             ),
                           ),
@@ -611,7 +612,7 @@ class _MessageScreenState extends State<MessageScreen>
               Image.network(
                 image,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const Center(
+                errorBuilder: (_, _, _) => const Center(
                   child: SizedBox(
                     width: 40,
                     height: 40,
@@ -903,7 +904,7 @@ class _MessageScreenState extends State<MessageScreen>
         physics: const NeverScrollableScrollPhysics(),
         itemCount: allChats.length,
         padding: EdgeInsets.zero,
-        separatorBuilder: (_, __) => const SizedBox(height: 1),
+        separatorBuilder: (_, _) => const SizedBox(height: 1),
         itemBuilder: (context, index) {
           var chat = allChats[index];
           String name = chat["name"] ?? "Unknown";
