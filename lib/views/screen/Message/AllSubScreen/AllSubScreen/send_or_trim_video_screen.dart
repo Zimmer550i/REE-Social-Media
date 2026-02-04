@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:ree_social_media_app/controllers/send_message_controller.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
 import 'package:ree_social_media_app/views/base/re_back.dart';
-import 'package:video_player/video_player.dart';
+import 'package:video_player_hdr/video_player_hdr.dart';
 import 'fram_selection_screen.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
@@ -42,8 +42,8 @@ class SendOrTrimVideoScreen extends StatefulWidget {
 class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
   final GlobalKey _repaintKey = GlobalKey();
   File? thumbnail;
-  VideoPlayerController? _mainVideoController;
-  VideoPlayerController? _reactionVideoController;
+  VideoPlayerHdrController? _mainVideoController;
+  VideoPlayerHdrController? _reactionVideoController;
   final ValueNotifier<bool> _isPlaying = ValueNotifier(false);
   final sendMessageController = Get.put(SendMessageController());
   Duration _videoPosition = Duration.zero;
@@ -99,8 +99,8 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
     try {
       // Reaction video (background)
       _reactionVideoController = widget.reactionVideo.startsWith('http')
-          ? VideoPlayerController.networkUrl(Uri.parse(widget.reactionVideo))
-          : VideoPlayerController.file(File(widget.reactionVideo));
+          ? VideoPlayerHdrController.networkUrl(Uri.parse(widget.reactionVideo))
+          : VideoPlayerHdrController.file(File(widget.reactionVideo));
 
       await Future.wait([_reactionVideoController!.initialize()]);
 
@@ -126,13 +126,13 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
     try {
       // Main video (background)
       _mainVideoController = widget.mainVideo.startsWith('http')
-          ? VideoPlayerController.networkUrl(Uri.parse(widget.mainVideo))
-          : VideoPlayerController.file(File(widget.mainVideo));
+          ? VideoPlayerHdrController.networkUrl(Uri.parse(widget.mainVideo))
+          : VideoPlayerHdrController.file(File(widget.mainVideo));
 
       // Reaction video (background)
       _reactionVideoController = widget.reactionVideo.startsWith('http')
-          ? VideoPlayerController.networkUrl(Uri.parse(widget.reactionVideo))
-          : VideoPlayerController.file(File(widget.reactionVideo));
+          ? VideoPlayerHdrController.networkUrl(Uri.parse(widget.reactionVideo))
+          : VideoPlayerHdrController.file(File(widget.reactionVideo));
 
       await Future.wait([
         _mainVideoController!.initialize(),
@@ -346,7 +346,7 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
                                         .value
                                         .size
                                         .height,
-                                    child: VideoPlayer(
+                                    child: VideoPlayerHdr(
                                       _reactionVideoController!,
                                     ),
                                   ),
@@ -379,7 +379,7 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
                                           .value
                                           .size
                                           .height,
-                                      child: VideoPlayer(_mainVideoController!),
+                                      child: VideoPlayerHdr(_mainVideoController!),
                                     ),
                                   ),
                                 ),

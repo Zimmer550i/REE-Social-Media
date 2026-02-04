@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -43,6 +44,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   String? currentUserId;
 
   final Map<String, File> _videoCache = {};
+  final Map<String, Future<File>> _videoFutureCache = {};
 
   @override
   void initState() {
@@ -72,6 +74,16 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     messageTextController.dispose();
     // chatController.disconnect();
     OneSignalHelper.optIn();
+
+    // Clear cached group videos when leaving screen
+    for (final file in _videoCache.values) {
+      if (file.existsSync()) {
+        file.deleteSync();
+      }
+    }
+    _videoCache.clear();
+    _videoFutureCache.clear();
+
     super.dispose();
   }
 
@@ -83,7 +95,17 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     }
   }
 
-  Future<File> _downloadVideoToLocal(String url) async {
+  Future<File> _downloadVideoToLocal(String url) {
+    if (_videoFutureCache.containsKey(url)) {
+      return _videoFutureCache[url]!;
+    }
+
+    final future = _loadVideo(url);
+    _videoFutureCache[url] = future;
+    return future;
+  }
+
+  Future<File> _loadVideo(String url) async {
     try {
       if (_videoCache.containsKey(url)) {
         return _videoCache[url]!;
@@ -92,6 +114,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       final fileName = "${url.hashCode}.mp4";
       final dir = await getTemporaryDirectory();
       final videoDir = Directory("${dir.path}/group_videos");
+
       if (!await videoDir.exists()) {
         await videoDir.create(recursive: true);
       }
@@ -175,7 +198,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               () => chatController.isLoading.value
                   ? LinearProgressIndicator(
                       color: AppColors.primaryColor,
-                      backgroundColor: AppColors.primaryColor,
+                      backgroundColor: AppColors.backgroundColor,
                     )
                   : const SizedBox.shrink(),
             ),

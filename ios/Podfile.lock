@@ -30,10 +30,10 @@ PODS:
     - libwebp/sharpyuv
   - onesignal_flutter (5.3.4):
     - Flutter
-    - OneSignalXCFramework (= 5.2.15)
-  - OneSignalXCFramework (5.2.15):
-    - OneSignalXCFramework/OneSignalComplete (= 5.2.15)
-  - OneSignalXCFramework/OneSignal (5.2.15):
+    - OneSignalXCFramework (= 5.4.0)
+  - OneSignalXCFramework (5.4.0):
+    - OneSignalXCFramework/OneSignalComplete (= 5.4.0)
+  - OneSignalXCFramework/OneSignal (5.4.0):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalExtension
     - OneSignalXCFramework/OneSignalLiveActivities
@@ -41,45 +41,42 @@ PODS:
     - OneSignalXCFramework/OneSignalOSCore
     - OneSignalXCFramework/OneSignalOutcomes
     - OneSignalXCFramework/OneSignalUser
-  - OneSignalXCFramework/OneSignalComplete (5.2.15):
+  - OneSignalXCFramework/OneSignalComplete (5.4.0):
     - OneSignalXCFramework/OneSignal
     - OneSignalXCFramework/OneSignalInAppMessages
     - OneSignalXCFramework/OneSignalLocation
-  - OneSignalXCFramework/OneSignalCore (5.2.15)
-  - OneSignalXCFramework/OneSignalExtension (5.2.15):
+  - OneSignalXCFramework/OneSignalCore (5.4.0)
+  - OneSignalXCFramework/OneSignalExtension (5.4.0):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalOutcomes
-  - OneSignalXCFramework/OneSignalInAppMessages (5.2.15):
+  - OneSignalXCFramework/OneSignalInAppMessages (5.4.0):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalNotifications
     - OneSignalXCFramework/OneSignalOSCore
     - OneSignalXCFramework/OneSignalOutcomes
     - OneSignalXCFramework/OneSignalUser
-  - OneSignalXCFramework/OneSignalLiveActivities (5.2.15):
+  - OneSignalXCFramework/OneSignalLiveActivities (5.4.0):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalOSCore
     - OneSignalXCFramework/OneSignalUser
-  - OneSignalXCFramework/OneSignalLocation (5.2.15):
+  - OneSignalXCFramework/OneSignalLocation (5.4.0):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalNotifications
     - OneSignalXCFramework/OneSignalOSCore
     - OneSignalXCFramework/OneSignalUser
-  - OneSignalXCFramework/OneSignalNotifications (5.2.15):
+  - OneSignalXCFramework/OneSignalNotifications (5.4.0):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalExtension
     - OneSignalXCFramework/OneSignalOutcomes
-  - OneSignalXCFramework/OneSignalOSCore (5.2.15):
+  - OneSignalXCFramework/OneSignalOSCore (5.4.0):
     - OneSignalXCFramework/OneSignalCore
-  - OneSignalXCFramework/OneSignalOutcomes (5.2.15):
+  - OneSignalXCFramework/OneSignalOutcomes (5.4.0):
     - OneSignalXCFramework/OneSignalCore
-  - OneSignalXCFramework/OneSignalUser (5.2.15):
+  - OneSignalXCFramework/OneSignalUser (5.4.0):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalNotifications
     - OneSignalXCFramework/OneSignalOSCore
     - OneSignalXCFramework/OneSignalOutcomes
-  - path_provider_foundation (0.0.1):
-    - Flutter
-    - FlutterMacOS
   - permission_handler_apple (9.3.0):
     - Flutter
   - shared_preferences_foundation (0.0.1):
@@ -92,6 +89,8 @@ PODS:
   - video_player_avfoundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - video_player_hdr (0.0.1):
+    - Flutter
   - video_thumbnail (0.0.1):
     - Flutter
     - libwebp
@@ -106,12 +105,12 @@ DEPENDENCIES:
   - gallery_saver_plus (from `.symlinks/plugins/gallery_saver_plus/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - onesignal_flutter (from `.symlinks/plugins/onesignal_flutter/ios`)
-  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sms_autofill (from `.symlinks/plugins/sms_autofill/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
+  - video_player_hdr (from `.symlinks/plugins/video_player_hdr/ios`)
   - video_thumbnail (from `.symlinks/plugins/video_thumbnail/ios`)
 
 SPEC REPOS:
@@ -139,8 +138,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/image_picker_ios/ios"
   onesignal_flutter:
     :path: ".symlinks/plugins/onesignal_flutter/ios"
-  path_provider_foundation:
-    :path: ".symlinks/plugins/path_provider_foundation/darwin"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
   shared_preferences_foundation:
@@ -151,6 +148,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
   video_player_avfoundation:
     :path: ".symlinks/plugins/video_player_avfoundation/darwin"
+  video_player_hdr:
+    :path: ".symlinks/plugins/video_player_hdr/ios"
   video_thumbnail:
     :path: ".symlinks/plugins/video_thumbnail/ios"
 
@@ -165,14 +164,14 @@ SPEC CHECKSUMS:
   gallery_saver_plus: 61c8a831d5975e2bf57f87bcd64379dcc7d29ff2
   image_picker_ios: e0ece4aa2a75771a7de3fa735d26d90817041326
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
-  onesignal_flutter: 6e6254c04f61c8d71d2b9a511bd19f8977eb44e4
-  OneSignalXCFramework: ea9e14a95b92ad48d9b35037cbae88a9542bdea3
-  path_provider_foundation: bb55f6dbba17d0dccd6737fe6f7f34fbd0376880
+  onesignal_flutter: 6822b73de41c2286b17b6e8af3924a0e9d236aff
+  OneSignalXCFramework: 95b6391df5a91b448003149c1a633ade42ceca1e
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
   sms_autofill: b36b2147535657fea83d7f3898d7831de70bd8e4
   url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
   video_player_avfoundation: dd410b52df6d2466a42d28550e33e4146928280a
+  video_player_hdr: 59ed463b32331b5693c833bbbbe2a6817d58cfea
   video_thumbnail: b637e0ad5f588ca9945f6e2c927f73a69a661140
 
 PODFILE CHECKSUM: e30f02f9d1c72c47bb6344a0a748c9d268180865

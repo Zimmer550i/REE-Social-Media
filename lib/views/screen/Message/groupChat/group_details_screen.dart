@@ -360,7 +360,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               style: const TextStyle(fontSize: 16, color: Color(0xFF413E3E)),
             ),
             const Spacer(),
-            if (trailing != null) trailing,
+            ?trailing,
           ],
         ),
       ),

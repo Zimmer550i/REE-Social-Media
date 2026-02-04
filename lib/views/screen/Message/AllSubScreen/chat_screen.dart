@@ -50,6 +50,8 @@ class _ChatScreenState extends State<ChatScreen> {
   String? _currentUserId;
   String? _receiverImage;
   bool enableBlur = false;
+  final Map<String, Future<File>> _videoFutureCache = {};
+  final Map<String, File> _videoCache = {};
 
   @override
   void initState() {
@@ -74,13 +76,21 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    chatController.disconnect();
-    messageController.dispose();
-    OneSignalHelper.optIn();
-    super.dispose();
+@override
+void dispose() {
+  chatController.disconnect();
+  messageController.dispose();
+  OneSignalHelper.optIn();
+  for (final file in _videoCache.values) {
+    if (file.existsSync()) {
+      file.deleteSync();
+    }
   }
+  _videoCache.clear();
+  _videoFutureCache.clear();
+
+  super.dispose();
+}
 
   void _sendTextMessage() {
     final text = messageController.text.trim();
@@ -90,47 +100,60 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  final Map<String, File> _videoCache = {};
-
-  Future<File> _downloadVideoToLocal(String url) async {
-    try {
-      if (_videoCache.containsKey(url)) {
-        return _videoCache[url]!;
-      }
-
-      final fileName = "${url.hashCode}.mp4";
-
-      final dir = await getTemporaryDirectory();
-      final videoDir = Directory("${dir.path}/videos");
-      if (!await videoDir.exists()) {
-        await videoDir.create(recursive: true);
-      }
-
-      final filePath = "${videoDir.path}/$fileName";
-      final cachedFile = File(filePath);
-
-      if (await cachedFile.exists()) {
-        _videoCache[url] = cachedFile;
-        debugPrint("✅ Using cached video for: $url");
-        return cachedFile;
-      }
-
-      debugPrint("⬇️ Downloading video from: $url");
-      final response = await http.get(Uri.parse(url));
-
-      if (response.statusCode == 200) {
-        await cachedFile.writeAsBytes(response.bodyBytes);
-        _videoCache[url] = cachedFile;
-        debugPrint("✅ Video downloaded & cached: ${cachedFile.path}");
-        return cachedFile;
-      } else {
-        throw Exception("Failed to download video: ${response.statusCode}");
-      }
-    } catch (e) {
-      debugPrint("❌ Error downloading video: $e");
-      rethrow;
-    }
+  
+Future<File> _downloadVideoToLocal(String url) {
+  // Prevent multiple reloads while scrolling
+  if (_videoFutureCache.containsKey(url)) {
+    return _videoFutureCache[url]!;
   }
+
+  final future = _loadVideo(url);
+  _videoFutureCache[url] = future;
+  return future;
+}
+
+Future<File> _loadVideo(String url) async {
+  try {
+    if (_videoCache.containsKey(url)) {
+      return _videoCache[url]!;
+    }
+
+    final fileName = "${url.hashCode}.mp4";
+    final dir = await getTemporaryDirectory();
+    final videoDir = Directory("${dir.path}/videos");
+
+    if (!await videoDir.exists()) {
+      await videoDir.create(recursive: true);
+    }
+
+    final filePath = "${videoDir.path}/$fileName";
+    final cachedFile = File(filePath);
+
+    // Already stored on disk
+    if (await cachedFile.exists()) {
+      _videoCache[url] = cachedFile;
+      debugPrint("✅ Using cached video for: $url");
+      return cachedFile;
+    }
+
+    // First time download
+    debugPrint("⬇️ Downloading video from: $url");
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      await cachedFile.writeAsBytes(response.bodyBytes);
+      _videoCache[url] = cachedFile;
+      debugPrint("✅ Video downloaded & cached: ${cachedFile.path}");
+      return cachedFile;
+    } else {
+      throw Exception("Failed to download video: ${response.statusCode}");
+    }
+  } catch (e) {
+    debugPrint("❌ Error downloading video: $e");
+    rethrow;
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -233,8 +256,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
   String _formatLocalTime(DateTime localTime) {
     final now = DateTime.now();
-    final timeFormat = DateFormat('h:mm a'); // Ex: 2:32 PM
-    final dateFormat = DateFormat('d MMM yyyy'); // Ex: 25 Nov 2025
+    final timeFormat = DateFormat('h:mm a');
+    final dateFormat = DateFormat('d MMM yyyy');
 
     // Today → return time only
     if (localTime.year == now.year &&

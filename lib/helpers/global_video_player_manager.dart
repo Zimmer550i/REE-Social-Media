@@ -1,18 +1,20 @@
 import 'dart:io';
 
-import 'package:video_player/video_player.dart';
+import 'package:video_player_hdr/video_player_hdr.dart';
 import 'package:flutter/foundation.dart';
 
 class GlobalVideoPlayerManager {
-  static VideoPlayerController? _controller;
+  static VideoPlayerHdrController? _controller;
 
-  static VideoPlayerController? get controller => _controller;
+  static VideoPlayerHdrController? get controller => _controller;
 
-  static Future<VideoPlayerController?> initialize(String path) async {
+  static Future<VideoPlayerHdrController?> initialize(String path) async {
     await dispose();
 
     try {
-      final controller = VideoPlayerController.file(File(path));
+      final controller = path.startsWith('http')
+          ? VideoPlayerHdrController.networkUrl(Uri.parse(path))
+          : VideoPlayerHdrController.file(File(path));
       await controller.initialize();
       _controller = controller;
       debugPrint("🎬 Video player initialized");
