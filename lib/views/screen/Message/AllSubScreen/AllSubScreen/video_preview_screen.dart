@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously, unnecessary_underscores
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -384,7 +385,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                 Positioned.fill(
                   child: isVideo
                       ? FittedBox(
-                          fit: BoxFit.contain,
+                          fit: BoxFit.cover,
                           child: SizedBox(
                             width: _video!.value.size.width,
                             height: _video!.value.size.height,
@@ -498,7 +499,10 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
     child: Stack(
       alignment: Alignment.center,
       children: [
-        Container(color: Colors.black.withValues(alpha: .4)),
+        BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(color: Colors.white.withValues(alpha: 0.9)),
+        ),
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -515,12 +519,26 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            Text(
-              'Get ready to re:',
-              style: const TextStyle(
-                fontSize: 16,
-                color: Color(0xFF383838),
-                fontWeight: FontWeight.w600,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withValues(alpha: 0.3),
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Text(
+                'Get ready to re:',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF383838),
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -528,7 +546,6 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
       ],
     ),
   );
-
   Widget _buildBottomControls() {
     final total = _videoDuration.inMilliseconds.toDouble().clamp(
       1,

@@ -380,9 +380,18 @@ class _MessageScreenState extends State<MessageScreen>
 
                   var story = filteredStories[index - 1];
                   final isVideo = story["contentType"] == "video";
-                  final mediaUrl = story["image"].isNotEmpty
-                      ? story["image"]
-                      : story["video"];
+                  // ignore: prefer_typing_uninitialized_variables
+                  late final String mediaUrl;
+
+                  if (Platform.isIOS) {
+                    mediaUrl = (story["image_ios"] ?? "").isNotEmpty
+                        ? story["image_ios"]
+                        : story["video_ios"];
+                  } else {
+                    mediaUrl = (story["image"] ?? "").isNotEmpty
+                        ? story["image"]
+                        : story["video"];
+                  }
 
                   // handle author safely
                   String authorName = "User";
