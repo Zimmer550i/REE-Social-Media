@@ -41,22 +41,34 @@ class BlurImageCard extends StatefulWidget {
 
 class _BlurImageCardState extends State<BlurImageCard> {
   bool _isLoaded = false;
+  bool _isNavigating = false;
   bool _isTapped = false;
 
   void _onTapImage() {
-    if (!_isLoaded || _isTapped) return;
-    setState(() => _isTapped = true);
+    if (!_isLoaded || _isTapped || _isNavigating) return;
+    setState(() {
+      _isTapped = true;
+      _isNavigating = true;
+    });
     Future.delayed(const Duration(milliseconds: 150), () {
       if (!mounted) return;
       if (widget.isMe == true) {
         Get.to(() => ViewMedia(mediaUrl: widget.imageUrl))?.then((_) {
-          if (mounted) setState(() => _isTapped = false);
+          if (!mounted) return;
+          setState(() {
+            _isTapped = false;
+            _isNavigating = false;
+          });
         });
       } else if (widget.isMe == false && widget.isReaction == true) {
         widget.chatController.updateChatView(widget.msgId);
 
         Get.to(() => ViewMedia(mediaUrl: widget.imageUrl))?.then((_) {
-          if (mounted) setState(() => _isTapped = false);
+          if (!mounted) return;
+          setState(() {
+            _isTapped = false;
+            _isNavigating = false;
+          });
         });
       } else {
         widget.chatController.updateChatView(widget.msgId);
@@ -74,7 +86,11 @@ class _BlurImageCardState extends State<BlurImageCard> {
             ),
           ),
         ).then((_) {
-          if (mounted) setState(() => _isTapped = false);
+          if (!mounted) return;
+          setState(() {
+            _isTapped = false;
+            _isNavigating = false;
+          });
         });
       }
     });
@@ -102,25 +118,29 @@ class _BlurImageCardState extends State<BlurImageCard> {
                 height: 260,
                 width: 180,
                 fit: BoxFit.contain,
-                loadingBuilder: (context, child, progress) {
-                  if (progress == null) {
-                    Future.delayed(const Duration(milliseconds: 200), () {
-                      if (mounted) setState(() => _isLoaded = true);
+                frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                  // Mark loaded once we have at least one rendered frame.
+                  if (!_isLoaded && (wasSynchronouslyLoaded || frame != null)) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (!mounted) return;
+                      setState(() => _isLoaded = true);
                     });
-                    return child;
-                  } else {
-                    return Container(
-                      height: 260,
-                      width: 180,
-                      color: Colors.black12.withValues(alpha: .1),
-                      child: Center(
-                        child: SpinKitWave(
-                          color: AppColors.primaryColor,
-                          size: 30.0,
-                        ),
-                      ),
-                    );
                   }
+                  return child;
+                },
+                loadingBuilder: (context, child, progress) {
+                  if (progress == null) return child;
+                  return Container(
+                    height: 260,
+                    width: 180,
+                    color: Colors.black12.withValues(alpha: .1),
+                    child: Center(
+                      child: SpinKitWave(
+                        color: AppColors.primaryColor,
+                        size: 30.0,
+                      ),
+                    ),
+                  );
                 },
                 errorBuilder: (_, _, _) => Container(
                   height: 260,

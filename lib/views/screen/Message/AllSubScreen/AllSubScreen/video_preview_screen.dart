@@ -1,8 +1,6 @@
 // ignore_for_file: use_build_context_synchronously, unnecessary_underscores
-
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui' show ImageFilter;
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -12,7 +10,7 @@ import 'package:ree_social_media_app/controllers/message_controller.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
 import 'package:ree_social_media_app/views/base/re_back.dart';
 import 'package:ree_social_media_app/views/screen/Message/AllSubScreen/AllSubScreen/send_or_trim_video_screen.dart';
-import 'package:video_player/video_player.dart';
+import 'package:video_player_hdr/video_player_hdr.dart';
 
 class VideoPreviewScreen extends StatefulWidget {
   const VideoPreviewScreen({
@@ -41,7 +39,7 @@ class VideoPreviewScreen extends StatefulWidget {
 class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
   final MessageController messageController = Get.find<MessageController>();
   CameraController? _frontCam;
-  VideoPlayerController? _video;
+  VideoPlayerHdrController? _video;
   Timer? _countdownTimer;
 
   int _secondsRemaining = 3;
@@ -158,8 +156,8 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
 
   Future<void> _initVideo() async {
     _video = widget.videoUrl.startsWith('http')
-        ? VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
-        : VideoPlayerController.file(File(widget.videoUrl));
+        ? VideoPlayerHdrController.networkUrl(Uri.parse(widget.videoUrl))
+        : VideoPlayerHdrController.file(File(widget.videoUrl));
 
     await _video!.initialize();
     _videoDuration = _video!.value.duration;
@@ -358,7 +356,11 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
             const SizedBox(width: 12),
             Text(
               widget.userName,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600,fontFamily: "LibreText"),
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w600,
+                fontFamily: "LibreText",
+              ),
             ),
           ],
         ),
@@ -382,11 +384,11 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                 Positioned.fill(
                   child: isVideo
                       ? FittedBox(
-                          fit: BoxFit.cover,
+                          fit: BoxFit.contain,
                           child: SizedBox(
                             width: _video!.value.size.width,
                             height: _video!.value.size.height,
-                            child: VideoPlayer(_video!),
+                            child: VideoPlayerHdr(_video!),
                           ),
                         )
                       : LayoutBuilder(
@@ -496,10 +498,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
     child: Stack(
       alignment: Alignment.center,
       children: [
-        BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: Container(color: Colors.white.withValues(alpha: 0.5)),
-        ),
+        Container(color: Colors.black.withValues(alpha: .4)),
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [

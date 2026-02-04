@@ -1,13 +1,13 @@
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:video_player_hdr/video_player_hdr.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:ree_social_media_app/controllers/message_controller.dart';
 import 'package:ree_social_media_app/controllers/send_message_controller.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
 import 'package:ree_social_media_app/views/screen/Camera/AllSubScreen/send_message_with_friend_screen.dart';
-import 'package:video_player/video_player.dart';
 import '../../../../controllers/story_controller.dart';
 import '../../../../helpers/route.dart';
 import '../../../../utils/file_utils.dart';
@@ -39,7 +39,7 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
   );
   final MessageController messageController = Get.find<MessageController>();
   CameraController? _frontCam;
-  VideoPlayerController? _video;
+  VideoPlayerHdrController? _video;
 
   Duration _videoDuration = Duration.zero;
   Duration _position = Duration.zero;
@@ -61,9 +61,9 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
 
   Future<void> _initVideo() async {
     if (widget.filePath.startsWith('http')) {
-      _video = VideoPlayerController.networkUrl(Uri.parse(widget.filePath));
+      _video = VideoPlayerHdrController.networkUrl(Uri.parse(widget.filePath));
     } else {
-      _video = VideoPlayerController.file(File(widget.filePath));
+      _video = VideoPlayerHdrController.file(File(widget.filePath));
     }
     await _video!.initialize();
     _videoDuration = _video!.value.duration;
@@ -124,7 +124,7 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
                           child: SizedBox(
                             width: _video!.value.size.width,
                             height: _video!.value.size.height,
-                            child: VideoPlayer(_video!),
+                            child: VideoPlayerHdr(_video!),
                           ),
                         )
                       : Center(

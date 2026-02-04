@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:ree_social_media_app/helpers/route.dart';
 import 'package:ree_social_media_app/views/base/re_back.dart';
-import 'package:video_player/video_player.dart';
+import 'package:video_player_hdr/video_player_hdr.dart';
 import 'package:ree_social_media_app/controllers/send_message_controller.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
 import 'package:ree_social_media_app/views/base/custom_loading.dart';
@@ -59,8 +59,8 @@ class _FrameSelectionScreenState extends State<FrameSelectionScreen> {
 
   Future<void> _loadVideoDuration() async {
     final controller = widget.frontVideoUrl.startsWith('http')
-        ? VideoPlayerController.networkUrl(Uri.parse(widget.frontVideoUrl))
-        : VideoPlayerController.file(File(widget.frontVideoUrl));
+        ? VideoPlayerHdrController.networkUrl(Uri.parse(widget.frontVideoUrl))
+        : VideoPlayerHdrController.file(File(widget.frontVideoUrl));
 
     await controller.initialize();
     _videoDuration = controller.value.duration;

@@ -9,7 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
 import 'package:ree_social_media_app/views/base/re_back.dart';
 import 'package:ree_social_media_app/views/base/reponsive_image.dart';
-import 'package:video_player/video_player.dart';
+import 'package:video_player_hdr/video_player_hdr.dart';
 
 class ViewMedia extends StatefulWidget {
   const ViewMedia({super.key, required this.mediaUrl});
@@ -21,7 +21,7 @@ class ViewMedia extends StatefulWidget {
 }
 
 class _ViewMediaState extends State<ViewMedia> {
-  VideoPlayerController? _video;
+  VideoPlayerHdrController? _video;
   Duration _videoDuration = Duration.zero;
   Duration _position = Duration.zero;
   late final ValueNotifier<bool> _isPlaying = ValueNotifier<bool>(false);
@@ -64,8 +64,8 @@ class _ViewMediaState extends State<ViewMedia> {
 
   Future<void> _initVideo() async {
     _video = widget.mediaUrl.startsWith('http')
-        ? VideoPlayerController.networkUrl(Uri.parse(widget.mediaUrl))
-        : VideoPlayerController.file(File(widget.mediaUrl));
+        ? VideoPlayerHdrController.networkUrl(Uri.parse(widget.mediaUrl))
+        : VideoPlayerHdrController.file(File(widget.mediaUrl));
 
     await _video!.initialize();
     _videoDuration = _video!.value.duration;
@@ -130,13 +130,13 @@ class _ViewMediaState extends State<ViewMedia> {
   }
 
   Widget _buildMediaView() {
-    if (isVideo && _video != null) {
+    if (isVideo && _video != null && _video!.value.isInitialized) {
       return FittedBox(
         fit: BoxFit.contain,
         child: SizedBox(
           width: _video!.value.size.width,
           height: _video!.value.size.height,
-          child: VideoPlayer(_video!),
+          child: VideoPlayerHdr(_video!),
         ),
       );
     }

@@ -43,10 +43,13 @@ class BlurVideoCard extends StatefulWidget {
   State<BlurVideoCard> createState() => _BlurVideoCardState();
 }
 
-class _BlurVideoCardState extends State<BlurVideoCard> {
+class _BlurVideoCardState extends State<BlurVideoCard> with AutomaticKeepAliveClientMixin {
   bool _isTapped = false;
   bool _isLoading = true;
   String? _thumbnailPath;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -136,6 +139,7 @@ class _BlurVideoCardState extends State<BlurVideoCard> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return GestureDetector(
       onTap: _onTapVideo,
       child: Stack(
