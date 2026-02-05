@@ -111,7 +111,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         return _videoCache[url]!;
       }
 
-      final fileName = "${url.hashCode}.mp4";
       final dir = await getTemporaryDirectory();
       final videoDir = Directory("${dir.path}/group_videos");
 
@@ -119,6 +118,15 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         await videoDir.create(recursive: true);
       }
 
+      // Try to detect extension from URL
+      String extension = url.split('.').last.split('?').first;
+
+      // If extension looks invalid, fallback by platform
+      if (extension.length > 5 || extension.contains('/')) {
+        extension = Platform.isIOS ? 'mov' : 'mp4';
+      }
+
+      final fileName = "${url.hashCode}.$extension";
       final filePath = "${videoDir.path}/$fileName";
       final cachedFile = File(filePath);
 
@@ -463,7 +471,12 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   }
 
   Widget _buildVideoMessage(Map<String, dynamic> msg, String name) {
-    final videoUrl = userController.addBaseUrl(msg["media"] ?? "");
+    late final String videoUrl;
+    if (Platform.isIOS) {
+      videoUrl = userController.addBaseUrl(msg["media_ios"]) ?? "";
+    } else {
+      videoUrl = userController.addBaseUrl(msg["media"]) ?? "";
+    }
     bool isMe = msg["isMe"] ?? false;
     bool isReaction = msg["reaction"] ?? false;
     bool hasThumbnail = false;
@@ -479,7 +492,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       hasThumbnail = false;
       thumbnail = "";
     }
-    final bool isViewed = isMe ? true : (msg["view"] ?? false);
+    // final bool isViewed = isMe ? true : (msg["view"] ?? false);
 
     return FutureBuilder<File>(
       future: _downloadVideoToLocal(videoUrl.toString()),
@@ -515,7 +528,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 isMe: isMe,
                 isReaction: isReaction,
                 thumbnail: thumbnail.toString(),
-                isView: isViewed,
+                isView: false,
                 videoFile: localVideo,
                 msg: msg,
                 receiverImage: groupChatController.groupImage.value,

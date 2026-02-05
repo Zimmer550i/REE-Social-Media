@@ -275,7 +275,7 @@ class ChatController extends GetxController {
     _scrollToBottom();
   }
 
-  Future<String?> uploadMedia(File file, {String type = "image"}) async {
+  Future<Map<String, dynamic>?> uploadMedia(File file, {String type = "image"}) async {
     final multipartBody = [MultipartBody(key: type, file: file)];
     final response = await api.postMultipartData(
       "/message/upload",
@@ -286,7 +286,11 @@ class ChatController extends GetxController {
 
     if (response.statusCode == 200) {
       final resData = jsonDecode(response.body);
-      return resData['mediaUrl'];
+      return {
+        "mediaUrl": resData["mediaUrl"],
+        "media_ios": resData["media_ios"],
+        "media_normal": resData["media_normal"],
+      };
     } else {
       debugPrint("❗ Upload failed: ${response.body}");
       return null;
@@ -298,20 +302,20 @@ class ChatController extends GetxController {
     final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
     if (file == null) return;
 
-    final mediaUrl = await uploadMedia(File(file.path), type: "image");
-    if (mediaUrl != null) {
+    final mediaData = await uploadMedia(File(file.path), type: "image");
+    if (mediaData != null) {
       SocketService.sendImage(
         chatId: _chatId,
         senderId: _currentUserId,
-        mediaUrl: mediaUrl,
+        mediaUrl: mediaData["mediaUrl"],
       );
 
-      // 👇 Add this manually so UI updates immediately
+      // Add this manually so UI updates immediately
       messages.insert(0, {
         "_id": const Uuid().v4(),
         "isMe": true,
         "type": "image",
-        "media": mediaUrl,
+        "media": mediaData["mediaUrl"],
         "message": "",
         "time":
             "${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}",
@@ -328,12 +332,12 @@ class ChatController extends GetxController {
     final XFile? file = await _picker.pickVideo(source: ImageSource.gallery);
     if (file == null) return;
 
-    final mediaUrl = await uploadMedia(File(file.path), type: "video");
-    if (mediaUrl != null) {
+    final mediaData = await uploadMedia(File(file.path), type: "video");
+    if (mediaData != null) {
       SocketService.sendVideo(
         chatId: _chatId,
         senderId: _currentUserId,
-        mediaUrl: mediaUrl,
+        mediaUrl: mediaData["mediaUrl"], mediaIos: mediaData['media_ios'],
       );
 
       // 👇 Add this manually so UI updates immediately
@@ -341,7 +345,8 @@ class ChatController extends GetxController {
         "_id": const Uuid().v4(),
         "isMe": true,
         "type": "video",
-        "media": mediaUrl,
+        "media": mediaData["mediaUrl"],
+        "media_ios": mediaData['media_ios'],
         "message": "",
         "time":
             "${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}",
@@ -600,6 +605,7 @@ class ChatController extends GetxController {
       "type": m["contentType"] ?? "text",
       "message": m["message"] ?? "",
       "media": m["media"] ?? "",
+      "media_ios": m["media_ios"] ?? "",
       "thumbnail": m["thumbnail"] ?? "",
       "time": createdAt,
       "temp": false,

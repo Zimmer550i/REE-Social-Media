@@ -102,7 +102,9 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
           ? VideoPlayerHdrController.networkUrl(Uri.parse(widget.reactionVideo))
           : VideoPlayerHdrController.file(File(widget.reactionVideo));
 
-      await Future.wait([_reactionVideoController!.initialize()]);
+      await Future.wait([
+  _reactionVideoController!.initialize(viewType: VideoViewType.textureView),
+]);
 
       // Check if both videos are initialized successfully
       if (!_reactionVideoController!.value.isInitialized) {
@@ -135,9 +137,9 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
           : VideoPlayerHdrController.file(File(widget.reactionVideo));
 
       await Future.wait([
-        _mainVideoController!.initialize(),
-        _reactionVideoController!.initialize(),
-      ]);
+  _mainVideoController!.initialize(viewType: VideoViewType.textureView),
+  _reactionVideoController!.initialize(viewType: VideoViewType.textureView),
+]);
 
       // Check if both videos are initialized successfully
       if (!_mainVideoController!.value.isInitialized ||
@@ -284,7 +286,7 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            backgroundColor: AppColors.backgroundColor,
+      backgroundColor: AppColors.backgroundColor,
 
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -299,7 +301,10 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
                   ? null
                   : NetworkImage(widget.userProfile),
               child: widget.userProfile.isEmpty
-                  ? Text(widget.userName[0].toUpperCase(),style: TextStyle(fontFamily: "LibreText"),)
+                  ? Text(
+                      widget.userName[0].toUpperCase(),
+                      style: TextStyle(fontFamily: "LibreText"),
+                    )
                   : null,
             ),
             const SizedBox(width: 12),
@@ -379,7 +384,9 @@ class _SendOrTrimVideoScreenState extends State<SendOrTrimVideoScreen> {
                                           .value
                                           .size
                                           .height,
-                                      child: VideoPlayerHdr(_mainVideoController!),
+                                      child: VideoPlayerHdr(
+                                        _mainVideoController!,
+                                      ),
                                     ),
                                   ),
                                 ),

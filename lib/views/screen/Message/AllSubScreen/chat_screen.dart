@@ -76,21 +76,21 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-@override
-void dispose() {
-  chatController.disconnect();
-  messageController.dispose();
-  OneSignalHelper.optIn();
-  for (final file in _videoCache.values) {
-    if (file.existsSync()) {
-      file.deleteSync();
+  @override
+  void dispose() {
+    chatController.disconnect();
+    messageController.dispose();
+    OneSignalHelper.optIn();
+    for (final file in _videoCache.values) {
+      if (file.existsSync()) {
+        file.deleteSync();
+      }
     }
-  }
-  _videoCache.clear();
-  _videoFutureCache.clear();
+    _videoCache.clear();
+    _videoFutureCache.clear();
 
-  super.dispose();
-}
+    super.dispose();
+  }
 
   void _sendTextMessage() {
     final text = messageController.text.trim();
@@ -100,60 +100,66 @@ void dispose() {
     }
   }
 
-  
-Future<File> _downloadVideoToLocal(String url) {
-  // Prevent multiple reloads while scrolling
-  if (_videoFutureCache.containsKey(url)) {
-    return _videoFutureCache[url]!;
+  Future<File> _downloadVideoToLocal(String url) {
+    // Prevent multiple reloads while scrolling
+    if (_videoFutureCache.containsKey(url)) {
+      return _videoFutureCache[url]!;
+    }
+
+    final future = _loadVideo(url);
+    _videoFutureCache[url] = future;
+    return future;
   }
 
-  final future = _loadVideo(url);
-  _videoFutureCache[url] = future;
-  return future;
-}
+  Future<File> _loadVideo(String url) async {
+    try {
+      if (_videoCache.containsKey(url)) {
+        return _videoCache[url]!;
+      }
 
-Future<File> _loadVideo(String url) async {
-  try {
-    if (_videoCache.containsKey(url)) {
-      return _videoCache[url]!;
+      final dir = await getTemporaryDirectory();
+      final videoDir = Directory("${dir.path}/videos");
+
+      if (!await videoDir.exists()) {
+        await videoDir.create(recursive: true);
+      }
+
+      // Try to detect extension from URL
+      String extension = url.split('.').last.split('?').first;
+
+      // If extension looks invalid, fallback by platform
+      if (extension.length > 5 || extension.contains('/')) {
+        extension = Platform.isIOS ? 'mov' : 'mp4';
+      }
+
+      final fileName = "${url.hashCode}.$extension";
+      final filePath = "${videoDir.path}/$fileName";
+      final cachedFile = File(filePath);
+
+      // Already stored on disk
+      if (await cachedFile.exists()) {
+        _videoCache[url] = cachedFile;
+        debugPrint("✅ Using cached video for: $url");
+        return cachedFile;
+      }
+
+      // First time download
+      debugPrint("⬇️ Downloading video from: $url");
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        await cachedFile.writeAsBytes(response.bodyBytes);
+        _videoCache[url] = cachedFile;
+        debugPrint("✅ Video downloaded & cached: ${cachedFile.path}");
+        return cachedFile;
+      } else {
+        throw Exception("Failed to download video: ${response.statusCode}");
+      }
+    } catch (e) {
+      debugPrint("❌ Error downloading video: $e");
+      rethrow;
     }
-
-    final fileName = "${url.hashCode}.mp4";
-    final dir = await getTemporaryDirectory();
-    final videoDir = Directory("${dir.path}/videos");
-
-    if (!await videoDir.exists()) {
-      await videoDir.create(recursive: true);
-    }
-
-    final filePath = "${videoDir.path}/$fileName";
-    final cachedFile = File(filePath);
-
-    // Already stored on disk
-    if (await cachedFile.exists()) {
-      _videoCache[url] = cachedFile;
-      debugPrint("✅ Using cached video for: $url");
-      return cachedFile;
-    }
-
-    // First time download
-    debugPrint("⬇️ Downloading video from: $url");
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      await cachedFile.writeAsBytes(response.bodyBytes);
-      _videoCache[url] = cachedFile;
-      debugPrint("✅ Video downloaded & cached: ${cachedFile.path}");
-      return cachedFile;
-    } else {
-      throw Exception("Failed to download video: ${response.statusCode}");
-    }
-  } catch (e) {
-    debugPrint("❌ Error downloading video: $e");
-    rethrow;
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -523,7 +529,13 @@ Future<File> _loadVideo(String url) async {
   }
 
   Widget _buildVideoMessage(Map<String, dynamic> msg) {
-    final videoUrl = userController.addBaseUrl(msg["media"] ?? "");
+    late final String videoUrl;
+    if (Platform.isIOS) {
+      videoUrl = userController.addBaseUrl(msg["media_ios"]) ?? "";
+    } else {
+      videoUrl = userController.addBaseUrl(msg["media"]) ?? "";
+    }
+    debugPrint("=====> videoUrl: $videoUrl");
     bool isMe = msg["isMe"];
     bool isReaction = msg["reaction"] ?? false;
     bool hasThumbnail = false;

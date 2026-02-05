@@ -5,10 +5,7 @@ import 'package:ree_social_media_app/utils/app_colors.dart';
 import 'package:ree_social_media_app/views/base/re_back.dart';
 import 'package:ree_social_media_app/views/screen/Message/AllSubScreen/AllSubScreen/video_preview_screen.dart';
 import 'package:ree_social_media_app/views/screen/Message/AllSubScreen/AllSubScreen/view_video.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
 import 'dart:io';
-import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 
 class SeeAllStoryScreen extends StatefulWidget {
   final List<dynamic> stories;
@@ -61,7 +58,6 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
               ),
               const SizedBox(height: 24),
 
-              /// ✅ Stories grid
               Expanded(
                 child: GridView.builder(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -69,7 +65,6 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
                     crossAxisCount: 2,
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
-                    // ✅ Match the 4:3 aspect ratio visually
                     childAspectRatio: 3 / 4,
                   ),
                   padding: EdgeInsets.zero,
@@ -85,13 +80,18 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
                       story["author"]?["image"] ?? "",
                     );
 
-                    // ✅ Determine media URL safely
                     String? mediaUrl;
                     if (type == "image" && (story["image"] ?? "").isNotEmpty) {
                       mediaUrl = userController.addBaseUrl(story["image"]);
                     } else if (type == "video" &&
                         (story["video"] ?? "").isNotEmpty) {
-                      mediaUrl = userController.addBaseUrl(story["video"]);
+                      if (Platform.isIOS) {
+                        mediaUrl = userController.addBaseUrl(
+                          story["video_ios"],
+                        );
+                      } else {
+                        mediaUrl = userController.addBaseUrl(story["video"]);
+                      }
                     }
 
                     if (mediaUrl == null || mediaUrl.isEmpty) {
@@ -113,7 +113,6 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
                       );
                     }
 
-                    // ✅ Each story item now keeps 4:3 ratio visually consistent
                     return _buildStoryCard(
                       context,
                       mediaUrl,
@@ -134,7 +133,6 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
     );
   }
 
-  /// Updated _buildStoryCard to include index
   Widget _buildStoryCard(
     BuildContext context,
     String mediaUrl,
@@ -181,7 +179,6 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // SpinKitWave(color: AppColors.primaryColor, size: 30.0),
                   Container(
                     height: 32,
                     padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -217,7 +214,6 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
     );
   }
 
-  /// 🖼️ Image story card
   Future<Widget> _buildImageCard(
     BuildContext context,
     String mediaUrl,
@@ -294,15 +290,6 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
     int index,
     String authorId,
   ) async {
-    final localVideo = await _downloadVideoToLocal(videoUrl);
-    final thumbPath = await VideoThumbnail.thumbnailFile(
-      video: localVideo.path,
-      imageFormat: ImageFormat.JPEG,
-      quality: 100,
-      maxHeight: 0,
-      maxWidth: 0,
-    );
-
     return AspectRatio(
       aspectRatio: 3 / 4,
       child: InkWell(
@@ -310,7 +297,7 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
           if (widget.isMe == false) {
             Get.to(
               () => VideoPreviewScreen(
-                videoUrl: localVideo.path,
+                videoUrl: videoUrl,
                 countdownSeconds: 3,
                 userProfile: userImage,
                 userName: name,
@@ -319,7 +306,7 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
               ),
             );
           } else {
-            Get.to(() => ViewMedia(mediaUrl: localVideo.path));
+            Get.to(() => ViewMedia(mediaUrl: videoUrl));
           }
         },
         child: ClipRRect(
@@ -327,30 +314,11 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              if (thumbPath != null)
-                // Image.file(File(thumbPath), fit: BoxFit.cover)
-                Image.network(userImage, fit: BoxFit.cover)
-              else
-                Image.network(
-                  userImage,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => const Center(
-                    child: SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    ),
-                  ),
-                ),
-
-              // ▶️ Play button overlay
+              Image.network(userImage, fit: BoxFit.cover),
               Center(
                 child: Container(
-                  width: 40,
-                  height: 40,
+                  width: 42,
+                  height: 42,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: AppColors.primaryColor,
@@ -363,9 +331,7 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
                   ),
                 ),
               ),
-
               _buildBottomNameBar(name),
-
               if (widget.isMe == true)
                 Positioned(
                   right: 0,
@@ -383,7 +349,7 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
                         },
                       );
                     },
-                    icon: Icon(Icons.delete, color: Colors.red),
+                    icon: const Icon(Icons.delete, color: Colors.red),
                   ),
                 ),
             ],
@@ -392,6 +358,7 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
       ),
     );
   }
+
 
   void _confirm(BuildContext context, {required VoidCallback onYes}) {
     showDialog(
@@ -476,14 +443,4 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
     );
   }
 
-  /// 🧩 Helper: download remote video to temp folder
-  Future<File> _downloadVideoToLocal(String url) async {
-    final response = await http.get(Uri.parse(url));
-    final dir = await getTemporaryDirectory();
-    final file = File(
-      "${dir.path}/${DateTime.now().millisecondsSinceEpoch}.mp4",
-    );
-    await file.writeAsBytes(response.bodyBytes);
-    return file;
-  }
 }

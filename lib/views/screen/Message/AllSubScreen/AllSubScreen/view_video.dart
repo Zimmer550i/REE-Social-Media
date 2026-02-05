@@ -14,7 +14,7 @@ import 'package:video_player_hdr/video_player_hdr.dart';
 class ViewMedia extends StatefulWidget {
   const ViewMedia({super.key, required this.mediaUrl});
 
-  final String mediaUrl; // can be video or image
+  final String mediaUrl;
 
   @override
   State<ViewMedia> createState() => _ViewMediaState();
@@ -132,7 +132,7 @@ class _ViewMediaState extends State<ViewMedia> {
   Widget _buildMediaView() {
     if (isVideo && _video != null && _video!.value.isInitialized) {
       return FittedBox(
-        fit: BoxFit.contain,
+        fit: BoxFit.cover,
         child: SizedBox(
           width: _video!.value.size.width,
           height: _video!.value.size.height,

@@ -44,6 +44,7 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
   Duration _videoDuration = Duration.zero;
   Duration _position = Duration.zero;
   late final ValueNotifier<bool> _isPlaying = ValueNotifier<bool>(false);
+  bool _isCompleted = false;
 
   @override
   void initState() {
@@ -67,14 +68,31 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
     }
     await _video!.initialize();
     _videoDuration = _video!.value.duration;
-    _video!.setLooping(false);
+    // Loop internally to prevent texture from being released at end
+    _video!.setLooping(true);
 
     _video!.addListener(() {
       if (!mounted) return;
+
+      final value = _video!.value;
+
       setState(() {
-        _position = _video!.value.position;
+        _position = value.position;
       });
-      _isPlaying.value = _video!.value.isPlaying;
+
+      _isPlaying.value = value.isPlaying;
+
+      // Stop just before the video loops to keep last frame visible
+      final remaining = value.duration - value.position;
+      if (!_isCompleted && remaining <= const Duration(milliseconds: 80)) {
+        _isCompleted = true;
+        _video!.pause();
+      }
+
+      // If user scrubs back, allow playback again
+      if (value.position < value.duration - const Duration(milliseconds: 300)) {
+        _isCompleted = false;
+      }
     });
     if (mounted) setState(() {});
   }
@@ -120,7 +138,7 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
             child: widget.isVideo
                 ? (_video != null && _video!.value.isInitialized
                       ? FittedBox(
-                          fit: BoxFit.contain,
+                          fit: BoxFit.cover,
                           child: SizedBox(
                             width: _video!.value.size.width,
                             height: _video!.value.size.height,
@@ -346,12 +364,23 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
                           color: Colors.white,
                         ),
                         onPressed: () async {
-                          if (playing) {
-                            await _video?.pause();
-                          } else {
-                            await _video?.play();
+                          if (_video == null) return;
+
+                          final value = _video!.value;
+
+                          // If previously completed, restart cleanly
+                          if (_isCompleted) {
+                            _isCompleted = false;
+                            await _video!.seekTo(Duration.zero);
                           }
-                          _isPlaying.value = _video?.value.isPlaying ?? false;
+
+                          if (value.isPlaying) {
+                            await _video!.pause();
+                          } else {
+                            await _video!.play();
+                          }
+
+                          _isPlaying.value = _video!.value.isPlaying;
                         },
                       ),
                     );
