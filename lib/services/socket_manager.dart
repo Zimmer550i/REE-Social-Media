@@ -125,12 +125,14 @@ class SocketService {
     required String chatId,
     required String senderId,
     required String mediaUrl,
+    required String mediaIos,
   }) {
     if (!isConnected) return;
     _socket!.emit("send-message", {
       "chat": chatId,
       "sender": senderId,
       "media": mediaUrl,
+      "media_ios": mediaIos,
       "contentType": "video",
     });
     log("➡️ Sent video: $mediaUrl to chat: $chatId");

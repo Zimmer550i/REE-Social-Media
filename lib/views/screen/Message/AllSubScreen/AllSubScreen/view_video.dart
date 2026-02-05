@@ -14,7 +14,7 @@ import 'package:video_player_hdr/video_player_hdr.dart';
 class ViewMedia extends StatefulWidget {
   const ViewMedia({super.key, required this.mediaUrl});
 
-  final String mediaUrl; // can be video or image
+  final String mediaUrl;
 
   @override
   State<ViewMedia> createState() => _ViewMediaState();
@@ -26,6 +26,7 @@ class _ViewMediaState extends State<ViewMedia> {
   Duration _position = Duration.zero;
   late final ValueNotifier<bool> _isPlaying = ValueNotifier<bool>(false);
   late final VoidCallback _videoListener;
+  bool _handledVideoEnd = false;
 
   bool get isVideo {
     final ext = widget.mediaUrl.toLowerCase();
@@ -69,14 +70,38 @@ class _ViewMediaState extends State<ViewMedia> {
 
     await _video!.initialize();
     _videoDuration = _video!.value.duration;
-    _video!.setLooping(false);
+    // Enable looping to prevent decoder from entering EOS state (causes white frame)
+    _video!.setLooping(true);
 
     _videoListener = () {
       if (!mounted) return;
+      final value = _video!.value;
+
+      // Clamp position so UI never advances past the final frame
+      final safePosition = value.position >= value.duration
+          ? value.duration
+          : value.position;
+
       setState(() {
-        _position = _video!.value.position;
-        _isPlaying.value = _video!.value.isPlaying;
+        _position = safePosition;
+        _isPlaying.value = value.isPlaying;
       });
+
+      // Freeze on last valid frame WITHOUT hitting EOS
+      final remaining = value.duration - value.position;
+
+      if (remaining <= const Duration(milliseconds: 60) && !_handledVideoEnd) {
+        _handledVideoEnd = true;
+
+        // Move slightly back from the end so the last frame remains renderable
+        final freezeFrame = value.duration - const Duration(milliseconds: 50);
+        _video!.seekTo(
+          freezeFrame.isNegative ? Duration.zero : freezeFrame,
+        );
+
+        _video!.pause();
+        _isPlaying.value = false;
+      }
     };
 
     _video!.addListener(_videoListener);
@@ -132,7 +157,7 @@ class _ViewMediaState extends State<ViewMedia> {
   Widget _buildMediaView() {
     if (isVideo && _video != null && _video!.value.isInitialized) {
       return FittedBox(
-        fit: BoxFit.contain,
+        fit: BoxFit.cover,
         child: SizedBox(
           width: _video!.value.size.width,
           height: _video!.value.size.height,
@@ -158,7 +183,7 @@ class _ViewMediaState extends State<ViewMedia> {
       1,
       double.infinity,
     );
-    final value = _position.inMilliseconds.toDouble().clamp(0, total);
+    // final value = _position.inMilliseconds.toDouble().clamp(0, total);
 
     return Positioned(
       bottom: 0,
@@ -176,7 +201,10 @@ class _ViewMediaState extends State<ViewMedia> {
               ),
               Expanded(
                 child: Slider(
-                  value: value.toDouble(),
+                  value: _position.inMilliseconds
+                      .toDouble()
+                      .clamp(0, total)
+                      .toDouble(),
                   min: 0,
                   max: total.toDouble(),
                   activeColor: Colors.white,
@@ -200,6 +228,11 @@ class _ViewMediaState extends State<ViewMedia> {
                     if (playing) {
                       await _video?.pause();
                     } else {
+                      // If replaying after video ended, jump to start first
+                      if (_handledVideoEnd) {
+                        await _video?.seekTo(Duration.zero);
+                        _handledVideoEnd = false;
+                      }
                       await _video?.play();
                     }
                     _isPlaying.value = _video?.value.isPlaying ?? false;

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -70,20 +71,23 @@ class _MessageScreenState extends State<MessageScreen>
     _loadCachedVideos();
     notificationController.fetchNotifications();
 
-    // Pagination listener for chats
+    // Pagination listener for chats (only trigger when user is scrolling downward near the bottom)
     _chatScrollController.addListener(() {
-      if (_chatScrollController.position.pixels >=
-              _chatScrollController.position.maxScrollExtent - 200 &&
+      final position = _chatScrollController.position;
+
+      if (position.userScrollDirection == ScrollDirection.reverse &&
+          position.pixels >= position.maxScrollExtent - 50 &&
           !_isFetchingMoreChats &&
+          !controller.isLoadingChats.value &&
           controller.hasMoreChats.value) {
         _loadMoreChats();
       }
     });
 
-    // Pagination listener for stories
+    // Pagination listener for stories (only trigger when truly at end edge)
     _storyScrollController.addListener(() {
-      if (_storyScrollController.position.pixels >=
-              _storyScrollController.position.maxScrollExtent - 100 &&
+      if (_storyScrollController.position.atEdge &&
+          _storyScrollController.position.pixels != 0 &&
           !_isFetchingMoreStories &&
           controller.hasMoreStories.value) {
         _loadMoreStories();
@@ -119,8 +123,8 @@ class _MessageScreenState extends State<MessageScreen>
   void _startPolling() {
     _stopPolling();
     _pollingTimer = Timer.periodic(const Duration(seconds: 2), (_) {
-      controller.fetchAllChats();
-      controller.fetchAllStories();
+      controller.fetchChats(loadMore: false, silent: true);
+      controller.fetchStories(loadMore: false, silent: true);
     });
   }
 
@@ -136,15 +140,18 @@ class _MessageScreenState extends State<MessageScreen>
   }
 
   Future<void> _loadMoreChats() async {
-    setState(() => _isFetchingMoreChats = true);
-    await controller.fetchChats(loadMore: true);
-    setState(() => _isFetchingMoreChats = false);
+    if (_isFetchingMoreChats) return;
+    _isFetchingMoreChats = true;
+    await controller.fetchChats(loadMore: true, silent: true);
+    await Future.delayed(const Duration(milliseconds: 200));
+    if (mounted) setState(() => _isFetchingMoreChats = false);
   }
 
   Future<void> _loadMoreStories() async {
-    setState(() => _isFetchingMoreStories = true);
-    await controller.fetchStories(loadMore: true);
-    setState(() => _isFetchingMoreStories = false);
+    if (_isFetchingMoreStories) return;
+    _isFetchingMoreStories = true;
+    await controller.fetchStories(loadMore: true, silent: true);
+    if (mounted) setState(() => _isFetchingMoreStories = false);
   }
 
   @override
@@ -192,15 +199,15 @@ class _MessageScreenState extends State<MessageScreen>
                           ),
                         ),
                         _buildChatList(),
-                        if (_isFetchingMoreChats)
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: CircularProgressIndicator(
-                                color: AppColors.primaryColor,
-                              ),
-                            ),
-                          ),
+                        // if (_isFetchingMoreChats)
+                        //   Center(
+                        //     child: Padding(
+                        //       padding: const EdgeInsets.all(12.0),
+                        //       child: CircularProgressIndicator(
+                        //         color: AppColors.primaryColor,
+                        //       ),
+                        //     ),
+                        //   ),
                       ],
                     ),
                   ),
@@ -356,7 +363,7 @@ class _MessageScreenState extends State<MessageScreen>
           SizedBox(
             height: 170,
             child: Skeletonizer(
-              enabled: controller.isLoadingStories.value,
+              enabled: controller.isLoadingStories.value && _storiesUiCache.isEmpty,
               enableSwitchAnimation: true,
               child: ListView.builder(
                 controller: _storyScrollController,
@@ -392,6 +399,7 @@ class _MessageScreenState extends State<MessageScreen>
                         ? story["image"]
                         : story["video"];
                   }
+                  debugPrint("=====> videoUrl: $mediaUrl");
 
                   // handle author safely
                   String authorName = "User";
@@ -810,9 +818,19 @@ class _MessageScreenState extends State<MessageScreen>
   Future<File> _downloadVideoToLocal(String url) async {
     final response = await http.get(Uri.parse(url));
     final dir = await getTemporaryDirectory();
+
+    // Try to detect extension from URL
+    String extension = url.split('.').last.split('?').first;
+
+    // If extension looks invalid, fallback by platform
+    if (extension.length > 5 || extension.contains('/')) {
+      extension = Platform.isIOS ? 'mov' : 'mp4';
+    }
+
     final file = File(
-      "${dir.path}/${DateTime.now().millisecondsSinceEpoch}.mp4",
+      "${dir.path}/${DateTime.now().millisecondsSinceEpoch}.$extension",
     );
+
     await file.writeAsBytes(response.bodyBytes);
     return file;
   }
@@ -822,7 +840,8 @@ class _MessageScreenState extends State<MessageScreen>
     final currentUserId = userController.userInfo.value?.id ?? "";
 
     return Obx(() {
-      if (controller.isLoadingChats.value) {
+      // Show skeleton only on first load
+      if (controller.isLoadingChats.value && _chatsUiCache.isEmpty) {
         // Skeleton loading placeholder while chats are fetching
         return ListView.builder(
           itemCount: 6,
@@ -904,7 +923,7 @@ class _MessageScreenState extends State<MessageScreen>
         return bTime.compareTo(aTime);
       });
 
-      if (allChats.isEmpty) {
+      if (!controller.isRefreshingLoading.value && allChats.isEmpty) {
         return const Center(child: Text("No chats found"));
       }
 
@@ -1127,14 +1146,20 @@ class _MessageScreenState extends State<MessageScreen>
             _dialogActions(
               context,
               onYes: () async {
-                allChats.removeAt(index);
+                // Optimistically remove from UI caches
+                _chatsUiCache.removeWhere((c) => c["_id"] == chatId);
+                controller.privateChats.removeWhere((c) => c["_id"] == chatId);
+                controller.groupChats.removeWhere((c) => c["_id"] == chatId);
+                Get.back();
+
+                setState(() {});
                 final message = await controller.deleteChat(chatId);
-                if (message == "success") {
-                  Get.offAllNamed(AppRoutes.messageScreen);
-                } else {
-                  Get.back();
+
+                if (message != "success") {
                   showSnackBar("ERROR $message", true);
                 }
+
+                
               },
             ),
           ],

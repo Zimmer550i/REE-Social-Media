@@ -161,6 +161,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
         : VideoPlayerHdrController.file(File(widget.videoUrl));
 
     await _video!.initialize();
+
     _videoDuration = _video!.value.duration;
     _video!.setLooping(false);
 
@@ -315,6 +316,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
     final videoReady = isVideo ? _video?.value.isInitialized == true : true;
 
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Row(
@@ -501,7 +503,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
       children: [
         BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: Container(color: Colors.white.withValues(alpha: 0.9)),
+          child: Container(color: Colors.white.withValues(alpha: 0.5)),
         ),
         Column(
           mainAxisSize: MainAxisSize.min,
@@ -558,23 +560,23 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
       right: 0,
       child: Container(
         padding: const EdgeInsets.all(20),
-        color: Colors.black.withValues(alpha: 0.3),
+        color: Colors.black.withValues(alpha: 0.2),
         child: Row(
           children: [
-            Text(_fmt(_position), style: const TextStyle(color: Colors.white)),
+            Text(_fmt(_position), style: const TextStyle(color: Colors.black)),
             Expanded(
               child: Slider(
                 value: double.parse(value.toStringAsFixed(0)),
                 min: 0,
                 max: double.parse(total.toStringAsFixed(0)),
-                activeColor: Colors.white,
+                activeColor: Colors.black,
                 onChanged: (v) =>
                     _video?.seekTo(Duration(milliseconds: v.toInt())),
               ),
             ),
             Text(
               _fmt(_videoDuration),
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.black),
             ),
             const SizedBox(width: 12),
             ValueListenableBuilder<bool>(
@@ -582,7 +584,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
               builder: (_, playing, _) => IconButton(
                 icon: Icon(
                   playing ? Icons.pause : Icons.play_arrow,
-                  color: Colors.white,
+                  color: Colors.black,
                 ),
                 onPressed: () async {
                   if (playing) {

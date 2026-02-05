@@ -22,6 +22,7 @@ class MessageController extends GetxController {
   final RxList<Map<String, dynamic>> groupChats = <Map<String, dynamic>>[].obs;
   final RxInt unreadCount = 0.obs;
   final isLoadingChats = false.obs;
+  final isRefreshingLoading = false.obs;
   final chatPage = 1.obs;
   final hasMoreChats = true.obs;
 
@@ -30,6 +31,38 @@ class MessageController extends GetxController {
   final isLoading = false.obs;
   final storyPage = 1.obs;
   final hasMoreStories = true.obs;
+
+  void _mergeStories(List newStories) {
+    for (var story in newStories) {
+      final index = stories.indexWhere((s) => s["_id"] == story["_id"]);
+      if (index == -1) {
+        stories.add(story);
+      } else {
+        final oldUpdated = stories[index]["updatedAt"];
+        if (oldUpdated != story["updatedAt"]) {
+          stories[index] = story;
+        }
+      }
+    }
+  }
+
+  void _mergeChats(
+    List<Map<String, dynamic>> incoming,
+    RxList<Map<String, dynamic>> target,
+  ) {
+    for (var chat in incoming) {
+      final index = target.indexWhere((c) => c["_id"] == chat["_id"]);
+      if (index == -1) {
+        target.add(chat);
+      } else {
+        final oldLast = target[index]["lastMessage"]?["_id"];
+        final newLast = chat["lastMessage"]?["_id"];
+        if (oldLast != newLast) {
+          target[index] = chat;
+        }
+      }
+    }
+  }
 
   @override
   void onInit() {
@@ -143,15 +176,19 @@ class MessageController extends GetxController {
     }
   }
 
-  Future<void> fetchStories({int limit = 20, bool loadMore = false}) async {
+  Future<void> fetchStories({
+    int limit = 20,
+    bool loadMore = false,
+    bool silent = false,
+  }) async {
     if (isLoadingStories.value || (loadMore && !hasMoreStories.value)) return;
 
     if (!loadMore) {
       storyPage.value = 1;
-      stories.clear();
+      hasMoreStories.value = true;
     }
 
-    isLoadingStories.value = true;
+    if (!silent) isLoadingStories.value = true;
 
     try {
       final response = await _api.get(
@@ -166,40 +203,30 @@ class MessageController extends GetxController {
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         if (body["success"] == true) {
-          final newStories = body["data"] ?? [];
-          if (loadMore) {
-            stories.addAll(newStories);
-          } else {
-            stories.assignAll(newStories);
-          }
+          final List newStories = body["data"] ?? [];
+          _mergeStories(newStories);
 
           final meta = body["meta"] ?? {};
           final totalPage = meta["totalPage"] ?? 1;
           hasMoreStories.value = storyPage.value < totalPage;
           if (hasMoreStories.value) storyPage.value++;
-        } else {
-          debugPrint("⚠️ Fetch stories failed: ${body["message"]}");
         }
-      } else {
-        debugPrint("⚠️ Story fetch failed: ${response.body}");
       }
     } catch (e) {
       debugPrint("❌ Error fetching stories: $e");
     } finally {
-      isLoadingStories.value = false;
+      if (!silent) isLoadingStories.value = false;
     }
   }
 
-  Future<void> fetchChats({bool loadMore = false}) async {
-    if (isLoadingChats.value || !hasMoreChats.value) return;
+  Future<void> fetchChats({bool loadMore = false, bool silent = false}) async {
+    if (isLoadingChats.value || (loadMore && !hasMoreChats.value)) return;
+    if (!silent) isLoadingChats.value = true;
 
     if (!loadMore) {
       chatPage.value = 1;
-      privateChats.clear();
-      groupChats.clear();
+      hasMoreChats.value = true;
     }
-
-    isLoadingChats.value = true;
 
     try {
       final response = await _api.get(
@@ -214,23 +241,17 @@ class MessageController extends GetxController {
         if (body["success"] == true) {
           final List data = body["data"] ?? [];
 
-          final List<Map<String, dynamic>> privates = data
+          final privates = data
               .where((c) => c['type'] == "private")
               .map((c) => Map<String, dynamic>.from(c))
               .toList();
 
-          final List<Map<String, dynamic>> groups = data
+          final groups = data
               .where((c) => c['type'] == "group")
               .map((c) => Map<String, dynamic>.from(c))
               .toList();
-
-          if (loadMore) {
-            privateChats.addAll(privates);
-            groupChats.addAll(groups);
-          } else {
-            privateChats.assignAll(privates);
-            groupChats.assignAll(groups);
-          }
+          _mergeChats(privates, privateChats);
+          _mergeChats(groups, groupChats);
 
           calculateUnreadMessages();
 
@@ -238,97 +259,22 @@ class MessageController extends GetxController {
           final totalPage = meta['totalPage'] ?? 1;
           hasMoreChats.value = chatPage.value < totalPage;
           if (hasMoreChats.value) chatPage.value++;
-        } else {
-          debugPrint("⚠️ Fetch chats failed: ${body["message"]}");
         }
-      } else {
-        debugPrint("⚠️ Chat fetch failed: ${response.body}");
       }
     } catch (e) {
       debugPrint("❌ Error fetching chats: $e");
     } finally {
-      isLoadingChats.value = false;
+      if (!silent) isLoadingChats.value = false;
     }
   }
-
 
   Future<void> fetchAllStories() async {
-    try {
-      final response = await _api.get(
-        "/story/all-stories",
-        queryParams: {
-          "page": storyPage.value.toString(),
-          "limit": "10",
-        },
-        authReq: true,
-      );
-
-      if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
-        if (body["success"] == true) {
-          final newStories = body["data"] ?? [];
-          stories.assignAll(newStories);
-
-          final meta = body["meta"] ?? {};
-          final totalPage = meta["totalPage"] ?? 1;
-          hasMoreStories.value = storyPage.value < totalPage;
-          if (hasMoreStories.value) storyPage.value++;
-        } else {
-          debugPrint("⚠️ Fetch stories failed: ${body["message"]}");
-        }
-      } else {
-        debugPrint("⚠️ Story fetch failed: ${response.body}");
-      }
-    } catch (e) {
-      debugPrint("❌ Error fetching stories: $e");
-    }
+    await fetchStories(loadMore: false);
   }
-
 
   Future<void> fetchAllChats() async {
-    try {
-      final response = await _api.get(
-        "/chat/private-chat-list",
-        queryParams: {"limit": "10", "page": chatPage.value.toString()},
-        authReq: true,
-      );
-
-      if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
-
-        if (body["success"] == true) {
-          final List data = body["data"] ?? [];
-
-          final List<Map<String, dynamic>> privates = data
-              .where((c) => c['type'] == "private")
-              .map((c) => Map<String, dynamic>.from(c))
-              .toList();
-
-          final List<Map<String, dynamic>> groups = data
-              .where((c) => c['type'] == "group")
-              .map((c) => Map<String, dynamic>.from(c))
-              .toList();
-
-          privateChats.assignAll(privates);
-            groupChats.assignAll(groups);
-
-          calculateUnreadMessages();
-
-          final meta = body['meta'] ?? {};
-          final totalPage = meta['totalPage'] ?? 1;
-          hasMoreChats.value = chatPage.value < totalPage;
-          if (hasMoreChats.value) chatPage.value++;
-        } else {
-          debugPrint("⚠️ Fetch chats failed: ${body["message"]}");
-        }
-      } else {
-        debugPrint("⚠️ Chat fetch failed: ${response.body}");
-      }
-    } catch (e) {
-      debugPrint("❌ Error fetching chats: $e");
-    }
+    await fetchChats(loadMore: false);
   }
-
 
   String getLastMessage(Map<String, dynamic> chat) {
     final msg = chat["lastMessage"];
@@ -361,6 +307,7 @@ class MessageController extends GetxController {
   }
 
   Future<void> refreshAll() async {
+    isRefreshingLoading.value = true;
     chatPage.value = 1;
     storyPage.value = 1;
     hasMoreChats.value = true;
@@ -370,6 +317,7 @@ class MessageController extends GetxController {
     stories.clear();
 
     await Future.wait([fetchChats(), fetchStories()]);
+    isRefreshingLoading.value = false;
   }
 
   Future<void> createStory() async {
