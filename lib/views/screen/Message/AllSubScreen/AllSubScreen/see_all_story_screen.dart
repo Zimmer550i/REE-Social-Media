@@ -247,12 +247,14 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.network(
-                userImage,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) =>
-                    const Center(child: Icon(Icons.broken_image)),
-              ),
+              (userImage.isEmpty || userImage == "null")
+                  ? _initialsBackground(name)
+                  : Image.network(
+                      userImage,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) =>
+                          const Center(child: Icon(Icons.broken_image)),
+                    ),
               _buildBottomNameBar(name),
               if (widget.isMe == true)
                 Positioned(
@@ -279,6 +281,36 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
         ),
       ),
     );
+  }
+
+  Widget _initialsBackground(String name) {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: AppColors.primaryColor,
+      child: Center(
+        child: Text(
+          getInitials(name),
+          style: TextStyle(
+            color: AppColors.backgroundColor,
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  String getInitials(String name) {
+    if (name.trim().isEmpty) return "";
+
+    List<String> parts = name.trim().split(" ");
+
+    if (parts.length == 1) {
+      return parts[0][0].toUpperCase();
+    }
+
+    return (parts.first[0] + parts.last[0]).toUpperCase();
   }
 
   Future<Widget> _buildVideoThumbnailCard(
@@ -358,7 +390,6 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
       ),
     );
   }
-
 
   void _confirm(BuildContext context, {required VoidCallback onYes}) {
     showDialog(
@@ -442,5 +473,4 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
       ),
     );
   }
-
 }

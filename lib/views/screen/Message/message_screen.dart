@@ -363,7 +363,8 @@ class _MessageScreenState extends State<MessageScreen>
           SizedBox(
             height: 170,
             child: Skeletonizer(
-              enabled: controller.isLoadingStories.value && _storiesUiCache.isEmpty,
+              enabled:
+                  controller.isLoadingStories.value && _storiesUiCache.isEmpty,
               enableSwitchAnimation: true,
               child: ListView.builder(
                 controller: _storyScrollController,
@@ -436,6 +437,13 @@ class _MessageScreenState extends State<MessageScreen>
     final image = userController.userInfo.value!.image;
     final userImage = userController.addBaseUrl(image.toString());
     final currentUserId = userController.userInfo.value!.id;
+    final userName = userController.userInfo.value!.name ?? "";
+    final hasImage =
+        image != null &&
+        image.toString().isNotEmpty &&
+        image.toString() != "null";
+    const double cardW = 100;
+    const double cardH = 132;
     final myStories = controller.stories
         .where(
           (story) =>
@@ -448,8 +456,8 @@ class _MessageScreenState extends State<MessageScreen>
 
     return Container(
       margin: const EdgeInsets.only(left: 12, right: 8),
-      width: 100,
-      height: 132,
+      width: cardW,
+      height: cardH,
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.only(
           topRight: Radius.circular(8),
@@ -461,13 +469,29 @@ class _MessageScreenState extends State<MessageScreen>
               : Colors.transparent,
           width: myStories.isNotEmpty ? 5 : 0,
         ),
-        image: DecorationImage(
-          image: NetworkImage(userImage.toString()),
-          fit: BoxFit.cover,
-        ),
+        // image: DecorationImage(
+        //   image: NetworkImage(userImage.toString()),
+        //   fit: BoxFit.cover,
+        // ),
       ),
       child: Stack(
         children: [
+          ///Background (Image OR Initials)
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(8),
+              topLeft: Radius.circular(8),
+            ),
+            child: hasImage
+                ? Image.network(
+                    userImage!,
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _initialsBackground(userName),
+                  )
+                : _initialsBackground(userName),
+          ),
           // Left overlay with "Add Story" and camera button
           Align(
             alignment: Alignment.centerLeft,
@@ -553,6 +577,36 @@ class _MessageScreenState extends State<MessageScreen>
     );
   }
 
+  Widget _initialsBackground(String name) {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: Colors.transparent,
+      child: Center(
+        child: Text(
+          getInitials(name),
+          style: TextStyle(
+            color: AppColors.primaryColor,
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  String getInitials(String name) {
+    if (name.trim().isEmpty) return "";
+
+    List<String> parts = name.trim().split(" ");
+
+    if (parts.length == 1) {
+      return parts[0][0].toUpperCase();
+    }
+
+    return (parts.first[0] + parts.last[0]).toUpperCase();
+  }
+
   Widget _buildStoryCard(
     String mediaUrl,
     String name,
@@ -588,7 +642,6 @@ class _MessageScreenState extends State<MessageScreen>
     }
   }
 
-  /// Handles image story preview
   /// Handles image story preview
   Widget _buildImageStoryWidget(
     String mediaUrl,
@@ -626,20 +679,38 @@ class _MessageScreenState extends State<MessageScreen>
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.network(
-                image,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => const Center(
-                  child: SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              (image.isNotEmpty && image != 'null')
+                  ? Image.network(
+                      image,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Container(
+                        color: Colors.grey.shade800,
+                        child: Center(
+                          child: Text(
+                            getInitials(name),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  : Container(
+                      color: Colors.grey.shade800,
+                      child: Center(
+                        child: Text(
+                          getInitials(name),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
+
               Positioned(
                 left: 0,
                 right: 0,
@@ -1005,9 +1076,9 @@ class _MessageScreenState extends State<MessageScreen>
                       backgroundImage: image.isNotEmpty
                           ? NetworkImage(imageWithBaseUrl.toString())
                           : null,
-                      child: image.isEmpty
+                      child: image.isEmpty || image == "null"
                           ? Text(
-                              name.isNotEmpty ? name[0].toUpperCase() : "?",
+                              getInitials(name),
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -1158,8 +1229,6 @@ class _MessageScreenState extends State<MessageScreen>
                 if (message != "success") {
                   showSnackBar("ERROR $message", true);
                 }
-
-                
               },
             ),
           ],
