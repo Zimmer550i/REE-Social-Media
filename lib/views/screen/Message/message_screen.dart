@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -438,12 +440,12 @@ class _MessageScreenState extends State<MessageScreen>
     final userImage = userController.addBaseUrl(image.toString());
     final currentUserId = userController.userInfo.value!.id;
     final userName = userController.userInfo.value!.name ?? "";
+
     final hasImage =
         image != null &&
         image.toString().isNotEmpty &&
         image.toString() != "null";
-    const double cardW = 100;
-    const double cardH = 132;
+
     final myStories = controller.stories
         .where(
           (story) =>
@@ -454,126 +456,135 @@ class _MessageScreenState extends State<MessageScreen>
         )
         .toList();
 
-    return Container(
-      margin: const EdgeInsets.only(left: 12, right: 8),
-      width: cardW,
-      height: cardH,
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.only(
-          topRight: Radius.circular(8),
-          topLeft: Radius.circular(8),
-        ),
-        border: Border.all(
-          color: myStories.isNotEmpty
-              ? AppColors.primaryColor
-              : Colors.transparent,
-          width: myStories.isNotEmpty ? 5 : 0,
-        ),
-        // image: DecorationImage(
-        //   image: NetworkImage(userImage.toString()),
-        //   fit: BoxFit.cover,
-        // ),
-      ),
-      child: Stack(
-        children: [
-          ///Background (Image OR Initials)
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topRight: Radius.circular(8),
-              topLeft: Radius.circular(8),
-            ),
-            child: hasImage
-                ? Image.network(
-                    userImage!,
-                    width: double.infinity,
-                    height: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _initialsBackground(userName),
-                  )
-                : _initialsBackground(userName),
-          ),
-          // Left overlay with "Add Story" and camera button
-          Align(
-            alignment: Alignment.centerLeft,
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(8),
-                topLeft: Radius.circular(4),
-              ),
-              child: Container(
-                width: 56,
-                color: AppColors.primaryColor.withValues(alpha: 0.56),
-                child: Stack(
-                  children: [
-                    const Positioned(
-                      left: 10,
-                      top: 40,
-                      child: Text(
-                        "Add\nStory",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                          height: 1.2,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: 10,
-                      bottom: 60,
-                      child: InkWell(
-                        onTap: () => Get.offAndToNamed(AppRoutes.cameraScreen),
-                        child: Container(
-                          width: 26,
-                          height: 26,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: SvgPicture.asset(
-                              'assets/icons/camera.svg',
-                              // ignore: deprecated_member_use
-                              color: AppColors.primaryColor,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardWidth = constraints.maxWidth == double.infinity
+            ? MediaQuery.of(context).size.width * .25
+            : constraints.maxWidth;
+
+        final overlayWidth = cardWidth * .56;
+        final iconSize = cardWidth * .26;
+
+        return Container(
+          margin: const EdgeInsets.only(left: 12, right: 8),
+          width: cardWidth,
+          child: AspectRatio(
+            aspectRatio: 100 / 132, // keeps same shape
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(8),
+                  topLeft: Radius.circular(8),
+                ),
+                border: Border.all(
+                  color: myStories.isNotEmpty
+                      ? AppColors.primaryColor
+                      : Colors.transparent,
+                  width: myStories.isNotEmpty ? 5 : 0,
                 ),
               ),
-            ),
-          ),
+              child: Stack(
+                children: [
+                  /// Background (Image OR Initials)
+                  ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(8),
+                      topLeft: Radius.circular(8),
+                    ),
+                    child: hasImage
+                        ? Image.network(
+                            userImage!,
+                            width: double.infinity,
+                            height: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) =>
+                                _initialsBackground(userName),
+                          )
+                        : _initialsBackground(userName),
+                  ),
 
-          // Right side (background image) tap to open user's own stories
-          Positioned.fill(
-            left: 56, // only make the RIGHT side tappable
-            child: InkWell(
-              onTap: () {
-                if (myStories.isEmpty) {
-                  Get.snackbar(
-                    "No Stories",
-                    "You haven't added any stories yet.",
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
-                  return;
-                }
-                Get.to(
-                  () => SeeAllStoryScreen(stories: myStories, isMe: true),
-                )?.then((value) {
-                  // This code runs when the user comes back
-                  controller.refreshAll();
-                });
-              },
-              child: Container(
-                color: Colors.transparent, // needed for tap detection
+                  /// Left overlay
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(8),
+                        topLeft: Radius.circular(4),
+                      ),
+                      child: Container(
+                        width: overlayWidth,
+                        color: AppColors.primaryColor.withValues(alpha: 0.56),
+                        child: Stack(
+                          children: [
+                            Positioned(
+                              left: 10,
+                              top: 40,
+                              child: Text(
+                                "Add\nStory",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: cardWidth * .14,
+                                  height: 1.2,
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              left: 10,
+                              bottom: 40,
+                              child: InkWell(
+                                onTap: () =>
+                                    Get.offAndToNamed(AppRoutes.cameraScreen),
+                                child: Container(
+                                  width: iconSize,
+                                  height: iconSize,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4),
+                                    child: SvgPicture.asset(
+                                      'assets/icons/camera.svg',
+                                      color: AppColors.primaryColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  /// Right side tap
+                  Positioned.fill(
+                    left: overlayWidth,
+                    child: InkWell(
+                      onTap: () {
+                        if (myStories.isEmpty) {
+                          Get.snackbar(
+                            "No Stories",
+                            "You haven't added any stories yet.",
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                          return;
+                        }
+                        Get.to(
+                          () =>
+                              SeeAllStoryScreen(stories: myStories, isMe: true),
+                        )?.then((value) => controller.refreshAll());
+                      },
+                      child: Container(color: Colors.transparent),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
