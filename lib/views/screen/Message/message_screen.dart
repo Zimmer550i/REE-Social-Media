@@ -175,47 +175,31 @@ class _MessageScreenState extends State<MessageScreen>
         child: RefreshIndicator(
           onRefresh: controller.refreshAll,
           color: AppColors.primaryColor,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildTopBar(),
-                const SizedBox(height: 24),
-                Expanded(
-                  child: SingleChildScrollView(
-                    controller: _chatScrollController,
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildStoriesSection(),
-                        const SizedBox(height: 24),
-                        Text(
-                          "Chats",
-                          style: const TextStyle(
-                            color: Color(0xFF413E3E),
-                            fontSize: 24,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: "LibreText",
-                          ),
-                        ),
-                        _buildChatList(),
-                        // if (_isFetchingMoreChats)
-                        //   Center(
-                        //     child: Padding(
-                        //       padding: const EdgeInsets.all(12.0),
-                        //       child: CircularProgressIndicator(
-                        //         color: AppColors.primaryColor,
-                        //       ),
-                        //     ),
-                        //   ),
-                      ],
-                    ),
-                  ),
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            children: [
+              _buildTopBar(),
+              const SizedBox(height: 24),
+
+              /// Stories (fixed section)
+              _buildStoriesSection(),
+              const SizedBox(height: 24),
+
+              const Text(
+                "Chats",
+                style: TextStyle(
+                  color: Color(0xFF413E3E),
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: "LibreText",
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 12),
+
+              /// Chat list inside list
+              _buildChatList(),
+            ],
           ),
         ),
       ),
@@ -1014,7 +998,8 @@ class _MessageScreenState extends State<MessageScreen>
         physics: const NeverScrollableScrollPhysics(),
         itemCount: allChats.length,
         padding: EdgeInsets.zero,
-        separatorBuilder: (_, _) => const SizedBox(height: 1),
+        controller: _chatScrollController,
+        separatorBuilder: (_, _) => const SizedBox(),
         itemBuilder: (context, index) {
           var chat = allChats[index];
           String name = chat["name"] ?? "Unknown";
@@ -1075,85 +1060,90 @@ class _MessageScreenState extends State<MessageScreen>
                 }
               },
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 8,
-                  horizontal: 12,
-                ),
-                child: Row(
+                padding: const EdgeInsets.only(bottom: 8, left: 12, right: 12),
+                child: Column(
                   children: [
-                    CircleAvatar(
-                      radius: 24,
-                      backgroundColor: AppColors.primaryColor,
-                      backgroundImage: image.isNotEmpty
-                          ? NetworkImage(imageWithBaseUrl.toString())
-                          : null,
-                      child: image.isEmpty || image == "null"
-                          ? Text(
-                              getInitials(name),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            )
-                          : null,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 24,
+                          backgroundColor: AppColors.primaryColor,
+                          backgroundImage: image.isNotEmpty
+                              ? NetworkImage(imageWithBaseUrl.toString())
+                              : null,
+                          child: image.isEmpty || image == "null"
+                              ? Text(
+                                  getInitials(name),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : null,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              if (chat['lastMessage'] != null) ...[
-                                if (chat["lastMessage"]["read"] == false &&
-                                    chat["lastMessage"]["sender"] !=
-                                        currentUserId)
-                                  Container(
-                                    width: 10,
-                                    height: 10,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primaryColor,
-                                      shape: BoxShape.circle,
+                              Row(
+                                children: [
+                                  Text(
+                                    name,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
                                     ),
                                   ),
-                              ],
+                                  const SizedBox(width: 8),
+                                  if (chat['lastMessage'] != null) ...[
+                                    if (chat["lastMessage"]["read"] == false &&
+                                        chat["lastMessage"]["sender"] !=
+                                            currentUserId)
+                                      Container(
+                                        width: 10,
+                                        height: 10,
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primaryColor,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                  ],
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                lastMsg,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: chat["lastMessage"] == null
+                                      ? FontWeight.normal
+                                      : chat["lastMessage"]["read"] == false &&
+                                            chat["lastMessage"]["sender"] !=
+                                                currentUserId
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color:
+                                      lastMsg.contains("Video") ||
+                                          lastMsg.contains("Image")
+                                      ? Colors.black
+                                      : Colors.black.withValues(alpha: 0.6),
+                                ),
+                              ),
                             ],
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            lastMsg,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: chat["lastMessage"] == null
-                                  ? FontWeight.normal
-                                  : chat["lastMessage"]["read"] == false &&
-                                        chat["lastMessage"]["sender"] !=
-                                            currentUserId
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                              color:
-                                  lastMsg.contains("Video") ||
-                                      lastMsg.contains("Image")
-                                  ? Colors.black
-                                  : Colors.black.withValues(alpha: 0.6),
-                            ),
+                        ),
+                        Text(
+                          formattedTime,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      formattedTime,
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
+                    Divider(color: Colors.grey.shade300),
                   ],
                 ),
               ),
