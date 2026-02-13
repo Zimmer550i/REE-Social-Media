@@ -471,10 +471,10 @@ class _MessageScreenState extends State<MessageScreen>
                 children: [
                   /// Background (Image OR Initials)
                   ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(8),
-                      topLeft: Radius.circular(8),
-                    ),
+                    // borderRadius: const BorderRadius.only(
+                    //   topRight: Radius.circular(8),
+                    //   topLeft: Radius.circular(8),
+                    // ),
                     child: hasImage
                         ? Image.network(
                             userImage!,
@@ -576,12 +576,12 @@ class _MessageScreenState extends State<MessageScreen>
     return Container(
       width: double.infinity,
       height: double.infinity,
-      color: Colors.transparent,
+      color: AppColors.primaryColor,
       child: Center(
         child: Text(
           getInitials(name),
           style: TextStyle(
-            color: AppColors.primaryColor,
+            color: AppColors.backgroundColor,
             fontSize: 32,
             fontWeight: FontWeight.bold,
           ),

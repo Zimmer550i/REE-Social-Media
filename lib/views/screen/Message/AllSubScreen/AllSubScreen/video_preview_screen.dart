@@ -501,10 +501,27 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
     child: Stack(
       alignment: Alignment.center,
       children: [
-        BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: Container(color: Colors.white.withValues(alpha: 0.5)),
+        // Must clip for BackdropFilter to work
+        ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+            child: Container(
+              // must have some color (even transparent)
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.90),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.3),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
+
+        // Foreground content
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -528,9 +545,9 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.3),
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
                   ),
                 ],
               ),
@@ -548,6 +565,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
       ],
     ),
   );
+
   Widget _buildBottomControls() {
     final total = _videoDuration.inMilliseconds.toDouble().clamp(
       1,
