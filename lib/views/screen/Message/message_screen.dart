@@ -172,35 +172,46 @@ class _MessageScreenState extends State<MessageScreen>
         () => BottomMenu(0, messageCount: controller.unreadCount.value),
       ),
       body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: controller.refreshAll,
-          color: AppColors.primaryColor,
-          child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            children: [
-              _buildTopBar(),
-              const SizedBox(height: 24),
+        child: Column(
+          children: [
+            /// Fixed header area
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  _buildTopBar(),
+                  const SizedBox(height: 24),
 
-              /// Stories (fixed section)
-              _buildStoriesSection(),
-              const SizedBox(height: 24),
+                  /// Stories fixed
+                  _buildStoriesSection(),
+                  const SizedBox(height: 24),
 
-              const Text(
-                "Chats",
-                style: TextStyle(
-                  color: Color(0xFF413E3E),
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: "LibreText",
-                ),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Chats",
+                      style: TextStyle(
+                        color: Color(0xFF413E3E),
+                        fontSize: 24,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: "LibreText",
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
               ),
-              const SizedBox(height: 12),
+            ),
 
-              /// Chat list inside list
-              _buildChatList(),
-            ],
-          ),
+            /// ✅ Refresh works here
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: controller.refreshAll,
+                color: AppColors.primaryColor,
+                child: _buildChatList(),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -995,7 +1006,7 @@ class _MessageScreenState extends State<MessageScreen>
 
       return ListView.separated(
         shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
+        physics: ScrollPhysics(),
         itemCount: allChats.length,
         padding: EdgeInsets.zero,
         controller: _chatScrollController,
