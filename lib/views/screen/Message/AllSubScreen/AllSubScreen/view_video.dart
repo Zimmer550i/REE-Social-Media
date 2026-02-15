@@ -6,21 +6,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:ree_social_media_app/controllers/user_controller.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
 import 'package:ree_social_media_app/views/base/re_back.dart';
 import 'package:ree_social_media_app/views/base/reponsive_image.dart';
 import 'package:video_player_hdr/video_player_hdr.dart';
 
 class ViewMedia extends StatefulWidget {
-  const ViewMedia({super.key, required this.mediaUrl});
+  const ViewMedia({super.key, required this.mediaUrl, this.caption});
 
   final String mediaUrl;
+  final String? caption;
 
   @override
   State<ViewMedia> createState() => _ViewMediaState();
 }
 
 class _ViewMediaState extends State<ViewMedia> {
+  final UserController _userController = Get.find<UserController>();
   VideoPlayerHdrController? _video;
   Duration _videoDuration = Duration.zero;
   Duration _position = Duration.zero;
@@ -95,9 +98,7 @@ class _ViewMediaState extends State<ViewMedia> {
 
         // Move slightly back from the end so the last frame remains renderable
         final freezeFrame = value.duration - const Duration(milliseconds: 50);
-        _video!.seekTo(
-          freezeFrame.isNegative ? Duration.zero : freezeFrame,
-        );
+        _video!.seekTo(freezeFrame.isNegative ? Duration.zero : freezeFrame);
 
         _video!.pause();
         _isPlaying.value = false;
@@ -128,7 +129,7 @@ class _ViewMediaState extends State<ViewMedia> {
   @override
   Widget build(BuildContext context) {
     final videoReady = isVideo ? _video?.value.isInitialized == true : true;
-
+    String? image = _userController.userInfo.value!.image;
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -145,6 +146,69 @@ class _ViewMediaState extends State<ViewMedia> {
               alignment: Alignment.center,
               children: [
                 Positioned.fill(child: _buildMediaView()),
+                if (!isVideo && widget.caption!.isNotEmpty) ...[
+                  Positioned(
+                    left: 20,
+                    right: 20,
+                    bottom: 40,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircleAvatar(
+                          radius: 25,
+                          backgroundColor:
+                              image == null
+                              ? AppColors.primaryColor
+                              : Colors.transparent,
+                          backgroundImage:
+                              image == null
+                              ? null
+                              : NetworkImage(
+                                  _userController.userInfo.value!.image!,
+                                ),
+                          child: image == null
+                              ? Text(
+                                  getInitials(
+                                    _userController.userInfo.value!.name!,
+                                  ),
+                                  style: TextStyle(
+                                    color: AppColors.backgroundColor,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : null,
+                        ),
+                        SizedBox(width: 12),
+                        Flexible(
+                          fit: FlexFit.loose,
+                          child: Container(
+                            constraints: const BoxConstraints(maxWidth: 250),
+                            decoration: BoxDecoration(
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(30),
+                                topRight: Radius.circular(30),
+                                bottomRight: Radius.circular(30),
+                              ),
+                              color: AppColors.backgroundColor,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                widget.caption!,
+                                style: TextStyle(
+                                  color: AppColors.primaryColor,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 if (isVideo) _buildBottomControls(),
               ],
             )
@@ -152,6 +216,18 @@ class _ViewMediaState extends State<ViewMedia> {
               child: SpinKitWave(color: AppColors.primaryColor, size: 30.0),
             ),
     );
+  }
+
+  String getInitials(String name) {
+    if (name.trim().isEmpty) return "";
+
+    List<String> parts = name.trim().split(" ");
+
+    if (parts.length == 1) {
+      return parts[0][0].toUpperCase();
+    }
+
+    return (parts.first[0] + parts.last[0]).toUpperCase();
   }
 
   Widget _buildMediaView() {

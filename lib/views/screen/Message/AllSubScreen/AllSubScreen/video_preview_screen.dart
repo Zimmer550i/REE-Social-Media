@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously, unnecessary_underscores
+// ignore_for_file: use_build_context_synchronously, unnecessary_underscores, unnecessary_null_comparison
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
@@ -21,6 +21,7 @@ class VideoPreviewScreen extends StatefulWidget {
     required this.userProfile,
     required this.userName,
     this.chatId,
+    this.caption,
     required this.postId,
     this.isInbox = false,
   });
@@ -29,6 +30,7 @@ class VideoPreviewScreen extends StatefulWidget {
   final String userProfile;
   final String userName;
   final String? chatId;
+  final String? caption;
   final String postId;
   final bool? isInbox;
   final int countdownSeconds;
@@ -49,6 +51,9 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
   String? storyChatId;
   double imgWidth = 0;
   double imgHeight = 0;
+
+  // Tall image prediction flag
+  bool _isTallImage = false;
 
   Duration _videoDuration = Duration.zero;
   Duration _position = Duration.zero;
@@ -303,9 +308,19 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
         .resolve(const ImageConfiguration())
         .addListener(
           ImageStreamListener((ImageInfo info, _) {
+            final screenHeight = MediaQuery.of(context).size.height;
+            final aspectRatio = info.image.height / info.image.width;
+
+            // Predict rendered height using full width
+            final renderedHeight =
+                MediaQuery.of(context).size.width * aspectRatio;
+
+            final bool isVeryTall = renderedHeight > screenHeight * 0.7;
+
             setState(() {
               imgWidth = info.image.width.toDouble();
               imgHeight = info.image.height.toDouble();
+              _isTallImage = isVeryTall;
             });
           }),
         );
@@ -333,23 +348,16 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
             CircleAvatar(
               radius: 22,
               backgroundColor: AppColors.primaryColor,
-              backgroundImage: (widget.userProfile.isNotEmpty)
+              backgroundImage: widget.userProfile.isNotEmpty
                   ? NetworkImage(widget.userProfile)
                   : null,
-              child: (widget.userProfile.isEmpty && widget.userName.isNotEmpty)
+              child: (widget.userProfile.isEmpty || widget.userProfile == "")
                   ? Text(
-                      widget.userName[0].toUpperCase(),
+                      getInitials(widget.userName),
                       style: const TextStyle(
+                        fontSize: 20,
                         color: Colors.white,
-                        fontFamily: "LibreText",
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  : (widget.userProfile.isEmpty && widget.userName.isEmpty)
-                  ? Text(
-                      widget.userName.toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
+
                         fontFamily: "LibreText",
                         fontWeight: FontWeight.bold,
                       ),
@@ -394,26 +402,18 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                             child: VideoPlayerHdr(_video!),
                           ),
                         )
-                      : LayoutBuilder(
-                          builder: (context, constraints) {
-                            final screenHeight = MediaQuery.of(
-                              context,
-                            ).size.height;
-
-                            // Rendered height on screen
-                            final renderedHeight =
-                                constraints.maxWidth * (imgHeight / imgWidth);
-
-                            // If rendered image height > 70% of screen height
-                            double sHeight = screenHeight * 0.7;
-                            final bool isVeryTall = renderedHeight > sHeight;
-                            return Image.network(
-                              widget.videoUrl,
-                              fit: isVeryTall ? BoxFit.cover : BoxFit.contain,
-                              errorBuilder: (_, __, ___) =>
-                                  const Icon(Icons.broken_image),
-                            );
-                          },
+                      : AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 350),
+                          child: Image.network(
+                            widget.videoUrl,
+                            key: ValueKey(_isTallImage),
+                            fit: _isTallImage ? BoxFit.cover : BoxFit.contain,
+                            width: double.infinity,
+                            height: double.infinity,
+                            alignment: Alignment.center,
+                            errorBuilder: (_, __, ___) =>
+                                const Icon(Icons.broken_image),
+                          ),
                         ),
                 ),
 
@@ -440,6 +440,63 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                       ),
                     ),
                   ),
+                if (!isVideo && widget.caption!.isNotEmpty) ...[
+                  Positioned(
+                    left: 20,
+                    right: 20,
+                    bottom: 100,
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 25,
+                          backgroundColor: widget.userProfile.isEmpty
+                              ? AppColors.primaryColor
+                              : Colors.transparent,
+                          backgroundImage: widget.userProfile.isEmpty
+                              ? null
+                              : NetworkImage(widget.userProfile),
+                          child: widget.userProfile.isEmpty
+                              ? Text(
+                                  getInitials(widget.userName),
+                                  style: TextStyle(
+                                    color: AppColors.backgroundColor,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : null,
+                        ),
+                        SizedBox(width: 12),
+                        Flexible(
+                          fit: FlexFit.loose,
+                          child: Container(
+                            constraints: const BoxConstraints(maxWidth: 250),
+                            decoration: BoxDecoration(
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(30),
+                                topRight: Radius.circular(30),
+                                bottomRight: Radius.circular(30),
+                              ),
+                              color: AppColors.backgroundColor,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                widget.caption!,
+                                style: TextStyle(
+                                  color: AppColors.primaryColor,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
                 isVideo
                     ? _buildBottomControls()
                     : Positioned(
@@ -497,26 +554,27 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
     );
   }
 
+  String getInitials(String name) {
+    if (name.trim().isEmpty) return "";
+
+    List<String> parts = name.trim().split(" ");
+
+    if (parts.length == 1) {
+      return parts[0][0].toUpperCase();
+    }
+
+    return (parts.first[0] + parts.last[0]).toUpperCase();
+  }
+
   Widget _buildCountdownOverlay() => Positioned.fill(
     child: Stack(
       alignment: Alignment.center,
       children: [
-        // Must clip for BackdropFilter to work
-        ClipRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-            child: Container(
-              // must have some color (even transparent)
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.90),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.white.withOpacity(0.3),
-                    blurRadius: 6,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
+        Positioned.fill(
+          child: ClipRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+              child: Container(),
             ),
           ),
         ),
