@@ -515,7 +515,7 @@ class _MessageScreenState extends State<MessageScreen>
                           children: [
                             Positioned(
                               left: 10,
-                              top: 40,
+                              top: 45,
                               child: Text(
                                 "Add\nStory",
                                 style: TextStyle(
@@ -528,7 +528,7 @@ class _MessageScreenState extends State<MessageScreen>
                             ),
                             Positioned(
                               left: 10,
-                              bottom: 40,
+                              bottom: 45,
                               child: InkWell(
                                 onTap: () =>
                                     Get.offAndToNamed(AppRoutes.cameraScreen),
@@ -838,7 +838,7 @@ class _MessageScreenState extends State<MessageScreen>
                 fit: BoxFit.cover,
                 // ignore: unnecessary_underscores
                 errorBuilder: (_, __, ___) => Container(
-                  color: Colors.black26,
+                  color: AppColors.primaryColor,
                   child: const Center(
                     child: Icon(Icons.person, color: Colors.white54),
                   ),
@@ -1052,121 +1052,138 @@ class _MessageScreenState extends State<MessageScreen>
 
           final isPrivate = chat["type"] == "private";
 
-          return Slidable(
-            key: const ValueKey(0),
-            endActionPane: ActionPane(
-              motion: const ScrollMotion(),
-              children: [
-                SlidableAction(
-                  backgroundColor: const Color(0xFFFE4A49),
-                  foregroundColor: Colors.white,
-                  icon: Icons.delete,
-                  label: 'Delete',
-                  onPressed: (BuildContext context) =>
-                      confirm(context, allChats, index, chatId),
-                ),
-              ],
-            ),
-            child: InkWell(
-              onTap: () {
-                if (isPrivate) {
-                  Get.to(
-                    () => ChatScreen(
-                      chatId: chatId,
-                      receiverid: userId,
-                      receiverName: name,
-                      receiverImage: image,
+          return InkWell(
+            onTap: () {
+              if (isPrivate) {
+                Get.to(
+                  () => ChatScreen(
+                    chatId: chatId,
+                    receiverid: userId,
+                    receiverName: name,
+                    receiverImage: image,
+                  ),
+                );
+              } else {
+                Get.to(() => GroupChatScreen(chatId: chatId));
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(left: 12, right: 12),
+
+              /// ✅ SLIDABLE wraps whole item
+              child: Slidable(
+                key: ValueKey(chatId), // ⚠️ use unique key
+                endActionPane: ActionPane(
+                  motion: const ScrollMotion(),
+                  children: [
+                    SlidableAction(
+                      backgroundColor: const Color(0xFFFE4A49),
+                      foregroundColor: Colors.white,
+                      icon: Icons.delete,
+                      label: 'Delete',
+                      onPressed: (context) =>
+                          confirm(context, allChats, index, chatId),
                     ),
-                  );
-                } else {
-                  Get.to(() => GroupChatScreen(chatId: chatId));
-                }
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 8, left: 12, right: 12),
+                  ],
+                ),
+
+                /// ✅ Column holds row + divider
                 child: Column(
                   children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 24,
-                          backgroundColor: AppColors.primaryColor,
-                          backgroundImage: image.isNotEmpty
-                              ? NetworkImage(imageWithBaseUrl.toString())
-                              : null,
-                          child: image.isEmpty || image == "null"
-                              ? Text(
-                                  getInitials(name),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                )
-                              : null,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    name,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 10,
+                      ), // controls height
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 24,
+                            backgroundColor: AppColors.primaryColor,
+                            backgroundImage: image.isNotEmpty
+                                ? NetworkImage(imageWithBaseUrl.toString())
+                                : null,
+                            child: image.isEmpty || image == "null"
+                                ? Text(
+                                    getInitials(name),
                                     style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  if (chat['lastMessage'] != null) ...[
-                                    if (chat["lastMessage"]["read"] == false &&
-                                        chat["lastMessage"]["sender"] !=
-                                            currentUserId)
-                                      Container(
-                                        width: 10,
-                                        height: 10,
-                                        decoration: BoxDecoration(
-                                          color: AppColors.primaryColor,
-                                          shape: BoxShape.circle,
-                                        ),
+                                  )
+                                : null,
+                          ),
+                          const SizedBox(width: 12),
+
+                          Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisSize:
+                                            MainAxisSize.min, // important
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              name,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 16,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+
+                                          if (chat['lastMessage'] != null &&
+                                              chat["lastMessage"]["read"] ==
+                                                  false &&
+                                              chat["lastMessage"]["sender"] !=
+                                                  currentUserId)
+                                            Container(
+                                              margin: const EdgeInsets.only(
+                                                left: 6,
+                                              ),
+                                              width: 10,
+                                              height: 10,
+                                              decoration: BoxDecoration(
+                                                color: AppColors.primaryColor,
+                                                shape: BoxShape.circle,
+                                              ),
+                                            ),
+                                        ],
                                       ),
-                                  ],
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                lastMsg,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: chat["lastMessage"] == null
-                                      ? FontWeight.normal
-                                      : chat["lastMessage"]["read"] == false &&
-                                            chat["lastMessage"]["sender"] !=
-                                                currentUserId
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                  color:
-                                      lastMsg.contains("Video") ||
-                                          lastMsg.contains("Image")
-                                      ? Colors.black
-                                      : Colors.black.withValues(alpha: 0.6),
+
+                                      const SizedBox(height: 4),
+
+                                      Text(
+                                        lastMsg,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+
+                                const SizedBox(width: 8),
+
+                                Text(
+                                  formattedTime,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Text(
-                          formattedTime,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                    Divider(color: Colors.grey.shade300),
+
+                    Divider(color: Colors.grey.shade300, height: 1, indent: 60),
                   ],
                 ),
               ),

@@ -444,7 +444,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                   Positioned(
                     left: 20,
                     right: 20,
-                    bottom: 100,
+                    bottom: 40,
                     child: Row(
                       children: [
                         CircleAvatar(
