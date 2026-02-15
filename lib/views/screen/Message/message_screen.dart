@@ -454,7 +454,7 @@ class _MessageScreenState extends State<MessageScreen>
     return LayoutBuilder(
       builder: (context, constraints) {
         final cardWidth = constraints.maxWidth == double.infinity
-            ? MediaQuery.of(context).size.width * .25
+            ? MediaQuery.of(context).size.width * .24
             : constraints.maxWidth;
 
         final overlayWidth = cardWidth * .56;
@@ -464,7 +464,7 @@ class _MessageScreenState extends State<MessageScreen>
           margin: const EdgeInsets.only(left: 12, right: 8),
           width: cardWidth,
           child: AspectRatio(
-            aspectRatio: 100 / 132, // keeps same shape
+            aspectRatio: 100 / 132,
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.only(
@@ -474,7 +474,7 @@ class _MessageScreenState extends State<MessageScreen>
                 border: Border.all(
                   color: myStories.isNotEmpty
                       ? AppColors.primaryColor
-                      : Colors.transparent,
+                      : AppColors.primaryColor,
                   width: myStories.isNotEmpty ? 5 : 0,
                 ),
               ),
@@ -482,10 +482,10 @@ class _MessageScreenState extends State<MessageScreen>
                 children: [
                   /// Background (Image OR Initials)
                   ClipRRect(
-                    // borderRadius: const BorderRadius.only(
-                    //   topRight: Radius.circular(8),
-                    //   topLeft: Radius.circular(8),
-                    // ),
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(8),
+                      topLeft: Radius.circular(8),
+                    ),
                     child: hasImage
                         ? Image.network(
                             userImage!,

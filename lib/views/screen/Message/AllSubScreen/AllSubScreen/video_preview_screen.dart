@@ -50,6 +50,9 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
   double imgWidth = 0;
   double imgHeight = 0;
 
+  // Tall image prediction flag
+  bool _isTallImage = false;
+
   Duration _videoDuration = Duration.zero;
   Duration _position = Duration.zero;
   late final ValueNotifier<bool> _isPlaying = ValueNotifier<bool>(false);
@@ -303,9 +306,19 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
         .resolve(const ImageConfiguration())
         .addListener(
           ImageStreamListener((ImageInfo info, _) {
+            final screenHeight = MediaQuery.of(context).size.height;
+            final aspectRatio = info.image.height / info.image.width;
+
+            // Predict rendered height using full width
+            final renderedHeight =
+                MediaQuery.of(context).size.width * aspectRatio;
+
+            final bool isVeryTall = renderedHeight > screenHeight * 0.7;
+
             setState(() {
               imgWidth = info.image.width.toDouble();
               imgHeight = info.image.height.toDouble();
+              _isTallImage = isVeryTall;
             });
           }),
         );
@@ -394,26 +407,18 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                             child: VideoPlayerHdr(_video!),
                           ),
                         )
-                      : LayoutBuilder(
-                          builder: (context, constraints) {
-                            final screenHeight = MediaQuery.of(
-                              context,
-                            ).size.height;
-
-                            // Rendered height on screen
-                            final renderedHeight =
-                                constraints.maxWidth * (imgHeight / imgWidth);
-
-                            // If rendered image height > 70% of screen height
-                            double sHeight = screenHeight * 0.7;
-                            final bool isVeryTall = renderedHeight > sHeight;
-                            return Image.network(
-                              widget.videoUrl,
-                              fit: isVeryTall ? BoxFit.cover : BoxFit.contain,
-                              errorBuilder: (_, __, ___) =>
-                                  const Icon(Icons.broken_image),
-                            );
-                          },
+                      : AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 350),
+                          child: Image.network(
+                            widget.videoUrl,
+                            key: ValueKey(_isTallImage),
+                            fit: _isTallImage ? BoxFit.cover : BoxFit.contain,
+                            width: double.infinity,
+                            height: double.infinity,
+                            alignment: Alignment.center,
+                            errorBuilder: (_, __, ___) =>
+                                const Icon(Icons.broken_image),
+                          ),
                         ),
                 ),
 
@@ -501,22 +506,11 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
     child: Stack(
       alignment: Alignment.center,
       children: [
-        // Must clip for BackdropFilter to work
-        ClipRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-            child: Container(
-              // must have some color (even transparent)
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.90),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.white.withOpacity(0.3),
-                    blurRadius: 6,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
+        Positioned.fill(
+          child: ClipRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+              child: Container(),
             ),
           ),
         ),
