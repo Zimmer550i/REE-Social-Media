@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously, unnecessary_underscores
+// ignore_for_file: use_build_context_synchronously, unnecessary_underscores, unnecessary_null_comparison
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
@@ -21,6 +21,7 @@ class VideoPreviewScreen extends StatefulWidget {
     required this.userProfile,
     required this.userName,
     this.chatId,
+    this.caption,
     required this.postId,
     this.isInbox = false,
   });
@@ -29,6 +30,7 @@ class VideoPreviewScreen extends StatefulWidget {
   final String userProfile;
   final String userName;
   final String? chatId;
+  final String? caption;
   final String postId;
   final bool? isInbox;
   final int countdownSeconds;
@@ -346,23 +348,16 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
             CircleAvatar(
               radius: 22,
               backgroundColor: AppColors.primaryColor,
-              backgroundImage: (widget.userProfile.isNotEmpty)
+              backgroundImage: widget.userProfile.isNotEmpty
                   ? NetworkImage(widget.userProfile)
                   : null,
-              child: (widget.userProfile.isEmpty && widget.userName.isNotEmpty)
+              child: (widget.userProfile.isEmpty || widget.userProfile == "")
                   ? Text(
-                      widget.userName[0].toUpperCase(),
+                      getInitials(widget.userName),
                       style: const TextStyle(
+                        fontSize: 20,
                         color: Colors.white,
-                        fontFamily: "LibreText",
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  : (widget.userProfile.isEmpty && widget.userName.isEmpty)
-                  ? Text(
-                      widget.userName.toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
+
                         fontFamily: "LibreText",
                         fontWeight: FontWeight.bold,
                       ),
@@ -445,6 +440,63 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                       ),
                     ),
                   ),
+                if (!isVideo && widget.caption!.isNotEmpty) ...[
+                  Positioned(
+                    left: 20,
+                    right: 20,
+                    bottom: 100,
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 25,
+                          backgroundColor: widget.userProfile.isEmpty
+                              ? AppColors.primaryColor
+                              : Colors.transparent,
+                          backgroundImage: widget.userProfile.isEmpty
+                              ? null
+                              : NetworkImage(widget.userProfile),
+                          child: widget.userProfile.isEmpty
+                              ? Text(
+                                  getInitials(widget.userName),
+                                  style: TextStyle(
+                                    color: AppColors.backgroundColor,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : null,
+                        ),
+                        SizedBox(width: 12),
+                        Flexible(
+                          fit: FlexFit.loose,
+                          child: Container(
+                            constraints: const BoxConstraints(maxWidth: 250),
+                            decoration: BoxDecoration(
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(30),
+                                topRight: Radius.circular(30),
+                                bottomRight: Radius.circular(30),
+                              ),
+                              color: AppColors.backgroundColor,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                widget.caption!,
+                                style: TextStyle(
+                                  color: AppColors.primaryColor,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
                 isVideo
                     ? _buildBottomControls()
                     : Positioned(
@@ -500,6 +552,18 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
               child: SpinKitWave(color: AppColors.primaryColor, size: 30.0),
             ),
     );
+  }
+
+  String getInitials(String name) {
+    if (name.trim().isEmpty) return "";
+
+    List<String> parts = name.trim().split(" ");
+
+    if (parts.length == 1) {
+      return parts[0][0].toUpperCase();
+    }
+
+    return (parts.first[0] + parts.last[0]).toUpperCase();
   }
 
   Widget _buildCountdownOverlay() => Positioned.fill(

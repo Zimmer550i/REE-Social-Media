@@ -19,7 +19,11 @@ class CreateStoryController extends GetxController {
   final ImagePicker _picker = ImagePicker();
   var isLoading = false.obs;
 
-  Future<void> addStory({String? imagePath, String? videoPath}) async {
+  Future<void> addStory({
+    String? imagePath,
+    String? videoPath,
+    String? caption,
+  }) async {
     isLoading.value = true;
 
     try {
@@ -86,7 +90,7 @@ class CreateStoryController extends GetxController {
         mediaFile = await _ensureMp4Format(mediaFile);
       }
 
-      await _uploadStoryMedia(mediaFile, mediaType);
+      await _uploadStoryMedia(mediaFile, mediaType, caption);
 
       Get.offAndToNamed(AppRoutes.messageScreen);
     } catch (e) {
@@ -95,8 +99,8 @@ class CreateStoryController extends GetxController {
         "Error",
         "Something went wrong while uploading story.",
         snackPosition: SnackPosition.BOTTOM,
-          colorText: Colors.white,
-          backgroundColor: AppColors.primaryColor,
+        colorText: Colors.white,
+        backgroundColor: AppColors.primaryColor,
       );
     } finally {
       isLoading.value = false;
@@ -146,7 +150,11 @@ class CreateStoryController extends GetxController {
     return newFile;
   }
 
-  Future<void> _uploadStoryMedia(File file, String type) async {
+  Future<void> _uploadStoryMedia(
+    File file,
+    String type,
+    String? caption,
+  ) async {
     try {
       final mimeType = lookupMimeType(file.path) ?? 'application/octet-stream';
       debugPrint('📡 Uploading $type with MIME type: $mimeType');
@@ -155,7 +163,7 @@ class CreateStoryController extends GetxController {
 
       final response = await _api.postMultipartData(
         "/story/create-story",
-        {},
+        {"caption": caption},
         multipartBody: multipartBody,
         authReq: true,
       );
@@ -166,16 +174,16 @@ class CreateStoryController extends GetxController {
             "Upload Failed",
             "Could not upload story. Please try again.",
             snackPosition: SnackPosition.BOTTOM,
-          colorText: Colors.white,
-          backgroundColor: AppColors.primaryColor,
+            colorText: Colors.white,
+            backgroundColor: AppColors.primaryColor,
           );
         } catch (_) {
           Get.snackbar(
             "Upload Failed",
             "Server error: ${response.statusCode}",
             snackPosition: SnackPosition.BOTTOM,
-          colorText: Colors.white,
-          backgroundColor: AppColors.primaryColor,
+            colorText: Colors.white,
+            backgroundColor: AppColors.primaryColor,
           );
         }
       }
@@ -185,9 +193,8 @@ class CreateStoryController extends GetxController {
         "Error",
         "Could not upload story. Please try again.",
         snackPosition: SnackPosition.BOTTOM,
-          colorText: Colors.white,
-          backgroundColor: AppColors.primaryColor,
-        
+        colorText: Colors.white,
+        backgroundColor: AppColors.primaryColor,
       );
     }
   }

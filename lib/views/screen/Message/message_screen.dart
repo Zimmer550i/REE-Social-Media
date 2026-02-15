@@ -419,6 +419,7 @@ class _MessageScreenState extends State<MessageScreen>
                     isVideo,
                     authorId.toString(),
                     story["_id"],
+                    story["caption"] ?? "",
                   );
                 },
               ),
@@ -477,6 +478,7 @@ class _MessageScreenState extends State<MessageScreen>
                       : AppColors.primaryColor,
                   width: myStories.isNotEmpty ? 5 : 0,
                 ),
+                color: AppColors.primaryColor,
               ),
               child: Stack(
                 children: [
@@ -587,7 +589,13 @@ class _MessageScreenState extends State<MessageScreen>
     return Container(
       width: double.infinity,
       height: double.infinity,
-      color: AppColors.primaryColor,
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.only(
+          topRight: Radius.circular(8),
+          topLeft: Radius.circular(8),
+        ),
+        color: AppColors.primaryColor,
+      ),
       child: Center(
         child: Text(
           getInitials(name),
@@ -620,6 +628,7 @@ class _MessageScreenState extends State<MessageScreen>
     bool isVideo,
     String authorId,
     String postId,
+    String caption,
   ) {
     const double cardW = 100;
     const double cardH = 132;
@@ -644,6 +653,7 @@ class _MessageScreenState extends State<MessageScreen>
         authorImage,
         authorId,
         postId,
+        caption,
       );
     }
   }
@@ -655,6 +665,7 @@ class _MessageScreenState extends State<MessageScreen>
     String image,
     String authorId,
     String postId,
+    String caption,
   ) {
     const double cardW = 100;
     const double cardH = 132;
@@ -670,6 +681,7 @@ class _MessageScreenState extends State<MessageScreen>
             userName: name,
             postId: postId,
             chatId: authorId,
+            caption: caption,
           ),
         );
       },

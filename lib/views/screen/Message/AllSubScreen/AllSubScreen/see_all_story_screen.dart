@@ -72,6 +72,7 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
                   itemBuilder: (context, index) {
                     final story = storiesList[index];
                     final type = story["contentType"];
+                    final caption = story["caption"] ?? "";
                     final storyId = story["_id"];
                     final name = story["author"]?["name"] ?? "Unknown";
                     final authorId = story["author"]?["_id"] ?? "Unknown";
@@ -122,6 +123,7 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
                       storyId,
                       index,
                       authorId,
+                      caption,
                     );
                   },
                 ),
@@ -142,6 +144,7 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
     String storyId,
     int index,
     String authorId,
+    String caption,
   ) {
     return AspectRatio(
       aspectRatio: 3 / 4,
@@ -164,6 +167,7 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
                 storyId,
                 index,
                 authorId,
+                caption,
               ),
         builder: (context, snap) {
           if (snap.connectionState == ConnectionState.waiting) {
@@ -222,6 +226,7 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
     String storyId,
     int index,
     String authorId,
+    String caption,
   ) async {
     return AspectRatio(
       aspectRatio: 3 / 4,
@@ -236,10 +241,11 @@ class _SeeAllStoryScreenState extends State<SeeAllStoryScreen> {
                 userName: name,
                 chatId: authorId,
                 postId: storyId,
+                caption: caption,
               ),
             );
           } else {
-            Get.to(() => ViewMedia(mediaUrl: mediaUrl));
+            Get.to(() => ViewMedia(mediaUrl: mediaUrl, caption: caption));
           }
         },
         child: ClipRRect(

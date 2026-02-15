@@ -1,6 +1,10 @@
+// ignore_for_file: deprecated_member_use, unnecessary_null_comparison
+
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:ree_social_media_app/controllers/user_controller.dart';
 import 'package:video_player_hdr/video_player_hdr.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
@@ -31,6 +35,7 @@ class VideoEditScreen extends StatefulWidget {
 }
 
 class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
+  final UserController _userController = Get.find<UserController>();
   final CreateStoryController createStoryController = Get.put(
     CreateStoryController(),
   );
@@ -38,6 +43,7 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
     SendMessageController(),
   );
   final MessageController messageController = Get.find<MessageController>();
+  final TextEditingController caption = TextEditingController();
   CameraController? _frontCam;
   VideoPlayerHdrController? _video;
 
@@ -129,75 +135,169 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    String? image = _userController.userInfo.value!.image;
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
-          Positioned.fill(
-            child: widget.isVideo
-                ? (_video != null && _video!.value.isInitialized
-                      ? FittedBox(
-                          fit: BoxFit.cover,
-                          child: SizedBox(
-                            width: _video!.value.size.width,
-                            height: _video!.value.size.height,
-                            child: VideoPlayerHdr(_video!),
-                          ),
-                        )
-                      : Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.primaryColor,
-                          ),
-                        ))
-                : Image.file(File(widget.filePath), fit: BoxFit.contain),
-          ),
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned.fill(
+              child: widget.isVideo
+                  ? (_video != null && _video!.value.isInitialized
+                        ? FittedBox(
+                            fit: BoxFit.cover,
+                            child: SizedBox(
+                              width: _video!.value.size.width,
+                              height: _video!.value.size.height,
+                              child: VideoPlayerHdr(_video!),
+                            ),
+                          )
+                        : Center(
+                            child: CircularProgressIndicator(
+                              color: AppColors.primaryColor,
+                            ),
+                          ))
+                  : Image.file(File(widget.filePath), fit: BoxFit.contain),
+            ),
 
-          /// Close button
-          Positioned(
-            top: 70,
-            right: 20,
-            child: InkWell(
-              onTap: () {
-                Get.offAllNamed(AppRoutes.messageScreen);
-              },
-              child: Container(
-                height: 32,
-                width: 32,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.white,
-                  border: Border.all(color: Color(0xFFC4C3C3), width: 0.5),
-                ),
-                child: const Center(
-                  child: Icon(Icons.close, color: Color(0xFF676565)),
+            /// Close button
+            Positioned(
+              top: 70,
+              right: 20,
+              child: InkWell(
+                onTap: () {
+                  Get.offAllNamed(AppRoutes.messageScreen);
+                },
+                child: Container(
+                  height: 32,
+                  width: 32,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.white,
+                    border: Border.all(color: Color(0xFFC4C3C3), width: 0.5),
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.close, color: Color(0xFF676565)),
+                  ),
                 ),
               ),
             ),
-          ),
 
-          /// Bottom controls (only if video)
-          if (widget.isVideo)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: _buildBottomControls(),
-            ),
+            /// Bottom controls (only if video)
+            if (widget.isVideo)
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: _buildBottomControls(),
+              ),
 
-          if (!widget.isVideo)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Platform.isAndroid
-                  ? SafeArea(child: _buildBottomActions())
-                  : Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 26),
-                      child: _buildBottomActions(),
+            if (!widget.isVideo) ...[
+              Positioned(
+                left: 20,
+                right: 20,
+                bottom: 100,
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 25,
+                      backgroundColor:
+                          image == null
+                          ? AppColors.primaryColor
+                          : Colors.transparent,
+                      backgroundImage:
+                          image == null
+                          ? null
+                          : NetworkImage(
+                              _userController.userInfo.value!.image!,
+                            ),
+                      child: image == null
+                          ? Text(
+                              getInitials(
+                                _userController.userInfo.value!.name!,
+                              ),
+                              style: TextStyle(
+                                color: AppColors.backgroundColor,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
+                          : null,
                     ),
-            ),
-        ],
+
+                    const SizedBox(width: 12),
+
+                    /// Caption Input
+                    Expanded(
+                      child: Container(
+                        height: 50,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(.4),
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(
+                            color: Colors.grey.shade300,
+                            width: 0.8,
+                          ),
+                        ),
+                        child: TextField(
+                          controller: caption,
+                          maxLines: 1,
+                          minLines: 1,
+                          textAlignVertical: TextAlignVertical.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.backgroundColor,
+                          ),
+                          decoration: InputDecoration(
+                            
+                            hintText: "Write a caption...",
+                            hintStyle: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 14,
+                            ),
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(vertical: 14),
+                            suffixIcon: GestureDetector(
+                              onTap: () {
+                                FocusScope.of(context).unfocus();
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: SvgPicture.asset(
+                                  "assets/icons/send.svg",
+                                  height: 24,
+                                  width: 24,
+                                  color: AppColors.primaryColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                left: 20,
+                right: 20,
+                child: Platform.isAndroid
+                    ? SafeArea(child: _buildBottomActions())
+                    : Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 26),
+                        child: _buildBottomActions(),
+                      ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -211,7 +311,7 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
           if (widget.isVideo) {
             createStoryController.addStory(videoPath: widget.filePath);
           } else {
-            createStoryController.addStory(imagePath: widget.filePath);
+            createStoryController.addStory(imagePath: widget.filePath, caption: caption.text);
           }
         },
         child: Container(
@@ -303,6 +403,18 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
       ),
     ],
   );
+
+  String getInitials(String name) {
+    if (name.trim().isEmpty) return "";
+
+    List<String> parts = name.trim().split(" ");
+
+    if (parts.length == 1) {
+      return parts[0][0].toUpperCase();
+    }
+
+    return (parts.first[0] + parts.last[0]).toUpperCase();
+  }
 
   /// ==== Video Controls ====
   Widget _buildBottomControls() {
