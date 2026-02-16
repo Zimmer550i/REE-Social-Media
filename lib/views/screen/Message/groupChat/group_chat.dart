@@ -453,6 +453,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     isMe: isMe,
                     isView: false,
                     isReaction: isReaction,
+                    caption: caption,
                     chatController: chatController,
                     msgId: msg["_id"],
                     imageUrl: imageUrl.toString(),

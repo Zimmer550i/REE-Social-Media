@@ -70,6 +70,7 @@ class _MessageScreenState extends State<MessageScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
+    userController.getInfo();
     _loadCachedVideos();
     notificationController.fetchNotifications();
 
@@ -95,7 +96,6 @@ class _MessageScreenState extends State<MessageScreen>
         _loadMoreStories();
       }
     });
-
     userController.setSubscriptionId();
     enablePushNotification();
     _startPolling();
@@ -432,157 +432,262 @@ class _MessageScreenState extends State<MessageScreen>
 
   // Add Story Card
   Widget _buildAddStoryCard() {
-    final image = userController.userInfo.value!.image;
-    final userImage = userController.addBaseUrl(image.toString());
-    final currentUserId = userController.userInfo.value!.id;
-    final userName = userController.userInfo.value!.name ?? "";
+    return Obx(() {
+      final user = userController.userInfo.value;
 
-    final hasImage =
-        image != null &&
-        image.toString().isNotEmpty &&
-        image.toString() != "null";
+      if (user == null) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final cardWidth = constraints.maxWidth == double.infinity
+                ? MediaQuery.of(context).size.width * .24
+                : constraints.maxWidth;
 
-    final myStories = controller.stories
-        .where(
-          (story) =>
-              story["author"] != null &&
-              (story["author"] is Map
-                  ? story["author"]["_id"] == currentUserId
-                  : false),
-        )
-        .toList();
+            final overlayWidth = cardWidth * .56;
+            final iconSize = cardWidth * .26;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final cardWidth = constraints.maxWidth == double.infinity
-            ? MediaQuery.of(context).size.width * .24
-            : constraints.maxWidth;
-
-        final overlayWidth = cardWidth * .56;
-        final iconSize = cardWidth * .26;
-
-        return Container(
-          margin: const EdgeInsets.only(left: 12, right: 8),
-          width: cardWidth,
-          child: AspectRatio(
-            aspectRatio: 100 / 132,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(8),
-                  topLeft: Radius.circular(8),
-                ),
-                border: Border.all(
-                  color: myStories.isNotEmpty
-                      ? AppColors.primaryColor
-                      : AppColors.primaryColor,
-                  width: myStories.isNotEmpty ? 5 : 0,
-                ),
-                color: AppColors.primaryColor,
-              ),
-              child: Stack(
-                children: [
-                  /// Background (Image OR Initials)
-                  ClipRRect(
+            return Container(
+              margin: const EdgeInsets.only(left: 12, right: 8),
+              width: cardWidth,
+              child: AspectRatio(
+                aspectRatio: 100 / 132,
+                child: Container(
+                  decoration: BoxDecoration(
                     borderRadius: const BorderRadius.only(
                       topRight: Radius.circular(8),
                       topLeft: Radius.circular(8),
                     ),
-                    child: hasImage
-                        ? Image.network(
-                            userImage!,
-                            width: double.infinity,
-                            height: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) =>
-                                _initialsBackground(userName),
-                          )
-                        : _initialsBackground(userName),
+                    color: AppColors.primaryColor,
                   ),
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          topRight: Radius.circular(8),
+                          topLeft: Radius.circular(8),
+                        ),
+                        child: _initialsBackground(""),
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(8),
+                            topLeft: Radius.circular(4),
+                          ),
+                          child: Container(
+                            width: overlayWidth,
+                            color: AppColors.primaryColor.withValues(
+                              alpha: 0.56,
+                            ),
+                            child: Stack(
+                              children: [
+                                Positioned(
+                                  left: 10,
+                                  top: 45,
+                                  child: Text(
+                                    "Add\nStory",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: cardWidth * .14,
+                                      height: 1.2,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 10,
+                                  bottom: 45,
+                                  child: InkWell(
+                                    onTap: () => Get.offAndToNamed(
+                                      AppRoutes.cameraScreen,
+                                    ),
+                                    child: Container(
+                                      width: iconSize,
+                                      height: iconSize,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(4),
+                                        child: SvgPicture.asset(
+                                          'assets/icons/camera.svg',
+                                          color: AppColors.primaryColor,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      }
 
-                  /// Left overlay
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: ClipRRect(
+      final image = user.image;
+      final userImage =
+          (image != null &&
+              image.toString().isNotEmpty &&
+              image.toString() != "null")
+          ? userController.addBaseUrl(image.toString())
+          : null;
+
+      final currentUserId = user.id;
+      final userName = user.name ?? "";
+
+      final hasImage = userImage != null && userImage.toString().isNotEmpty;
+
+      final myStories = controller.stories
+          .where(
+            (story) =>
+                story["author"] != null &&
+                (story["author"] is Map
+                    ? story["author"]["_id"] == currentUserId
+                    : false),
+          )
+          .toList();
+
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final cardWidth = constraints.maxWidth == double.infinity
+              ? MediaQuery.of(context).size.width * .24
+              : constraints.maxWidth;
+
+          final overlayWidth = cardWidth * .56;
+          final iconSize = cardWidth * .26;
+
+          return Container(
+            margin: const EdgeInsets.only(left: 12, right: 8),
+            width: cardWidth,
+            child: AspectRatio(
+              aspectRatio: 100 / 132,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.only(
+                    topRight: Radius.circular(8),
+                    topLeft: Radius.circular(8),
+                  ),
+                  border: Border.all(
+                    color: AppColors.primaryColor,
+                    width: myStories.isNotEmpty ? 5 : 0,
+                  ),
+                  color: AppColors.primaryColor,
+                ),
+                child: Stack(
+                  children: [
+                    /// Background (Image OR Initials)
+                    ClipRRect(
                       borderRadius: const BorderRadius.only(
                         topRight: Radius.circular(8),
-                        topLeft: Radius.circular(4),
+                        topLeft: Radius.circular(8),
                       ),
-                      child: Container(
-                        width: overlayWidth,
-                        color: AppColors.primaryColor.withValues(alpha: 0.56),
-                        child: Stack(
-                          children: [
-                            Positioned(
-                              left: 10,
-                              top: 45,
-                              child: Text(
-                                "Add\nStory",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: cardWidth * .14,
-                                  height: 1.2,
+                      child: hasImage
+                          ? Image.network(
+                              userImage!,
+                              key: ValueKey(userImage),
+                              width: double.infinity,
+                              height: double.infinity,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) =>
+                                  _initialsBackground(userName),
+                            )
+                          : _initialsBackground(userName),
+                    ),
+
+                    /// Left overlay
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          topRight: Radius.circular(8),
+                          topLeft: Radius.circular(4),
+                        ),
+                        child: Container(
+                          width: overlayWidth,
+                          color: AppColors.primaryColor.withValues(alpha: 0.56),
+                          child: Stack(
+                            children: [
+                              Positioned(
+                                left: 10,
+                                top: 45,
+                                child: Text(
+                                  "Add\nStory",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: cardWidth * .14,
+                                    height: 1.2,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Positioned(
-                              left: 10,
-                              bottom: 45,
-                              child: InkWell(
-                                onTap: () =>
-                                    Get.offAndToNamed(AppRoutes.cameraScreen),
-                                child: Container(
-                                  width: iconSize,
-                                  height: iconSize,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(4),
-                                    child: SvgPicture.asset(
-                                      'assets/icons/camera.svg',
-                                      color: AppColors.primaryColor,
+                              Positioned(
+                                left: 10,
+                                bottom: 45,
+                                child: InkWell(
+                                  onTap: () =>
+                                      Get.offAndToNamed(AppRoutes.cameraScreen),
+                                  child: Container(
+                                    width: iconSize,
+                                    height: iconSize,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(4),
+                                      child: SvgPicture.asset(
+                                        'assets/icons/camera.svg',
+                                        color: AppColors.primaryColor,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                  /// Right side tap
-                  Positioned.fill(
-                    left: overlayWidth,
-                    child: InkWell(
-                      onTap: () {
-                        if (myStories.isEmpty) {
-                          Get.snackbar(
-                            "No Stories",
-                            "You haven't added any stories yet.",
-                            snackPosition: SnackPosition.BOTTOM,
-                          );
-                          return;
-                        }
-                        Get.to(
-                          () =>
-                              SeeAllStoryScreen(stories: myStories, isMe: true),
-                        )?.then((value) => controller.refreshAll());
-                      },
-                      child: Container(color: Colors.transparent),
+                    /// Right side tap
+                    Positioned.fill(
+                      left: overlayWidth,
+                      child: InkWell(
+                        onTap: () {
+                          if (myStories.isEmpty) {
+                            Get.snackbar(
+                              "No Stories",
+                              "You haven't added any stories yet.",
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                            return;
+                          }
+                          Get.to(
+                            () => SeeAllStoryScreen(
+                              stories: myStories,
+                              isMe: true,
+                            ),
+                          )?.then((value) => controller.refreshAll());
+                        },
+                        child: Container(color: Colors.transparent),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    });
   }
 
   Widget _initialsBackground(String name) {
