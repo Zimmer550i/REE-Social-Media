@@ -488,6 +488,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final imageUrl = userController.addBaseUrl(msg["media"] ?? "");
 
     bool isMe = msg["isMe"] ?? false;
+    String caption = msg["caption"] ?? "";
     bool view = msg["view"] ?? false;
     bool isReaction = msg["reaction"] ?? false;
     bool hasThumbnail = false;
@@ -520,6 +521,7 @@ class _ChatScreenState extends State<ChatScreen> {
           chatId: widget.chatId,
           isView: view,
           receiverImage: _receiverImage,
+          caption: caption,
         ),
 
         const SizedBox(height: 4),

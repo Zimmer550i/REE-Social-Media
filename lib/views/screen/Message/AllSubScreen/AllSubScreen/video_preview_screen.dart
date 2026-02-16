@@ -440,7 +440,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                       ),
                     ),
                   ),
-                if (!isVideo && widget.caption!.isNotEmpty) ...[
+                if (!isVideo && widget.caption!= null) ...[
                   Positioned(
                     left: 20,
                     right: 20,

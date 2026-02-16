@@ -146,7 +146,7 @@ class _ViewMediaState extends State<ViewMedia> {
               alignment: Alignment.center,
               children: [
                 Positioned.fill(child: _buildMediaView()),
-                if (!isVideo && widget.caption!.isNotEmpty) ...[
+                if (!isVideo && widget.caption != null) ...[
                   Positioned(
                     left: 20,
                     right: 20,

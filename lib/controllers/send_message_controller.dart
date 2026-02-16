@@ -102,6 +102,7 @@ class SendMessageController extends GetxController {
     required String filePath,
     required File? thumbnail,
     required bool isVideo,
+    String? caption
   }) async {
     isLoading.value = true;
 
@@ -139,6 +140,7 @@ class SendMessageController extends GetxController {
         mediaFile: file,
         thumbnail: validThumbnail,
         contentType: isVideo ? 'video' : 'image',
+        caption: caption
       );
 
       // Navigate to message screen after sending
@@ -163,6 +165,7 @@ class SendMessageController extends GetxController {
     required File? thumbnail,
     required bool isVideo,
     required bool isReaction,
+    String? caption
   }) async {
     try {
       isLoading.value = true;
@@ -182,6 +185,7 @@ class SendMessageController extends GetxController {
         thumbnail: thumbnail,
         contentType: isVideo ? 'video' : 'image',
         isReaction: isReaction,
+        caption: caption
       );
 
       // Navigate to message screen after sending

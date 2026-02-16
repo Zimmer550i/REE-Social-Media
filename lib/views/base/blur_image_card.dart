@@ -13,6 +13,7 @@ class BlurImageCard extends StatefulWidget {
   final String msgId;
   final String receiverName;
   final String? receiverImage;
+  final String? caption;
   final String thumbnail;
   final bool hasThumbnail;
   final String chatId;
@@ -32,7 +33,7 @@ class BlurImageCard extends StatefulWidget {
     required this.isMe,
     required this.isReaction,
     required this.thumbnail,
-    required this.hasThumbnail,
+    required this.hasThumbnail, this.caption,
   });
 
   @override
@@ -53,7 +54,7 @@ class _BlurImageCardState extends State<BlurImageCard> {
     Future.delayed(const Duration(milliseconds: 150), () {
       if (!mounted) return;
       if (widget.isMe == true) {
-        Get.to(() => ViewMedia(mediaUrl: widget.imageUrl))?.then((_) {
+        Get.to(() => ViewMedia(mediaUrl: widget.imageUrl,caption: widget.caption,))?.then((_) {
           if (!mounted) return;
           setState(() {
             _isTapped = false;
@@ -63,7 +64,7 @@ class _BlurImageCardState extends State<BlurImageCard> {
       } else if (widget.isMe == false && widget.isReaction == true) {
         widget.chatController.updateChatView(widget.msgId);
 
-        Get.to(() => ViewMedia(mediaUrl: widget.imageUrl))?.then((_) {
+        Get.to(() => ViewMedia(mediaUrl: widget.imageUrl,caption: widget.caption,))?.then((_) {
           if (!mounted) return;
           setState(() {
             _isTapped = false;
@@ -83,6 +84,7 @@ class _BlurImageCardState extends State<BlurImageCard> {
               chatId: widget.chatId,
               isInbox: true,
               postId: widget.msgId,
+              caption: widget.caption,
             ),
           ),
         ).then((_) {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:ree_social_media_app/controllers/user_controller.dart';
 import 'package:ree_social_media_app/helpers/route.dart';
 import 'package:ree_social_media_app/views/base/re_back.dart';
 import 'package:video_player_hdr/video_player_hdr.dart';
@@ -35,8 +36,10 @@ class FrameSelectionScreen extends StatefulWidget {
 }
 
 class _FrameSelectionScreenState extends State<FrameSelectionScreen> {
+  final UserController _userController = Get.find<UserController>();
   final sendMessageController = Get.put(SendMessageController());
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController caption = TextEditingController();
   final List<String> _thumbnailPaths = [];
   bool _isInitialized = false;
   int _selectedFrameIndex = 0;
@@ -102,43 +105,128 @@ class _FrameSelectionScreenState extends State<FrameSelectionScreen> {
     if (!_isInitialized) {
       return Scaffold(
         backgroundColor: AppColors.backgroundColor,
-
         body: Center(
           child: SpinKitWave(color: AppColors.primaryColor, size: 30.0),
         ),
       );
     }
 
+    final user = _userController.userInfo.value;
+    final String? image = user?.image;
+    final String userName = (user?.name ?? '').trim();
+
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
-
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: _buildAppBarTitle(),
       ),
-      body: Column(
+      body: Stack(
         children: [
           // Big preview
-          Expanded(
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 100,
             child: _thumbnailPaths.isEmpty
-                ? const Center(child: Text("No frames available"))
+                ? const Center(child: Text('No frames available'))
                 : Container(
                     margin: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       color: Colors.black,
                     ),
-                    clipBehavior: Clip.antiAliasWithSaveLayer,
-                    child: AspectRatio(
-                      aspectRatio: 9 / 16,
-                      child: Image.file(
-                        File(_thumbnailPaths[_selectedFrameIndex]),
-                        fit: BoxFit.cover,
-                      ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Image.file(
+                      File(_thumbnailPaths[_selectedFrameIndex]),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
                     ),
                   ),
           ),
-          _buildBottomControls(),
+
+          // Caption row
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: 120,
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 25,
+                  backgroundColor: (image == null || image.isEmpty)
+                      ? AppColors.primaryColor
+                      : Colors.transparent,
+                  backgroundImage: (image == null || image.isEmpty)
+                      ? null
+                      : NetworkImage(image),
+                  child: (image == null || image.isEmpty)
+                      ? Text(
+                          getInitials(userName.isEmpty ? 'U' : userName),
+                          style: TextStyle(
+                            color: AppColors.backgroundColor,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 12),
+
+                /// Caption Input
+                Expanded(
+                  child: Container(
+                    height: 50,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(.4),
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(
+                        color: AppColors.primaryColor,
+                        width: 0.8,
+                      ),
+                    ),
+                    child: TextField(
+                      controller: caption,
+                      maxLines: 1,
+                      minLines: 1,
+                      textAlignVertical: TextAlignVertical.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppColors.primaryColor,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Write a caption...',
+                        hintStyle: TextStyle(
+                          color: AppColors.primaryColor,
+                          fontSize: 14,
+                        ),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 14,
+                        ),
+                        suffixIcon: IconButton(
+                          onPressed: () => FocusScope.of(context).unfocus(),
+                          icon: const Icon(Icons.arrow_upward, size: 24),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Bottom controls
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: _buildBottomControls(),
+          ),
         ],
       ),
     );
@@ -173,6 +261,18 @@ class _FrameSelectionScreenState extends State<FrameSelectionScreen> {
       ),
     ],
   );
+
+  String getInitials(String name) {
+    if (name.trim().isEmpty) return "";
+
+    List<String> parts = name.trim().split(" ");
+
+    if (parts.length == 1) {
+      return parts[0][0].toUpperCase();
+    }
+
+    return (parts.first[0] + parts.last[0]).toUpperCase();
+  }
 
   Widget _buildBottomControls() => Container(
     color: Colors.transparent,
@@ -262,6 +362,7 @@ class _FrameSelectionScreenState extends State<FrameSelectionScreen> {
         filePath: selectedFrame,
         isVideo: false,
         isReaction: true,
+        caption: caption.text,
       );
     } else {
       await Get.to(

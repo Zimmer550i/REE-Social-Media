@@ -384,6 +384,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     final imageUrl = userController.addBaseUrl(msg["media"] ?? "");
     bool isMe = msg["isMe"] ?? false;
     bool view = msg["view"] ?? false;
+    String caption = msg["caption"] ?? "";
     bool isReaction = msg["reaction"] ?? false;
     final bool isViewed = isMe ? true : view;
     bool hasThumbnail = false;
@@ -418,6 +419,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             chatId: widget.chatId,
             isView: isViewed,
             receiverImage: groupChatController.groupImage.value,
+            caption: caption,
           ),
 
           const SizedBox(height: 4),

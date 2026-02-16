@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:ree_social_media_app/controllers/message_controller.dart';
 import 'package:ree_social_media_app/controllers/user_controller.dart';
 import 'package:ree_social_media_app/utils/app_colors.dart';
+import 'package:ree_social_media_app/views/screen/Camera/AllSubScreen/add_caption.dart';
 import 'package:ree_social_media_app/views/screen/Message/groupChat/group_details_screen.dart';
 import 'package:uuid/uuid.dart';
 import '../models/multi_body.dart';
@@ -147,7 +148,6 @@ class ChatController extends GetxController {
   ) async {
     isLoading.value = true;
     try {
-      
       final response = await api.post("/chat/create-private", {
         "member": memberId,
       }, authReq: true);
@@ -275,7 +275,10 @@ class ChatController extends GetxController {
     _scrollToBottom();
   }
 
-  Future<Map<String, dynamic>?> uploadMedia(File file, {String type = "image"}) async {
+  Future<Map<String, dynamic>?> uploadMedia(
+    File file, {
+    String type = "image",
+  }) async {
     final multipartBody = [MultipartBody(key: type, file: file)];
     final response = await api.postMultipartData(
       "/message/upload",
@@ -297,17 +300,23 @@ class ChatController extends GetxController {
     }
   }
 
-  Future<void> pickAndSendImage() async {
-    isLoading.value = true;
-    final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
-    if (file == null) return;
+  Future<void> pickImage() async {
+    final XFile? xfile = await _picker.pickImage(source: ImageSource.gallery);
+    if (xfile == null) return;
+    final filePath = File(xfile.path);
+    Get.to(() => AddCaptionScreen(filePath: filePath.path));
+  }
 
-    final mediaData = await uploadMedia(File(file.path), type: "image");
+  Future<void> sendPickedImage(String filePath, String caption) async {
+    isLoading.value = true;
+
+    final mediaData = await uploadMedia(File(filePath), type: "image");
     if (mediaData != null) {
       SocketService.sendImage(
         chatId: _chatId,
         senderId: _currentUserId,
         mediaUrl: mediaData["mediaUrl"],
+        caption: caption,
       );
 
       // Add this manually so UI updates immediately
@@ -317,6 +326,7 @@ class ChatController extends GetxController {
         "type": "image",
         "media": mediaData["mediaUrl"],
         "message": "",
+        "caption": caption,
         "time":
             "${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}",
         "temp": true,
@@ -325,6 +335,7 @@ class ChatController extends GetxController {
     }
 
     isLoading.value = false;
+    Get.back();
   }
 
   Future<void> pickAndSendVideo() async {
@@ -337,7 +348,8 @@ class ChatController extends GetxController {
       SocketService.sendVideo(
         chatId: _chatId,
         senderId: _currentUserId,
-        mediaUrl: mediaData["mediaUrl"], mediaIos: mediaData['media_ios'],
+        mediaUrl: mediaData["mediaUrl"],
+        mediaIos: mediaData['media_ios'],
       );
 
       // 👇 Add this manually so UI updates immediately
@@ -376,7 +388,7 @@ class ChatController extends GetxController {
                 title: const Text("Select Image"),
                 onTap: () async {
                   Navigator.pop(context);
-                  await pickAndSendImage();
+                  await pickImage();
                 },
               ),
               ListTile(
@@ -414,6 +426,7 @@ class ChatController extends GetxController {
     required File mediaFile,
     required File? thumbnail,
     required String contentType,
+    String? caption
   }) async {
     if (selectedIds.isEmpty) {
       debugPrint("⚠️ No friends selected to send media.");
@@ -447,6 +460,8 @@ class ChatController extends GetxController {
             "senderId": senderId,
             "chatIds": [chatId],
             "contentType": contentType,
+            "caption": caption,
+
           }),
         };
 
@@ -504,6 +519,7 @@ class ChatController extends GetxController {
     required File? thumbnail,
     required String contentType,
     bool isReaction = false,
+    String? caption
   }) async {
     try {
       isLoading.value = true;
@@ -536,6 +552,7 @@ class ChatController extends GetxController {
           "reaction": isReaction,
           "chatIds": [chatId],
           "contentType": contentType,
+          "caption": caption,
         }),
       };
 
@@ -610,6 +627,7 @@ class ChatController extends GetxController {
       "time": createdAt,
       "temp": false,
       "view": m["view"],
+      "caption": m["caption"],
       "reaction": m["reaction"],
       "name": m["sender"]["name"],
     };

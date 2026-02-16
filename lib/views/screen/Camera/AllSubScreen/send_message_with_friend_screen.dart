@@ -16,12 +16,13 @@ class SendMessageWithFriendScreen extends StatefulWidget {
   final String filePath;
   final File? thumbnail;
   final bool isVideo;
+  final String? caption;
 
   const SendMessageWithFriendScreen({
     super.key,
     required this.filePath,
     required this.isVideo,
-    this.thumbnail,
+    this.thumbnail, this.caption,
   });
 
   @override
@@ -56,7 +57,7 @@ class _SendMessageWithFriendScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            backgroundColor: AppColors.backgroundColor,
+      backgroundColor: AppColors.backgroundColor,
 
       body: SafeArea(
         child: Obx(() {
@@ -90,6 +91,7 @@ class _SendMessageWithFriendScreenState
                           filePath: widget.filePath,
                           thumbnail: widget.thumbnail,
                           isVideo: widget.isVideo,
+                          caption: widget.caption
                         ),
                       ),
                     ),

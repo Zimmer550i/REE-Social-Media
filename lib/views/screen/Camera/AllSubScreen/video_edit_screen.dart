@@ -3,7 +3,6 @@
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:ree_social_media_app/controllers/user_controller.dart';
 import 'package:video_player_hdr/video_player_hdr.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -205,12 +204,10 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
                   children: [
                     CircleAvatar(
                       radius: 25,
-                      backgroundColor:
-                          image == null
+                      backgroundColor: image == null
                           ? AppColors.primaryColor
                           : Colors.transparent,
-                      backgroundImage:
-                          image == null
+                      backgroundImage: image == null
                           ? null
                           : NetworkImage(
                               _userController.userInfo.value!.image!,
@@ -240,7 +237,7 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
                           color: Colors.grey.withOpacity(.4),
                           borderRadius: BorderRadius.circular(30),
                           border: Border.all(
-                            color: Colors.grey.shade300,
+                            color: AppColors.primaryColor,
                             width: 0.8,
                           ),
                         ),
@@ -251,13 +248,12 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
                           textAlignVertical: TextAlignVertical.center,
                           style: TextStyle(
                             fontSize: 14,
-                            color: AppColors.backgroundColor,
+                            color: AppColors.primaryColor,
                           ),
                           decoration: InputDecoration(
-                            
                             hintText: "Write a caption...",
                             hintStyle: TextStyle(
-                              color: Colors.grey,
+                              color: AppColors.primaryColor,
                               fontSize: 14,
                             ),
                             border: InputBorder.none,
@@ -267,15 +263,7 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
                               onTap: () {
                                 FocusScope.of(context).unfocus();
                               },
-                              child: Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: SvgPicture.asset(
-                                  "assets/icons/send.svg",
-                                  height: 24,
-                                  width: 24,
-                                  color: AppColors.primaryColor,
-                                ),
-                              ),
+                              child: Icon(Icons.arrow_upward, size: 24),
                             ),
                           ),
                         ),
@@ -311,7 +299,10 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
           if (widget.isVideo) {
             createStoryController.addStory(videoPath: widget.filePath);
           } else {
-            createStoryController.addStory(imagePath: widget.filePath, caption: caption.text);
+            createStoryController.addStory(
+              imagePath: widget.filePath,
+              caption: caption.text,
+            );
           }
         },
         child: Container(
@@ -349,6 +340,7 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
                   isVideo: widget.isVideo,
                   thumbnail: null,
                   isReaction: false,
+                  caption: caption.text,
                 );
               }
             : () async {
@@ -368,6 +360,7 @@ class _SendOrTrimVideoScreenState extends State<VideoEditScreen> {
                       () => SendMessageWithFriendScreen(
                         filePath: widget.filePath,
                         isVideo: widget.isVideo,
+                        caption: caption.text,
                       ),
                     );
                   }
