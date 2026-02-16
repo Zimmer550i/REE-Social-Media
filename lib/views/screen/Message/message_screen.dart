@@ -591,7 +591,7 @@ class _MessageScreenState extends State<MessageScreen>
                       ),
                       child: hasImage
                           ? Image.network(
-                              userImage!,
+                              userImage,
                               key: ValueKey(userImage),
                               width: double.infinity,
                               height: double.infinity,
